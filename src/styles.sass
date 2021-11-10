@@ -93,6 +93,58 @@ body
 .scroll-spacer
     height: 20vh
 
+// Milkdown markdown content
+
+.markdown-wrapper > .milkdown
+    max-width: revert
+    padding: revert
+    box-shadow: revert
+
+.milkdown .slash-dropdown
+    z-index: 1
+
+.milkdown .heading::before
+    margin-inline-end: 0.3em
+    opacity: 0.5
+
+.milkdown .heading.h1::before
+    content: "#"
+
+.milkdown .heading.h2::before
+    content: "##"
+
+.milkdown .heading.h3::before
+    content: "###"
+
+.milkdown .heading.h4::before
+    content: "####"
+
+.milkdown .heading.h5::before
+    content: "#####"
+
+.milkdown .heading.h6::before
+    content: "######"
+
+.milkdown .katex::before
+    content: "$"
+    margin-inline: 0.2em
+    opacity: 0.5
+
+.milkdown .katex::after
+    content: "$"
+    margin-inline: 0.2em
+    opacity: 0.5
+
+.milkdown .math-block .katex::before
+    content: none
+    margin-inline: 0.2em
+    opacity: 0.5
+
+.milkdown .math-block .katex::after
+    content: none
+    margin-inline: 0.2em
+    opacity: 0.5
+
 // qhana form inputs (from micro frontends)
 
 form.qhana-form

@@ -32,7 +32,16 @@
                         ],
                         "styles": [
                             "./node_modules/@angular/material/prebuilt-themes/deeppurple-amber.css",
+                            "./node_modules/prosemirror-view/style/prosemirror.css",
+                            "./node_modules/prosemirror-tables/style/tables.css",
+                            "./node_modules/prosemirror-gapcursor/style/gapcursor.css",
+                            "./node_modules/katex/dist/katex.min.css",
                             "src/styles.sass"
+                        ],
+                        "allowedCommonJsDependencies": [
+                            "debug",
+                            "remark",
+                            "remark-inline-links"
                         ],
                         "scripts": []
                     },

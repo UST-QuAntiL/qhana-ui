@@ -46,6 +46,12 @@
             </dl>
         </mat-card-content>
     </mat-card>
+    <h2>Notes</h2>
+    <mat-card>
+        <mat-card-content>
+            <qhana-markdown [markdown]="'# markdown works...'" [editable]="true"></qhana-markdown>
+        </mat-card-content>
+    </mat-card>
     <ng-container *ngIf="timelineStep.outputData != null && timelineStep.outputData.length > 0">
         <h2>Output</h2>
         <qhana-preview-list [dataList]="timelineStep.outputData ?? []"></qhana-preview-list>

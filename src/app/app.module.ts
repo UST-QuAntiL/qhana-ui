@@ -48,6 +48,7 @@ import { TimelineStepComponent } from './components/timeline-step/timeline-step.
 import { CreateExperimentDialog } from './dialogs/create-experiment/create-experiment.component';
 import { DataPreviewComponent } from './components/data-preview/data-preview.component';
 import { PreviewListComponent } from './components/preview-list/preview-list.component';
+import { MarkdownComponent } from './components/markdown/markdown.component';
 
 
 
@@ -68,6 +69,7 @@ import { PreviewListComponent } from './components/preview-list/preview-list.com
         SettingsPageComponent,
         DataPreviewComponent,
         PreviewListComponent,
+        MarkdownComponent,
     ],
     imports: [
         BrowserModule,
