@@ -46,10 +46,25 @@
             </dl>
         </mat-card-content>
     </mat-card>
-    <h2>Notes</h2>
+    <div class="notes-title">
+        <h2>Notes</h2>
+        <div class="notes-status" *ngIf="notesStatus === 'changed'">
+            <span>pending changes</span>
+            <mat-spinner mode="indeterminate" diameter="30" color="primary"></mat-spinner>
+        </div>
+        <div class="notes-status" *ngIf="notesStatus === 'saved'">
+            <span>saved</span>
+            <mat-icon aria-hidden="true">checkmark</mat-icon>
+        </div>
+    </div>
     <mat-card>
         <mat-card-content>
-            <qhana-markdown [markdown]="'# markdown works...'" [editable]="true"></qhana-markdown>
+            <qhana-markdown [markdown]="stepNotes" (markdownChanges)="triggerNoteAutosave($event)" [editable]="true"
+                [hidden]="timelineStep == null || timelineStep.status === 'PENDING'" *ngIf="stepNotes != null">
+            </qhana-markdown>
+            <mat-spinner class="notes-content-spinner" mode="indeterminate" strokeWidth="5" color="primary"
+                *ngIf="stepNotes == null">
+            </mat-spinner>
         </mat-card-content>
     </mat-card>
     <ng-container *ngIf="timelineStep.outputData != null && timelineStep.outputData.length > 0">

@@ -84,6 +84,10 @@ export interface TimelineStepApiObject extends ApiObject {
     outputData?: ExperimentDataRef[];
 }
 
+export interface TimelineStepNotesApiObject extends ApiObject {
+    notes: string;
+}
+
 @Injectable({
     providedIn: 'root'
 })
@@ -206,5 +210,13 @@ export class QhanaBackendService {
 
     public getTimelineStep(experimentId: number | string, step: number | string): Observable<TimelineStepApiObject> {
         return this.http.get<TimelineStepApiObject>(`${this.rootUrl}/experiments/${experimentId}/timeline/${step}`);
+    }
+
+    public getTimelineStepNotes(experimentId: number | string, step: number | string): Observable<TimelineStepNotesApiObject> {
+        return this.http.get<TimelineStepNotesApiObject>(`${this.rootUrl}/experiments/${experimentId}/timeline/${step}/notes`);
+    }
+
+    public saveTimelineStepNotes(experimentId: number | string, step: number | string, notes: string): Observable<TimelineStepNotesApiObject> {
+        return this.http.put<TimelineStepNotesApiObject>(`${this.rootUrl}/experiments/${experimentId}/timeline/${step}/notes`, { notes: notes });
     }
 }

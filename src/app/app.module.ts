@@ -25,9 +25,10 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule, MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
 import { MatListModule } from '@angular/material/list';
 import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSelectModule } from '@angular/material/select';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { BrowserModule } from '@angular/platform-browser';
@@ -35,20 +36,20 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { DataDetailComponent } from './components/data-detail/data-detail.component';
+import { DataPreviewComponent } from './components/data-preview/data-preview.component';
 import { ExperimentDataComponent } from './components/experiment-data/experiment-data.component';
 import { ExperimentNavComponent } from './components/experiment-nav/experiment-nav.component';
 import { ExperimentTimelineComponent } from './components/experiment-timeline/experiment-timeline.component';
 import { ExperimentWorkspaceComponent } from './components/experiment-workspace/experiment-workspace.component';
 import { ExperimentComponent } from './components/experiment/experiment.component';
 import { ExperimentsPageComponent } from './components/experiments-page/experiments-page.component';
+import { MarkdownComponent } from './components/markdown/markdown.component';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { PluginUiComponent } from './components/plugin-ui/plugin-ui.component';
+import { PreviewListComponent } from './components/preview-list/preview-list.component';
 import { SettingsPageComponent } from './components/settings-page/settings-page.component';
 import { TimelineStepComponent } from './components/timeline-step/timeline-step.component';
 import { CreateExperimentDialog } from './dialogs/create-experiment/create-experiment.component';
-import { DataPreviewComponent } from './components/data-preview/data-preview.component';
-import { PreviewListComponent } from './components/preview-list/preview-list.component';
-import { MarkdownComponent } from './components/markdown/markdown.component';
 
 
 
@@ -90,6 +91,7 @@ import { MarkdownComponent } from './components/markdown/markdown.component';
         MatChipsModule,
         MatIconModule,
         MatSelectModule,
+        MatProgressSpinnerModule,
     ],
     providers: [
         { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: "outline" } }
