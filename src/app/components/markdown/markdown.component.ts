@@ -11,7 +11,7 @@ import { defaultActions, slash, slashPlugin } from '@milkdown/plugin-slash';
 import { tooltip } from '@milkdown/plugin-tooltip';
 import { gfm } from '@milkdown/preset-gfm';
 import { nord } from '@milkdown/theme-nord';
-//import { } from '@milkdown/utils';
+
 
 @Component({
     selector: 'qhana-markdown',
@@ -33,7 +33,6 @@ export class MarkdownComponent implements OnChanges {
 
     ngAfterViewInit() {
         const nativeElement = this.editorRef?.nativeElement;
-        console.log(this.editorRef)
 
         if (nativeElement != null) {
             const listeners: Listener = {
