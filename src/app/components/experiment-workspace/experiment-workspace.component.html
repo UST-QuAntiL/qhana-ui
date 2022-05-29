@@ -1,6 +1,19 @@
 <div class="workspace-content">
     <div class="sidebar-container">
         <mat-card class="sidebar card">
+            <mat-card-title>
+                <h3>
+                    <mat-form-field appearance="fill">
+                        <mat-label>Template</mat-label>
+                        <mat-select>
+                            <mat-option *ngFor="let template of templateList | async" value="{{template.title}}"
+                                (onSelectionChange)="changeActiveTemplate(template)">
+                                {{template.title}}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </h3>
+            </mat-card-title>
             <mat-card-content>
                 <div class="sidebar-content-header">
                     <mat-form-field class="mat-form form-field" [style.width.%]="100">
@@ -8,14 +21,31 @@
                         <input [(ngModel)]="searchValue" (ngModelChange)="changeFilterPluginList()" matInput>
                     </mat-form-field>
                 </div>
-                <mat-nav-list class="card-list">
-                    <a mat-list-item
-                        [routerLink]="['/experiments', experimentId, 'workspace', plugin.pluginDescription.identifier]"
-                        [routerLinkActive]="'active-list-item'" *ngFor="let plugin of filteredPluginList | async">
-                        {{plugin.metadata.title ?? plugin.pluginDescription.name}}
-                        (@{{plugin.pluginDescription.version}})
-                    </a>
-                </mat-nav-list>
+                <mat-accordion [multi]="false">
+                    <mat-list class="card-list">
+                        <mat-expansion-panel mat-list-item *ngFor="let category of activeTemplate?.categories">
+                            <mat-expansion-panel-header>
+                                <mat-panel-title>
+                                    {{category.name}}
+                                </mat-panel-title>
+                                <mat-panel-description>
+                                    {{category.description}}
+                                </mat-panel-description>
+                            </mat-expansion-panel-header>
+                            <mat-nav-list class="card-list">
+                                <div *ngFor="let plugin of filteredPluginList | async">
+                                    <a mat-list-item
+                                        [routerLink]="['/experiments', experimentId, 'workspace', plugin.pluginDescription.identifier]"
+                                        [routerLinkActive]="'active-list-item'"
+                                        *ngFor="let plugin of filteredPluginList | async">
+                                        {{plugin.metadata.title ?? plugin.pluginDescription.name}}
+                                        (@{{plugin.pluginDescription.version}})
+                                    </a>
+                                </div>
+                            </mat-nav-list>
+                        </mat-expansion-panel>
+                    </mat-list>
+                </mat-accordion>
             </mat-card-content>
         </mat-card>
     </div>

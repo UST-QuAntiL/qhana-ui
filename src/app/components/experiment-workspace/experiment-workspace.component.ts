@@ -4,6 +4,7 @@ import { from, Observable, of, Subscription } from 'rxjs';
 import { map, switchMap } from "rxjs/operators";
 import { CurrentExperimentService } from 'src/app/services/current-experiment.service';
 import { PluginsService, QhanaPlugin } from 'src/app/services/plugins.service';
+import { TemplatesService, QhanaTemplate } from 'src/app/services/templates.service';
 import { QhanaBackendService } from 'src/app/services/qhana-backend.service';
 import { FormSubmitData } from '../plugin-uiframe/plugin-uiframe.component';
 
@@ -21,14 +22,16 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
     searchValue: string = "";
     pluginList: Observable<QhanaPlugin[]> | null = null;
     filteredPluginList: Observable<QhanaPlugin[]> | null = null;
+    templateList: Observable<QhanaTemplate[]> | null = null;
 
     activePluginSubscription: Subscription | null = null;
     activePlugin: QhanaPlugin | null = null;
+    activeTemplate: QhanaTemplate | null = null;
     frontendUrl: string | null = null;
 
     expandedPluginDescription: boolean = false;
 
-    constructor(private route: ActivatedRoute, private experiment: CurrentExperimentService, private plugins: PluginsService, private backend: QhanaBackendService, private router: Router) { }
+    constructor(private route: ActivatedRoute, private experiment: CurrentExperimentService, private plugins: PluginsService, private templates: TemplatesService, private backend: QhanaBackendService, private router: Router) { }
 
     ngOnInit(): void {
         this.routeSubscription = this.route.params.subscribe(params => {
@@ -49,6 +52,8 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
         this.plugins.loadPlugins();
         this.pluginList = this.plugins.plugins;
         this.filteredPluginList = this.pluginList;
+        this.templates.loadTemplates();
+        this.templateList = this.templates.templates;
     }
 
     ngOnDestroy(): void {
@@ -110,6 +115,18 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
         this.activePlugin = plugin;
         this.frontendUrl = frontendUrl;
         this.expandedPluginDescription = false;
+    }
+
+    changeActiveTemplate(template: QhanaTemplate) {
+        if (template == null || template === this.activeTemplate) {
+            this.activeTemplate = null;
+            return;
+        }
+        this.activeTemplate = template;
+    }
+
+    intersection(tags1: string[], tags2: string[]) : string[] {
+        return tags1.filter(t => tags2.includes(t));
     }
 
     onPluginUiFormSubmit(formData: FormSubmitData) {
