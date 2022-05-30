@@ -37,7 +37,7 @@
                                     <a mat-list-item
                                         [routerLink]="['/experiments', experimentId, 'workspace', plugin.pluginDescription.identifier]"
                                         [routerLinkActive]="'active-list-item'"
-                                        *ngFor="let plugin of filteredPluginList | async">
+                                        *ngIf="(intersection(category.tags, plugin.metadata.tags).length)">
                                         {{plugin.metadata.title ?? plugin.pluginDescription.name}}
                                         (@{{plugin.pluginDescription.version}})
                                     </a>
