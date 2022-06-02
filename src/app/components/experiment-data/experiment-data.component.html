@@ -1,6 +1,12 @@
 <qhana-experiment-nav active="data"></qhana-experiment-nav>
 <div class="big-content">
-    <h1 class="t-page-headline">Experiment Data</h1>
+    <div class="flex-header">
+        <h1 class="t-page-headline">Experiment Data</h1>
+
+        <mat-paginator class="paginator" (page)="onPageChange($event)" [length]="collectionSize" [pageSize]="10"
+            [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page">
+        </mat-paginator>
+    </div>
 
     <div class="page-item-list">
         <mat-card class="page-item card" *ngFor="let data of experimentData | async">
