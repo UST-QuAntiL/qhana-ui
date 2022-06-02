@@ -50,6 +50,10 @@ export class PluginsService {
 
     constructor(private http: HttpClient, private backend: QhanaBackendService) { }
 
+    getPlugin(pluginId: string) {
+        return this.pluginsSubject.pipe(map(pluginList => pluginList.find(p => p.pluginDescription.identifier === pluginId) ?? null));
+    }
+
     loadPlugins() {
         if (this.loading) {
             return;

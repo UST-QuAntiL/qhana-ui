@@ -10,15 +10,14 @@
                     <mat-label>Search plugins</mat-label>
                     <input [(ngModel)]="searchValue" (ngModelChange)="changeFilterPluginList()" matInput>
                 </mat-form-field>
-                <mat-action-list class="card-list">
-                    <button
-                        [ngClass]="{'active-list-item': plugin.pluginDescription.identifier === activePlugin?.pluginDescription?.identifier}"
-                        mat-list-item (click)="changeActivePlugin(plugin)"
-                        *ngFor="let plugin of filteredPluginList | async">
+                <mat-nav-list class="card-list">
+                    <a mat-list-item
+                        [routerLink]="['/experiments', experimentId, 'workspace', plugin.pluginDescription.identifier]"
+                        [routerLinkActive]="'active-list-item'" *ngFor="let plugin of filteredPluginList | async">
                         {{plugin.metadata.title ?? plugin.pluginDescription.name}}
                         (@{{plugin.pluginDescription.version}})
-                    </button>
-                </mat-action-list>
+                    </a>
+                </mat-nav-list>
             </mat-card-content>
         </mat-card>
     </div>

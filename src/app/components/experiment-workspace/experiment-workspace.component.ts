@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Observable, Subscription, of } from 'rxjs';
-import { map } from "rxjs/operators";
+import { from, Observable, of, Subscription } from 'rxjs';
+import { map, switchMap } from "rxjs/operators";
 import { CurrentExperimentService } from 'src/app/services/current-experiment.service';
 import { PluginsService, QhanaPlugin } from 'src/app/services/plugins.service';
 import { QhanaBackendService } from 'src/app/services/qhana-backend.service';
@@ -22,6 +22,7 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
     pluginList: Observable<QhanaPlugin[]> | null = null;
     filteredPluginList: Observable<QhanaPlugin[]> | null = null;
 
+    activePluginSubscription: Subscription | null = null;
     activePlugin: QhanaPlugin | null = null;
     frontendUrl: string | null = null;
 
@@ -32,6 +33,17 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
             this.experimentId = params?.experimentId ?? null;
             this.experiment.setExperimentId(params?.experimentId ?? null);
         });
+        this.activePluginSubscription = this.route.params.pipe(
+            map(params => params?.pluginId ?? null),
+            switchMap(pluginId => {
+                if (pluginId == null) {
+                    return from([null]); // emits a single value null
+                }
+                return this.plugins.getPlugin(pluginId);
+            }),
+        ).subscribe(activePlugin => {
+            this.changeActivePlugin(activePlugin);
+        });
         this.plugins.loadPlugins();
         this.pluginList = this.plugins.plugins;
         this.filteredPluginList = this.pluginList;
@@ -39,6 +51,7 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
 
     ngOnDestroy(): void {
         this.routeSubscription?.unsubscribe();
+        this.activePluginSubscription?.unsubscribe();
     }
 
     changeFilterPluginList(): void {
@@ -64,8 +77,7 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
         }
     }
 
-
-    changeActivePlugin(plugin: QhanaPlugin) {
+    changeActivePlugin(plugin: QhanaPlugin | null) {
         if (plugin == null || plugin === this.activePlugin) {
             this.activePlugin = null;
             this.frontendUrl = null;
