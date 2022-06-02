@@ -99,7 +99,7 @@ export class SettingsPageComponent implements OnInit {
     }
 
     addPluginEndpoint() {
-        const url = this.endpointUrl;
+        const url = this.endpointUrl?.trim();
         const type = this.endpointType ? this.endpointType : undefined;
         if (url) {
             this.backend.addPluginEndpoint(url, type).subscribe(() => {
