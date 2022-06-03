@@ -22,7 +22,13 @@
     </div>
     <div class="content-container">
         <div class="main-content">
-            <h1 class="t-page-headline">Experiment Workspace</h1>
+            <div class="title">
+                <h1 class="t-page-headline">Experiment Workspace</h1>
+                <a mat-icon-button aria-label="unselect plugin"
+                    [routerLink]="['/experiments', experimentId, 'workspace']" *ngIf="activePlugin != null">
+                    <mat-icon>arrow_back</mat-icon>
+                </a>
+            </div>
             <div *ngIf="activePlugin == null">
                 <p>Choose a plugin.</p>
             </div>

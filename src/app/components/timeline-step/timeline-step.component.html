@@ -1,6 +1,12 @@
 <qhana-experiment-nav active="timeline"></qhana-experiment-nav>
 <div class="big-content" *ngIf="timelineStep != null">
-    <h1 class="t-page-headline">Timeline Step</h1>
+    <div class="title">
+        <h1 class="t-page-headline">Timeline Step</h1>
+        <a mat-icon-button aria-label="back to timeline step list"
+            [routerLink]="['/experiments', experimentId, 'timeline']">
+            <mat-icon>arrow_back</mat-icon>
+        </a>
+    </div>
     <mat-card class="experiment-card card">
         <mat-card-title class="t-headline flex-title">
             Step {{timelineStep.sequence}} ({{timelineStep.processorName}}@{{timelineStep.processorVersion}})

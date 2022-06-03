@@ -1,6 +1,11 @@
 <qhana-experiment-nav active="data"></qhana-experiment-nav>
 <div class="big-content" *ngIf="data != null">
-    <h1 class="t-page-headline">Data</h1>
+    <div class="title">
+        <h1 class="t-page-headline">Data</h1>
+        <a mat-icon-button aria-label="back to data list" [routerLink]="['/experiments', experimentId, 'data']">
+            <mat-icon>arrow_back</mat-icon>
+        </a>
+    </div>
     <mat-card class="data-card card">
         <mat-card-title class="t-headline">{{data?.name}}</mat-card-title>
         <mat-card-content>
