@@ -26,6 +26,8 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
     activePlugin: QhanaPlugin | null = null;
     frontendUrl: string | null = null;
 
+    expandedPluginDescription: boolean = false;
+
     constructor(private route: ActivatedRoute, private experiment: CurrentExperimentService, private plugins: PluginsService, private backend: QhanaBackendService, private router: Router) { }
 
     ngOnInit(): void {
@@ -77,10 +79,21 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
         }
     }
 
+    onKeyDown(event: KeyboardEvent) {
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            this.expandedPluginDescription = !this.expandedPluginDescription;
+        }
+    }
+
     changeActivePlugin(plugin: QhanaPlugin | null) {
-        if (plugin == null || plugin === this.activePlugin) {
+        if (plugin == null) {
             this.activePlugin = null;
             this.frontendUrl = null;
+            this.expandedPluginDescription = false;
+            return;
+        }
+        if (plugin == this.activePlugin) {
             return;
         }
         let frontendUrl: string | null = plugin?.metadata?.entryPoint?.uiHref;
@@ -96,6 +109,7 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
         }
         this.activePlugin = plugin;
         this.frontendUrl = frontendUrl;
+        this.expandedPluginDescription = false;
     }
 
     onPluginUiFormSubmit(formData: FormSubmitData) {

@@ -4,15 +4,30 @@
     gap: 1rem
 
 .sidebar-container
+    position: sticky
     top: 0px
     padding: 0.6rem
     flex-basis: 30%
     min-width: 16.2rem
     max-width: 35rem
+    max-height: 80vh
 
 .sidebar
+    position: relative
     min-width: 15rem
     width: max-content
+    max-height: 100%
+    overflow-y: auto
+
+.sidebar .sidebar-content-header
+    position: sticky
+    top: -16px
+    background-color: var(--background)
+    z-index: 1
+    margin-top: -16px
+    margin-inline: -16px
+    padding-top: 16px
+    padding-inline: 16px
 
 .content-container
     flex-basis: 70%
@@ -34,6 +49,49 @@
 
 .plugin-details
     margin-block-end: 1rem
+
+.plugin-header
+    display: flex
+    gap: 0.5rem
+    align-items: center
+    cursor: pointer
+    margin-block-start: 0px
+    margin-block-end: 1rem
+
+.plugin-description-container
+    display: flex
+    flex-direction: column
+
+.card .plugin-description-container
+    margin-bottom: -16px
+    margin-inline: -16px
+
+.plugin-description-container > .scroll-container
+    padding-bottom: 16px
+    padding-inline: 16px
+    flex-grow: 1
+    flex-shrink: 1
+
+.plugin-description-container
+    position: relative
+
+.plugin-description-container.closed
+    max-height: 12rem
+    overflow: hidden
+
+.plugin-description-container.closed::after
+    position: absolute
+    content: ""
+    pointer-events: none
+    top: 6rem
+    bottom: 0px
+    left: 0px
+    right: 0px
+    background: linear-gradient(to bottom, #FFFFFF00, var(--background))
+
+.scroll-container
+    max-height: 100%
+    overflow: auto
 
 .plugin-description
     display: block

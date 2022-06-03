@@ -2,14 +2,13 @@
 <div class="workspace-content">
     <div class="sidebar-container">
         <mat-card class="sidebar card">
-            <mat-card-title>
-                <h3>Plugins</h3>
-            </mat-card-title>
             <mat-card-content>
-                <mat-form-field class="mat-form form-field" [style.width.%]="100">
-                    <mat-label>Search plugins</mat-label>
-                    <input [(ngModel)]="searchValue" (ngModelChange)="changeFilterPluginList()" matInput>
-                </mat-form-field>
+                <div class="sidebar-content-header">
+                    <mat-form-field class="mat-form form-field" [style.width.%]="100">
+                        <mat-label>Search plugins</mat-label>
+                        <input [(ngModel)]="searchValue" (ngModelChange)="changeFilterPluginList()" matInput>
+                    </mat-form-field>
+                </div>
                 <mat-nav-list class="card-list">
                     <a mat-list-item
                         [routerLink]="['/experiments', experimentId, 'workspace', plugin.pluginDescription.identifier]"
@@ -30,17 +29,27 @@
             <div *ngIf="activePlugin != null">
                 <mat-card class="plugin-details card">
                     <mat-card-title>
-                        <h2 class="t-title">{{activePlugin.metadata.title ?? activePlugin.pluginDescription.name}}
-                            (@{{activePlugin.pluginDescription.version}})</h2>
+                        <h2 class="plugin-header" role="button" tabindex="0" aria-controls="plugin-description"
+                            aria-expanded="expandedPluginDescription" (keydown)="onKeyDown($event)"
+                            (click)="expandedPluginDescription = !expandedPluginDescription">
+                            <mat-icon aria-hidden="false" aria-label="expand description"
+                                [hidden]="expandedPluginDescription">chevron_right</mat-icon>
+                            <mat-icon aria-hidden="false" aria-label="expand description"
+                                [hidden]="!expandedPluginDescription">expand_more</mat-icon>
+                            <span class="t-title">{{activePlugin.metadata.title ?? activePlugin.pluginDescription.name}}
+                                (@{{activePlugin.pluginDescription.version}})</span>
+                        </h2>
                     </mat-card-title>
-                    <mat-card-content>
-                        <mat-chip-list>
-                            <mat-chip color="primary">{{activePlugin.metadata.pluginType ?? 'unknown'}}</mat-chip>
-                            <mat-chip *ngFor="let tag of (activePlugin.metadata.tags ?? [])">{{tag}}</mat-chip>
-                        </mat-chip-list>
-                        <qhana-markdown class="plugin-description" [markdown]="activePlugin.metadata.description"
-                            [editable]="false">
-                        </qhana-markdown>
+                    <mat-card-content id="plugin-description"
+                        class="plugin-description-container {{expandedPluginDescription ? 'open' : 'closed'}}">
+                        <div class="scroll-container">
+                            <mat-chip-list>
+                                <mat-chip *ngFor="let tag of (activePlugin.metadata.tags ?? [])">{{tag}}</mat-chip>
+                            </mat-chip-list>
+                            <qhana-markdown class="plugin-description" [markdown]="activePlugin.metadata.description"
+                                [editable]="false">
+                            </qhana-markdown>
+                        </div>
                     </mat-card-content>
                 </mat-card>
                 <qhana-plugin-uiframe [url]="frontendUrl" (formDataSubmit)="onPluginUiFormSubmit($event)">
