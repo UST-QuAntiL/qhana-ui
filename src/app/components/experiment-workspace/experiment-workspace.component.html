@@ -6,9 +6,9 @@
                     <mat-form-field appearance="fill">
                         <mat-label>Template</mat-label>
                         <mat-select>
-                            <mat-option *ngFor="let template of templateList | async" value="{{template.title}}"
+                            <mat-option *ngFor="let template of templateList | async" value="{{template.name}}"
                                 (onSelectionChange)="changeActiveTemplate(template)">
-                                {{template.title}}
+                                {{template.name}}
                             </mat-option>
                         </mat-select>
                     </mat-form-field>
@@ -36,8 +36,7 @@
                                 <div *ngFor="let plugin of filteredPluginList | async">
                                     <a mat-list-item
                                         [routerLink]="['/experiments', experimentId, 'workspace', plugin.pluginDescription.identifier]"
-                                        [routerLinkActive]="'active-list-item'"
-                                        *ngIf="(intersection(category.tags, plugin.metadata.tags).length)">
+                                        [routerLinkActive]="'active-list-item'">
                                         {{plugin.metadata.title ?? plugin.pluginDescription.name}}
                                         (@{{plugin.pluginDescription.version}})
                                     </a>

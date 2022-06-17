@@ -4,9 +4,10 @@ import { from, Observable, of, Subscription } from 'rxjs';
 import { map, switchMap } from "rxjs/operators";
 import { CurrentExperimentService } from 'src/app/services/current-experiment.service';
 import { PluginsService, QhanaPlugin } from 'src/app/services/plugins.service';
-import { TemplatesService, QhanaTemplate } from 'src/app/services/templates.service';
+import { TemplatesService, QhanaTemplateInfo, QhanaTemplate } from 'src/app/services/templates.service';
 import { QhanaBackendService } from 'src/app/services/qhana-backend.service';
 import { FormSubmitData } from '../plugin-uiframe/plugin-uiframe.component';
+import { first } from 'rxjs/operators';
 
 @Component({
     selector: 'qhana-experiment-workspace',
@@ -20,13 +21,15 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
     experimentId: string | null = null;
 
     searchValue: string = "";
-    pluginList: Observable<QhanaPlugin[]> | null = null;
+    templateList: Observable<QhanaTemplateInfo[]> | null = null;
+
+    activeTemplate: QhanaTemplate | null = null;
+    
+    pluginList: Observable<QhanaPlugin[]> | null = null; // TODO: rework plugins list
     filteredPluginList: Observable<QhanaPlugin[]> | null = null;
-    templateList: Observable<QhanaTemplate[]> | null = null;
 
     activePluginSubscription: Subscription | null = null;
     activePlugin: QhanaPlugin | null = null;
-    activeTemplate: QhanaTemplate | null = null;
     frontendUrl: string | null = null;
 
     expandedPluginDescription: boolean = false;
@@ -61,26 +64,13 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
         this.activePluginSubscription?.unsubscribe();
     }
 
-    changeFilterPluginList(): void {
-        let searchValue: string = this.searchValue.toLowerCase();
-        if (this.pluginList == null || !this.searchValue || this.searchValue.trim() === "") {
-            this.filteredPluginList = this.pluginList;
-        } else {
-            if (this.pluginList !== null && this.searchValue) {
-                this.pluginList.pipe(
-                    map(pluginList =>
-                        pluginList.filter(plugin => {
-                            // console.log(plugin.metadata);
-                            return (plugin.pluginDescription.name.toLowerCase().includes(searchValue) ||
-                                plugin.pluginDescription.apiRoot.toLowerCase().includes(searchValue) ||
-                                plugin.pluginDescription.version.toLowerCase().includes(searchValue) ||
-                                plugin.pluginDescription.identifier.toLowerCase().includes(searchValue) ||
-                                (plugin.metadata.title && plugin.metadata.title.toLowerCase().includes(searchValue)) ||
-                                (plugin.metadata.tags && plugin.metadata.tags.some((tag: string) => tag.toLowerCase().includes(searchValue))))
-                        })
-                    )
-                ).subscribe(pluginList => this.filteredPluginList = of(pluginList));
-            }
+    changeActiveTemplate(templateInfo: QhanaTemplateInfo) {
+         const previousTemplate = this.activeTemplate;
+        this.templates.loadTemplate(templateInfo).pipe(first()).subscribe(
+            template => this.activeTemplate = template
+        )
+        if (previousTemplate === this.activeTemplate) {
+            this.activeTemplate = null;
         }
     }
 
@@ -117,14 +107,6 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
         this.expandedPluginDescription = false;
     }
 
-    changeActiveTemplate(template: QhanaTemplate) {
-        if (template == null || template === this.activeTemplate) {
-            this.activeTemplate = null;
-            return;
-        }
-        this.activeTemplate = template;
-    }
-
     intersection(tags1: string[], tags2: string[]) : string[] {
         return tags1.filter(t => tags2.includes(t));
     }
@@ -146,6 +128,31 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
             resultLocation: formData.resultUrl,
         }).subscribe(timelineStep => this.router.navigate(['/experiments', experimentId, 'timeline', timelineStep.sequence.toString()]));
 
+    }
+    
+
+
+    changeFilterPluginList(): void {
+        let searchValue: string = this.searchValue.toLowerCase();
+        if (this.pluginList == null || !this.searchValue || this.searchValue.trim() === "") {
+            this.filteredPluginList = this.pluginList;
+        } else {
+            if (this.pluginList !== null && this.searchValue) {
+                this.pluginList.pipe(
+                    map(pluginList =>
+                        pluginList.filter(plugin => {
+                            // console.log(plugin.metadata);
+                            return (plugin.pluginDescription.name.toLowerCase().includes(searchValue) ||
+                                plugin.pluginDescription.apiRoot.toLowerCase().includes(searchValue) ||
+                                plugin.pluginDescription.version.toLowerCase().includes(searchValue) ||
+                                plugin.pluginDescription.identifier.toLowerCase().includes(searchValue) ||
+                                (plugin.metadata.title && plugin.metadata.title.toLowerCase().includes(searchValue)) ||
+                                (plugin.metadata.tags && plugin.metadata.tags.some((tag: string) => tag.toLowerCase().includes(searchValue))))
+                        })
+                    )
+                ).subscribe(pluginList => this.filteredPluginList = of(pluginList));
+            }
+        }
     }
 
 }

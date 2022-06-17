@@ -17,31 +17,36 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, from, Observable, of } from 'rxjs';
-import { catchError, filter, map, mergeAll, mergeMap, toArray } from 'rxjs/operators';
+import { catchError, filter, mergeAll, mergeMap, toArray } from 'rxjs/operators';
+import { QhanaPlugin } from './plugins.service';
 import { QhanaBackendService } from './qhana-backend.service';
 
-export interface QhanaTemplate {
-    title: string;
-    description: string;
-    categories: TemplateItem[];
-}
-
-export interface TemplateItem {
+export interface QhanaTemplateInfo {
     name: string;
     description: string;
-    tags: string[];
+    identifier: string;
+    apiRoot: string;
+}
+
+export interface QhanaTemplate {
+    name: string;
+    description: string;
+    categories: TemplateCategory[];
+}
+
+export interface TemplateCategory {
+    name: string;
+    description: string;
+    plugins: QhanaPlugin[];
 }
 
 @Injectable({
     providedIn: 'root'
 })
+
 export class TemplatesService {
-
     private loading: boolean = false;
-
-    private templateList: QhanaTemplate[] = [];
-
-    private templatesSubject: BehaviorSubject<QhanaTemplate[]> = new BehaviorSubject<QhanaTemplate[]>([]);
+    private templatesSubject: BehaviorSubject<QhanaTemplateInfo[]> = new BehaviorSubject<QhanaTemplateInfo[]>([]);
 
     get templates() {
         return this.templatesSubject.asObservable();
@@ -54,11 +59,12 @@ export class TemplatesService {
             return;
         }
         this.loading = true;
+
         this.backend.getPluginEndpoints().subscribe(pluginEndpoints => {
-            var observables: Observable<QhanaTemplate | "error">[] = [];
+            var observables: Observable<QhanaTemplateInfo | "error">[] = [];
             pluginEndpoints.items.map(pluginEndpoint => {
                 if (pluginEndpoint.type === "PluginRunner") {
-                    observables.push(this.http.get<{ templates: QhanaTemplate[] }>(`${pluginEndpoint.url}/templates`).pipe(
+                    observables.push(this.http.get<{ templates: QhanaTemplateInfo[] }>(`${pluginEndpoint.url}/templates`).pipe(
                         mergeMap(templateResponse => from(templateResponse.templates)),
                         catchError(err => {
                             console.log(err);
@@ -66,26 +72,30 @@ export class TemplatesService {
                         })
                     ))
                 }
+
                 from(observables).pipe(
                     mergeAll(),
                     // filter out all templates that could not be loaded because of some error (i.e. filter out all error sentinel values left)
-                    filter<QhanaTemplate | "error", QhanaTemplate>((value): value is QhanaTemplate => value !== "error"),
+                    filter<QhanaTemplateInfo | "error", QhanaTemplateInfo>((value): value is QhanaTemplateInfo => value !== "error"),
                     toArray(),
                 ).subscribe(templates => {
                     templates.sort((a, b) => {
-                        if (a.title > b.title) {
+                        if (a.name > b.name) {
                             return 1;
                         }
-                        if (a.title < b.title) {
+                        if (a.name < b.name) {
                             return -1;
                         }
                         return 0;
                     })
-                    this.templateList = templates;
                     this.templatesSubject.next(templates);
                     this.loading = false;
                 });
             });
         })
+    }
+    
+    loadTemplate(templateInfo: QhanaTemplateInfo): Observable<QhanaTemplate> {
+        return this.http.get<QhanaTemplate>(templateInfo.apiRoot)
     }
 }
