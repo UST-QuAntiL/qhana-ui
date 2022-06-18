@@ -18,7 +18,7 @@
                 <div class="sidebar-content-header">
                     <mat-form-field class="mat-form form-field" [style.width.%]="100">
                         <mat-label>Search plugins</mat-label>
-                        <input [(ngModel)]="searchValue" matInput>
+                        <input [(ngModel)]="searchValue" (ngModelChange)="changeFilterPluginLists()" matInput>
                     </mat-form-field>
                 </div>
                 <mat-accordion [multi]="false">
@@ -33,7 +33,7 @@
                                 </mat-panel-description>
                             </mat-expansion-panel-header>
                             <mat-nav-list class="card-list">
-                                <div *ngFor="let plugin of category.plugins | async">
+                                <div *ngFor="let plugin of filteredPluginListes[category.name] | async">
                                     <a mat-list-item
                                         [routerLink]="['/experiments', experimentId, 'workspace', plugin.pluginDescription.identifier]"
                                         [routerLinkActive]="'active-list-item'">
