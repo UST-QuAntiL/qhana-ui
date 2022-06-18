@@ -16,9 +16,9 @@
 
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, from, Observable, of } from 'rxjs';
-import { catchError, filter, mergeAll, mergeMap, toArray } from 'rxjs/operators';
-import { QhanaPlugin } from './plugins.service';
+import { BehaviorSubject, from, Observable} from 'rxjs';
+import { catchError, mergeAll, mergeMap, toArray } from 'rxjs/operators';
+import { PluginDescription, QhanaPlugin } from './plugins.service';
 import { QhanaBackendService } from './qhana-backend.service';
 
 export interface QhanaTemplateInfo {
@@ -37,7 +37,7 @@ export interface QhanaTemplate {
 export interface TemplateCategory {
     name: string;
     description: string;
-    plugins: QhanaPlugin[];
+    plugins: PluginDescription[];
 }
 
 @Injectable({
@@ -61,7 +61,7 @@ export class TemplatesService {
         this.loading = true;
 
         this.backend.getPluginEndpoints().subscribe(pluginEndpoints => {
-            var observables: Observable<QhanaTemplateInfo | "error">[] = [];
+            var observables: Observable<QhanaTemplateInfo>[] = [];
             pluginEndpoints.items.map(pluginEndpoint => {
                 if (pluginEndpoint.type === "PluginRunner") {
                     observables.push(this.http.get<{ templates: QhanaTemplateInfo[] }>(`${pluginEndpoint.url}/templates`).pipe(
@@ -72,25 +72,23 @@ export class TemplatesService {
                         })
                     ))
                 }
+            });
 
-                from(observables).pipe(
-                    mergeAll(),
-                    // filter out all templates that could not be loaded because of some error (i.e. filter out all error sentinel values left)
-                    filter<QhanaTemplateInfo | "error", QhanaTemplateInfo>((value): value is QhanaTemplateInfo => value !== "error"),
-                    toArray(),
-                ).subscribe(templates => {
-                    templates.sort((a, b) => {
-                        if (a.name > b.name) {
-                            return 1;
-                        }
-                        if (a.name < b.name) {
-                            return -1;
-                        }
-                        return 0;
-                    })
-                    this.templatesSubject.next(templates);
-                    this.loading = false;
-                });
+            from(observables).pipe(
+                mergeAll(),
+                toArray(),
+            ).subscribe(templates => {
+                templates.sort((a, b) => {
+                    if (a.name > b.name) {
+                        return 1;
+                    }
+                    if (a.name < b.name) {
+                        return -1;
+                    }
+                    return 0;
+                })
+                this.templatesSubject.next(templates);
+                this.loading = false;
             });
         })
     }

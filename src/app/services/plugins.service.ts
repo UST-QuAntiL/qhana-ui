@@ -133,7 +133,7 @@ export class PluginsService {
         );
     }
 
-    private loadPluginMetadata(plugin: PluginDescription): Observable<QhanaPlugin> {
+    loadPluginMetadata(plugin: PluginDescription): Observable<QhanaPlugin> {
         return this.http.get<QhanaPlugin>(plugin.apiRoot).pipe(
             map(pluginMetadata => {
                 return {

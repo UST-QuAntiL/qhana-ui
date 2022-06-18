@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { from, Observable, of, Subscription } from 'rxjs';
 import { map, switchMap } from "rxjs/operators";
 import { CurrentExperimentService } from 'src/app/services/current-experiment.service';
-import { PluginsService, QhanaPlugin } from 'src/app/services/plugins.service';
+import { PluginDescription, PluginsService, QhanaPlugin } from 'src/app/services/plugins.service';
 import { TemplatesService, QhanaTemplateInfo, QhanaTemplate } from 'src/app/services/templates.service';
 import { QhanaBackendService } from 'src/app/services/qhana-backend.service';
 import { FormSubmitData } from '../plugin-uiframe/plugin-uiframe.component';
@@ -25,8 +25,8 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
 
     activeTemplate: QhanaTemplate | null = null;
     
-    pluginList: Observable<QhanaPlugin[]> | null = null; // TODO: rework plugins list
-    filteredPluginList: Observable<QhanaPlugin[]> | null = null;
+    pluginList: Observable<QhanaPlugin[]> | null = null;
+    filteredPluginList: Observable<QhanaPlugin[]> | null = null; // TODO: implement search
 
     activePluginSubscription: Subscription | null = null;
     activePlugin: QhanaPlugin | null = null;
@@ -65,7 +65,7 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
     }
 
     changeActiveTemplate(templateInfo: QhanaTemplateInfo) {
-         const previousTemplate = this.activeTemplate;
+        const previousTemplate = this.activeTemplate;
         this.templates.loadTemplate(templateInfo).pipe(first()).subscribe(
             template => this.activeTemplate = template
         )
@@ -91,9 +91,10 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
         if (plugin == this.activePlugin) {
             return;
         }
-        let frontendUrl: string | null = plugin?.metadata?.entryPoint?.uiHref;
+
+        let frontendUrl: string | null = this.activePlugin?.metadata?.entryPoint?.uiHref;
         if (frontendUrl != null) {
-            const base = new URL(plugin?.url ?? "");
+            const base = new URL(this.activePlugin?.url ?? "");
             // const pluginOrigin = base.origin;
             if (frontendUrl.startsWith("/")) {
                 frontendUrl = base.origin + frontendUrl;
@@ -102,7 +103,6 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
                 frontendUrl = base.href + frontendUrl;
             }
         }
-        this.activePlugin = plugin;
         this.frontendUrl = frontendUrl;
         this.expandedPluginDescription = false;
     }
@@ -132,7 +132,7 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
     
 
 
-    changeFilterPluginList(): void {
+        /*
         let searchValue: string = this.searchValue.toLowerCase();
         if (this.pluginList == null || !this.searchValue || this.searchValue.trim() === "") {
             this.filteredPluginList = this.pluginList;
@@ -153,6 +153,6 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
                 ).subscribe(pluginList => this.filteredPluginList = of(pluginList));
             }
         }
-    }
+        */
 
 }
