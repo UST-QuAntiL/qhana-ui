@@ -33,7 +33,7 @@
                                 </mat-panel-description>
                             </mat-expansion-panel-header>
                             <mat-nav-list class="card-list">
-                                <div *ngFor="let plugin of filteredPluginList | async">
+                                <div *ngFor="let plugin of category.plugins | async">
                                     <a mat-list-item
                                         [routerLink]="['/experiments', experimentId, 'workspace', plugin.pluginDescription.identifier]"
                                         [routerLinkActive]="'active-list-item'">

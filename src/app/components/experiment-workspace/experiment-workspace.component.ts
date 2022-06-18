@@ -4,7 +4,7 @@ import { from, Observable, of, Subscription } from 'rxjs';
 import { map, switchMap } from "rxjs/operators";
 import { CurrentExperimentService } from 'src/app/services/current-experiment.service';
 import { PluginDescription, PluginsService, QhanaPlugin } from 'src/app/services/plugins.service';
-import { TemplatesService, QhanaTemplateInfo, QhanaTemplate } from 'src/app/services/templates.service';
+import { TemplatesService, QhanaTemplate } from 'src/app/services/templates.service';
 import { QhanaBackendService } from 'src/app/services/qhana-backend.service';
 import { FormSubmitData } from '../plugin-uiframe/plugin-uiframe.component';
 import { first } from 'rxjs/operators';
@@ -21,12 +21,9 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
     experimentId: string | null = null;
 
     searchValue: string = "";
-    templateList: Observable<QhanaTemplateInfo[]> | null = null;
+    templateList: Observable<QhanaTemplate[]> | null = null;
 
     activeTemplate: QhanaTemplate | null = null;
-    
-    pluginList: Observable<QhanaPlugin[]> | null = null;
-    filteredPluginList: Observable<QhanaPlugin[]> | null = null; // TODO: implement search
 
     activePluginSubscription: Subscription | null = null;
     activePlugin: QhanaPlugin | null = null;
@@ -52,9 +49,6 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
         ).subscribe(activePlugin => {
             this.changeActivePlugin(activePlugin);
         });
-        this.plugins.loadPlugins();
-        this.pluginList = this.plugins.plugins;
-        this.filteredPluginList = this.pluginList;
         this.templates.loadTemplates();
         this.templateList = this.templates.templates;
     }
@@ -64,13 +58,11 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
         this.activePluginSubscription?.unsubscribe();
     }
 
-    changeActiveTemplate(templateInfo: QhanaTemplateInfo) {
-        const previousTemplate = this.activeTemplate;
-        this.templates.loadTemplate(templateInfo).pipe(first()).subscribe(
-            template => this.activeTemplate = template
-        )
-        if (previousTemplate === this.activeTemplate) {
+    changeActiveTemplate(template: QhanaTemplate) {
+        if (template == null || template === this.activeTemplate) {
             this.activeTemplate = null;
+        } else {
+            this.activeTemplate = template;
         }
     }
 
@@ -91,10 +83,9 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
         if (plugin == this.activePlugin) {
             return;
         }
-
-        let frontendUrl: string | null = this.activePlugin?.metadata?.entryPoint?.uiHref;
+        let frontendUrl: string | null = plugin?.metadata?.entryPoint?.uiHref;
         if (frontendUrl != null) {
-            const base = new URL(this.activePlugin?.url ?? "");
+            const base = new URL(plugin?.url ?? "");
             // const pluginOrigin = base.origin;
             if (frontendUrl.startsWith("/")) {
                 frontendUrl = base.origin + frontendUrl;
@@ -103,11 +94,13 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
                 frontendUrl = base.href + frontendUrl;
             }
         }
+        this.activePlugin = plugin;
         this.frontendUrl = frontendUrl;
         this.expandedPluginDescription = false;
     }
 
-    intersection(tags1: string[], tags2: string[]) : string[] {
+
+    intersection(tags1: string[], tags2: string[]): string[] {
         return tags1.filter(t => tags2.includes(t));
     }
 
@@ -129,30 +122,4 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
         }).subscribe(timelineStep => this.router.navigate(['/experiments', experimentId, 'timeline', timelineStep.sequence.toString()]));
 
     }
-    
-
-
-        /*
-        let searchValue: string = this.searchValue.toLowerCase();
-        if (this.pluginList == null || !this.searchValue || this.searchValue.trim() === "") {
-            this.filteredPluginList = this.pluginList;
-        } else {
-            if (this.pluginList !== null && this.searchValue) {
-                this.pluginList.pipe(
-                    map(pluginList =>
-                        pluginList.filter(plugin => {
-                            // console.log(plugin.metadata);
-                            return (plugin.pluginDescription.name.toLowerCase().includes(searchValue) ||
-                                plugin.pluginDescription.apiRoot.toLowerCase().includes(searchValue) ||
-                                plugin.pluginDescription.version.toLowerCase().includes(searchValue) ||
-                                plugin.pluginDescription.identifier.toLowerCase().includes(searchValue) ||
-                                (plugin.metadata.title && plugin.metadata.title.toLowerCase().includes(searchValue)) ||
-                                (plugin.metadata.tags && plugin.metadata.tags.some((tag: string) => tag.toLowerCase().includes(searchValue))))
-                        })
-                    )
-                ).subscribe(pluginList => this.filteredPluginList = of(pluginList));
-            }
-        }
-        */
-
 }

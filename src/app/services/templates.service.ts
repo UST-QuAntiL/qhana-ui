@@ -16,16 +16,22 @@
 
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, from, Observable} from 'rxjs';
-import { catchError, mergeAll, mergeMap, toArray } from 'rxjs/operators';
-import { PluginDescription, QhanaPlugin } from './plugins.service';
+import { BehaviorSubject, from, Observable } from 'rxjs';
+import { catchError, mergeAll, mergeMap, toArray, map } from 'rxjs/operators';
+import { PluginDescription, PluginsService, QhanaPlugin } from './plugins.service';
 import { QhanaBackendService } from './qhana-backend.service';
 
-export interface QhanaTemplateInfo {
+export interface QhanaTemplateDescription {
     name: string;
     description: string;
     identifier: string;
     apiRoot: string;
+}
+
+export interface QhanaTemplateInfo {
+    name: string;
+    description: string;
+    categories: TemplateCategoryInfo[];
 }
 
 export interface QhanaTemplate {
@@ -34,38 +40,47 @@ export interface QhanaTemplate {
     categories: TemplateCategory[];
 }
 
-export interface TemplateCategory {
+export interface TemplateCategoryInfo {
     name: string;
     description: string;
     plugins: PluginDescription[];
 }
 
+export interface TemplateCategory {
+    name: string;
+    description: string;
+    plugins: Observable<QhanaPlugin[]>;
+}
+
 @Injectable({
     providedIn: 'root'
 })
-
 export class TemplatesService {
     private loading: boolean = false;
-    private templatesSubject: BehaviorSubject<QhanaTemplateInfo[]> = new BehaviorSubject<QhanaTemplateInfo[]>([]);
+    private templatesSubject: BehaviorSubject<QhanaTemplate[]> = new BehaviorSubject<QhanaTemplate[]>([]);
 
     get templates() {
         return this.templatesSubject.asObservable();
     }
 
-    constructor(private http: HttpClient, private backend: QhanaBackendService) { }
+    constructor(private http: HttpClient, private backend: QhanaBackendService, private pluginsService: PluginsService) { }
 
     loadTemplates() {
         if (this.loading) {
             return;
         }
         this.loading = true;
+        this.pluginsService.loadPlugins();
 
         this.backend.getPluginEndpoints().subscribe(pluginEndpoints => {
-            var observables: Observable<QhanaTemplateInfo>[] = [];
+            var observables: Observable<QhanaTemplate>[] = [];
             pluginEndpoints.items.map(pluginEndpoint => {
                 if (pluginEndpoint.type === "PluginRunner") {
-                    observables.push(this.http.get<{ templates: QhanaTemplateInfo[] }>(`${pluginEndpoint.url}/templates`).pipe(
+                    observables.push(this.http.get<{ templates: QhanaTemplateDescription[] }>(`${pluginEndpoint.url}/templates`).pipe(
                         mergeMap(templateResponse => from(templateResponse.templates)),
+                        mergeMap(template => {
+                            return this.loadTemplate(template);
+                        }),
                         catchError(err => {
                             console.log(err);
                             return [];
@@ -92,8 +107,28 @@ export class TemplatesService {
             });
         })
     }
-    
-    loadTemplate(templateInfo: QhanaTemplateInfo): Observable<QhanaTemplate> {
-        return this.http.get<QhanaTemplate>(templateInfo.apiRoot)
+
+    loadTemplate(templateInfo: QhanaTemplateDescription): Observable<QhanaTemplate> {
+        return this.http.get<QhanaTemplateInfo>(templateInfo.apiRoot).pipe(
+            map(template => {
+                return {
+                    name: templateInfo.name,
+                    description: templateInfo.description,
+                    categories: template.categories.map(
+                        category => {
+                            return {
+                                name: category.name,
+                                description: category.description,
+                                plugins: this.pluginsService.plugins.pipe(
+                                    map(
+                                        pluginList => pluginList.filter(plugin => category.plugins.map(p => p.identifier).includes(`${plugin.metadata.name}@${plugin.metadata.version.replaceAll('.', '-')}`))
+                                    )
+                                )
+                            }
+                        }
+                    )
+                }
+            }),
+        )
     }
 }
