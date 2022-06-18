@@ -21,32 +21,32 @@ import { catchError, mergeAll, mergeMap, toArray, map } from 'rxjs/operators';
 import { PluginDescription, PluginsService, QhanaPlugin } from './plugins.service';
 import { QhanaBackendService } from './qhana-backend.service';
 
-export interface QhanaTemplateDescription {
-    name: string;
-    description: string;
-    identifier: string;
-    apiRoot: string;
-}
-
-export interface QhanaTemplateInfo {
-    name: string;
-    description: string;
-    categories: TemplateCategoryInfo[];
-}
-
 export interface QhanaTemplate {
     name: string;
     description: string;
     categories: TemplateCategory[];
 }
 
-export interface TemplateCategoryInfo {
+interface QhanaTemplateDescription {
+    name: string;
+    description: string;
+    identifier: string;
+    apiRoot: string;
+}
+
+interface QhanaTemplateInfo {
+    name: string;
+    description: string;
+    categories: TemplateCategoryInfo[];
+}
+
+interface TemplateCategoryInfo {
     name: string;
     description: string;
     plugins: PluginDescription[];
 }
 
-export interface TemplateCategory {
+interface TemplateCategory {
     name: string;
     description: string;
     plugins: Observable<QhanaPlugin[]>;
