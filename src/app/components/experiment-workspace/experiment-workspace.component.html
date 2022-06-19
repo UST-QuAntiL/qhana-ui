@@ -6,7 +6,8 @@
                     <mat-form-field appearance="fill">
                         <mat-label>Template</mat-label>
                         <mat-select>
-                            <mat-option *ngFor="let template of templateList | async" value="{{template.name}}" (onSelectionChange)="changeActiveTemplate(template, $event)">
+                            <mat-option *ngFor="let template of templateList | async" value="{{template.name}}"
+                                (onSelectionChange)="changeActiveTemplate(template, $event)">
                                 {{template.name}}
                             </mat-option>
                         </mat-select>
@@ -37,6 +38,10 @@
                                         [routerLink]="['/experiments', experimentId, 'workspace', plugin.identifier]"
                                         [routerLinkActive]="'active-list-item'">
                                         {{plugin.name}}(@{{plugin.version}})
+                                        <font *ngIf="plugin.running == 'SUCCESS'" color="#00f700"> &#10004; </font>
+                                        <font *ngIf="plugin.running == 'PENDING'" color="#00f700"> &#8986; </font>
+                                        <font *ngIf="plugin.running == 'ERROR'" color="#FF0000"> &#10006; </font>
+                                        <font *ngIf="plugin.running == 'UNKNOWN'" color="#FF0000"> &#063; </font>
                                     </a>
                                 </div>
                             </mat-nav-list>

@@ -27,6 +27,8 @@ export interface PluginDescription {
     identifier: string;
     description: string;
     tags: string[];
+
+    running: null | "PENDING" | "SUCCESS" | "ERROR" | "UNKNOWN";
 }
 
 export interface QhanaPlugin {
@@ -79,6 +81,7 @@ export class PluginsService {
                                     identifier: pluginMetadata.identifier,
                                     description: pluginMetadata.description,
                                     tags: pluginMetadata.tags,
+                                    running: null,
                                 },
                                 metadata: pluginMetadata,
                             };

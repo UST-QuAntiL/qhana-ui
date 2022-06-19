@@ -1,11 +1,11 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { from, Observable, of, Subscription } from 'rxjs';
-import { map, switchMap } from "rxjs/operators";
+import { from, Observable, Subscription, merge } from 'rxjs';
+import { map, switchMap, catchError } from "rxjs/operators";
 import { CurrentExperimentService } from 'src/app/services/current-experiment.service';
 import { PluginDescription, PluginsService, QhanaPlugin } from 'src/app/services/plugins.service';
 import { TemplatesService, TemplateDescription, QhanaTemplate } from 'src/app/services/templates.service';
-import { QhanaBackendService } from 'src/app/services/qhana-backend.service';
+import { QhanaBackendService, TimelineStepApiObject, ApiObjectList  } from 'src/app/services/qhana-backend.service';
 import { FormSubmitData } from '../plugin-uiframe/plugin-uiframe.component';
 import { MatOptionSelectionChange } from '@angular/material/core';
 
@@ -75,6 +75,74 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
                     this.resetFilteredPluginLists();
                 }
             );
+
+            let itemCountTimeline: number = 0;
+            const experimentId = this.experimentId;
+            let timeLine: Observable<TimelineStepApiObject[]>
+            let timeLineList: Observable<ApiObjectList<TimelineStepApiObject>> | null;
+            const itemsPerPage: number = 100;
+    
+            if (experimentId !== null) {
+                timeLineList = this.backend.getTimelineStepsPage(experimentId, 0, itemsPerPage).pipe(
+                    map(value => {
+                        return value;
+                    }),
+                    catchError(err => {
+                        throw err;
+                    })
+                );
+    
+                if (timeLineList !== null) {
+    
+                    timeLine = timeLineList.pipe(
+                        map(value => {
+                            return value.items;
+                    }));
+    
+                    timeLineList.subscribe(
+                        value => {
+                            itemCountTimeline=value.itemCount;
+                        }
+                    );
+    
+                    (async () => {
+    
+                        await delay(500);
+    
+                        for (let i = 1; i<itemCountTimeline/itemsPerPage; i++) {
+                            let timeLinePage = this.backend.getTimelineStepsPage(experimentId, i, itemsPerPage).pipe(
+                                map(value => {
+                                    return value.items;
+                                }),
+                                catchError(err => {
+                                    throw err;
+                                })
+                            );
+                            timeLine = merge(timeLine, timeLinePage);
+                        }
+    
+                        this.activeTemplate?.categories.forEach(category => {
+                            category.plugins.forEach(plugin => {
+                                if (timeLine !== null) {
+                                    timeLine.forEach(value => value.forEach(step => {
+                                        if (plugin.name === step.processorName) {
+                                            if (step.status === "SUCCESS") {
+                                                plugin.running = "SUCCESS";
+                                            } else if (step.status === "PENDING") {
+                                                plugin.running = "PENDING";
+                                            } else if (step.status === "ERROR") {
+                                                plugin.running = "PENDING";
+                                            } else if (step.status === "UNKNOWN") {
+                                                plugin.running = "UNKNOWN";
+                                            }
+                                        }
+                                    }))
+                                }
+                            })
+                        });
+                    })();
+                }
+            }
         }
     }
 
@@ -154,4 +222,8 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
             resultLocation: formData.resultUrl,
         }).subscribe(timelineStep => this.router.navigate(['/experiments', experimentId, 'timeline', timelineStep.sequence.toString()]));
     }
+}
+
+function delay(ms: number) {
+    return new Promise( resolve => setTimeout(resolve, ms) );
 }
