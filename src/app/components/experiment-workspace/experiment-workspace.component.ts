@@ -78,42 +78,31 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
 
             let itemCountTimeline: number = 0;
             const experimentId = this.experimentId;
-            let timeLine: Observable<TimelineStepApiObject[]>
-            let timeLineList: Observable<ApiObjectList<TimelineStepApiObject>> | null;
             const itemsPerPage: number = 100;
     
             if (experimentId !== null) {
-                timeLineList = this.backend.getTimelineStepsPage(experimentId, 0, itemsPerPage).pipe(
-                    map(value => {
-                        return value;
-                    }),
-                    catchError(err => {
-                        throw err;
-                    })
-                );
+                const timeLineList = this.backend.getTimelineStepsPage(experimentId, 0, itemsPerPage);
     
                 if (timeLineList !== null) {
-    
-                    timeLine = timeLineList.pipe(
-                        map(value => {
-                            return value.items;
-                    }));
+                    let timeLine = timeLineList.pipe(
+                        map(value => value.items),
+                        catchError(err => {
+                            throw err;
+                        })
+                    );
     
                     timeLineList.subscribe(
                         value => {
-                            itemCountTimeline=value.itemCount;
+                            itemCountTimeline = value.itemCount;
                         }
                     );
     
                     (async () => {
-    
                         await delay(500);
     
                         for (let i = 1; i<itemCountTimeline/itemsPerPage; i++) {
                             let timeLinePage = this.backend.getTimelineStepsPage(experimentId, i, itemsPerPage).pipe(
-                                map(value => {
-                                    return value.items;
-                                }),
+                                map(value => value.items),
                                 catchError(err => {
                                     throw err;
                                 })
@@ -121,19 +110,23 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
                             timeLine = merge(timeLine, timeLinePage);
                         }
     
-                        this.activeTemplate?.categories.forEach(category => {
-                            category.plugins.forEach(plugin => {
-                                if (timeLine !== null) {
-                                    timeLine.forEach(value => value.forEach(step => {
-                                        if (isInstanceOfPluginStatus(step.status)) {
-                                            plugin.running = step.status;
-                                        } else {
-                                            plugin.running = "UNKNOWN";
-                                        }
-                                    }))
-                                }
-                            })
-                        });
+                        if (timeLine !== null) {
+                            this.activeTemplate?.categories.forEach(
+                                category => category.plugins.forEach(
+                                    plugin => timeLine.forEach(
+                                        value => value.forEach(
+                                            step => {
+                                                if (isInstanceOfPluginStatus(step.status)) {
+                                                    plugin.running = step.status;
+                                                } else {
+                                                    plugin.running = "UNKNOWN";
+                                                }
+                                            }
+                                        )
+                                    )
+                                )
+                            )
+                        }
                     })();
                 }
             }
