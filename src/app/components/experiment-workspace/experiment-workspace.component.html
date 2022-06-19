@@ -33,12 +33,11 @@
                                 </mat-panel-description>
                             </mat-expansion-panel-header>
                             <mat-nav-list class="card-list">
-                                <div *ngFor="let plugin of filteredPluginListes[category.name] | async">
+                                <div *ngFor="let plugin of filteredPluginLists[category.name]">
                                     <a mat-list-item
-                                        [routerLink]="['/experiments', experimentId, 'workspace', plugin.pluginDescription.identifier]"
+                                        [routerLink]="['/experiments', experimentId, 'workspace', plugin.identifier]"
                                         [routerLinkActive]="'active-list-item'">
-                                        {{plugin.metadata.title ?? plugin.pluginDescription.name}}
-                                        (@{{plugin.pluginDescription.version}})
+                                        {{plugin.name}}(@{{plugin.version}})
                                     </a>
                                 </div>
                             </mat-nav-list>

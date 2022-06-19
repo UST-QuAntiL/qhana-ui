@@ -25,6 +25,8 @@ export interface PluginDescription {
     name: string;
     version: string;
     identifier: string;
+    description: string;
+    tags: string[];
 }
 
 export interface QhanaPlugin {
@@ -75,6 +77,8 @@ export class PluginsService {
                                     name: pluginMetadata.name,
                                     version: pluginMetadata.version,
                                     identifier: pluginMetadata.identifier,
+                                    description: pluginMetadata.description,
+                                    tags: pluginMetadata.tags,
                                 },
                                 metadata: pluginMetadata,
                             };

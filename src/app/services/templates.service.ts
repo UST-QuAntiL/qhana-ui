@@ -21,35 +21,28 @@ import { catchError, mergeAll, mergeMap, toArray, map } from 'rxjs/operators';
 import { PluginDescription, PluginsService, QhanaPlugin } from './plugins.service';
 import { QhanaBackendService } from './qhana-backend.service';
 
-export interface QhanaTemplate {
-    name: string;
-    description: string;
-    categories: TemplateCategory[];
-}
 
-interface QhanaTemplateDescription {
+export interface TemplateDescription {
     name: string;
     description: string;
     identifier: string;
     apiRoot: string;
 }
 
-interface QhanaTemplateInfo {
+export interface QhanaTemplate {
     name: string;
     description: string;
-    categories: TemplateCategoryInfo[];
-}
-
-interface TemplateCategoryInfo {
-    name: string;
-    description: string;
-    plugins: PluginDescription[];
+    categories: TemplateCategory[];
 }
 
 interface TemplateCategory {
     name: string;
     description: string;
-    plugins: Observable<QhanaPlugin[]>;
+    plugins: PluginDescription[];
+}
+
+interface CategoriesResponse {
+    categories: TemplateCategory[]
 }
 
 @Injectable({
@@ -57,7 +50,7 @@ interface TemplateCategory {
 })
 export class TemplatesService {
     private loading: boolean = false;
-    private templatesSubject: BehaviorSubject<QhanaTemplate[]> = new BehaviorSubject<QhanaTemplate[]>([]);
+    private templatesSubject: BehaviorSubject<TemplateDescription[]> = new BehaviorSubject<TemplateDescription[]>([]);
 
     get templates() {
         return this.templatesSubject.asObservable();
@@ -73,14 +66,11 @@ export class TemplatesService {
         this.pluginsService.loadPlugins();
 
         this.backend.getPluginEndpoints().subscribe(pluginEndpoints => {
-            var observables: Observable<QhanaTemplate>[] = [];
+            var observables: Observable<TemplateDescription>[] = [];
             pluginEndpoints.items.map(pluginEndpoint => {
                 if (pluginEndpoint.type === "PluginRunner") {
-                    observables.push(this.http.get<{ templates: QhanaTemplateDescription[] }>(`${pluginEndpoint.url}/templates`).pipe(
+                    observables.push(this.http.get<{ templates: TemplateDescription[] }>(`${pluginEndpoint.url}/templates`).pipe(
                         mergeMap(templateResponse => from(templateResponse.templates)),
-                        mergeMap(template => {
-                            return this.loadTemplate(template);
-                        }),
                         catchError(err => {
                             console.log(err);
                             return [];
@@ -108,27 +98,17 @@ export class TemplatesService {
         })
     }
 
-    loadTemplate(templateInfo: QhanaTemplateDescription): Observable<QhanaTemplate> {
-        return this.http.get<QhanaTemplateInfo>(templateInfo.apiRoot).pipe(
-            map(template => {
-                return {
-                    name: templateInfo.name,
-                    description: templateInfo.description,
-                    categories: template.categories.map(
-                        category => {
-                            return {
-                                name: category.name,
-                                description: category.description,
-                                plugins: this.pluginsService.plugins.pipe(
-                                    map(
-                                        pluginList => pluginList.filter(plugin => category.plugins.map(p => p.identifier).includes(`${plugin.metadata.name}@${plugin.metadata.version.replaceAll('.', '-')}`))
-                                    )
-                                )
-                            }
-                        }
-                    )
+    loadTemplate(templateDesc: TemplateDescription): Observable<QhanaTemplate> {
+        return this.http.get<CategoriesResponse>(templateDesc.apiRoot).pipe(
+            map(
+                categoriesResponse => {
+                    return  {
+                        name: templateDesc.name,
+                        description: templateDesc.description,
+                        categories: categoriesResponse.categories,
+                    }
                 }
-            }),
+            )
         )
     }
 }

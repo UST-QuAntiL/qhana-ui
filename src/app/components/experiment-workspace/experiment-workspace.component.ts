@@ -3,8 +3,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { from, Observable, of, Subscription } from 'rxjs';
 import { map, switchMap } from "rxjs/operators";
 import { CurrentExperimentService } from 'src/app/services/current-experiment.service';
-import { PluginsService, QhanaPlugin } from 'src/app/services/plugins.service';
-import { TemplatesService, QhanaTemplate } from 'src/app/services/templates.service';
+import { PluginDescription, PluginsService, QhanaPlugin } from 'src/app/services/plugins.service';
+import { TemplatesService, TemplateDescription, QhanaTemplate } from 'src/app/services/templates.service';
 import { QhanaBackendService } from 'src/app/services/qhana-backend.service';
 import { FormSubmitData } from '../plugin-uiframe/plugin-uiframe.component';
 
@@ -20,9 +20,9 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
     experimentId: string | null = null;
 
     searchValue: string = "";
-    templateList: Observable<QhanaTemplate[]> | null = null;
+    templateList: Observable<TemplateDescription[]> | null = null;
 
-    filteredPluginListes: { [category: string]: Observable<QhanaPlugin[]> } = {};
+    filteredPluginLists: { [category: string]: PluginDescription[] } = {};
 
     activeTemplate: QhanaTemplate | null = null;
 
@@ -59,19 +59,26 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
         this.activePluginSubscription?.unsubscribe();
     }
 
-    changeActiveTemplate(template: QhanaTemplate) {
-        if (template == null || template === this.activeTemplate) {
-            this.activeTemplate = null;
-            return;
-        }
-        this.activeTemplate = template;
-        this.resetFilteredPluginLists();
+    changeActiveTemplate(templateDesc: TemplateDescription) {
+        this.templates.loadTemplate(templateDesc).subscribe(
+            template => {
+                if (template == null || template === this.activeTemplate) {
+                    this.activeTemplate = null;
+                    return;
+                }
+                this.activeTemplate = template;
+                
+                console.log(template)
+
+                this.resetFilteredPluginLists();
+            }
+        );
     }
 
     private resetFilteredPluginLists() {
         this.activeTemplate?.categories.forEach(
-            category => this.filteredPluginListes[category.name] = category.plugins
-        )
+            category => this.filteredPluginLists[category.name] = category.plugins
+        );
     }
 
     onKeyDown(event: KeyboardEvent) {
@@ -113,18 +120,18 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
             this.resetFilteredPluginLists();
             return;
         }
+        
         this.activeTemplate?.categories.forEach(
-            category => category.plugins.pipe(
-                map(pluginList => pluginList.filter(plugin => {
-                    return (plugin.pluginDescription.name.toLowerCase().includes(searchValue) ||
-                        plugin.pluginDescription.apiRoot.toLowerCase().includes(searchValue) ||
-                        plugin.pluginDescription.version.toLowerCase().includes(searchValue) ||
-                        plugin.pluginDescription.identifier.toLowerCase().includes(searchValue) ||
-                        (plugin.metadata.title && plugin.metadata.title.toLowerCase().includes(searchValue)) ||
-                        (plugin.metadata.tags && plugin.metadata.tags.some((tag: string) => tag.toLowerCase().includes(searchValue))))
-                }))
-            ).subscribe(pluginList => this.filteredPluginListes[category.name] = of(pluginList))
-        )
+            category => this.filteredPluginLists[category.name] = category.plugins.filter(
+                plugin => plugin.name.toLowerCase().includes(searchValue) ||
+                        plugin.apiRoot.toLowerCase().includes(searchValue) ||
+                        plugin.version.toLowerCase().includes(searchValue) ||
+                        plugin.identifier.toLowerCase().includes(searchValue) ||
+                        plugin.description.toLocaleLowerCase().includes(searchValue) ||
+                        plugin.tags.some((tag: string) => tag.toLowerCase().includes(searchValue))
+                
+            )
+        );
     }
 
     onPluginUiFormSubmit(formData: FormSubmitData) {
