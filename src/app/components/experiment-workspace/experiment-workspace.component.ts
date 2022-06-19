@@ -7,6 +7,7 @@ import { PluginDescription, PluginsService, QhanaPlugin } from 'src/app/services
 import { TemplatesService, TemplateDescription, QhanaTemplate } from 'src/app/services/templates.service';
 import { QhanaBackendService } from 'src/app/services/qhana-backend.service';
 import { FormSubmitData } from '../plugin-uiframe/plugin-uiframe.component';
+import { MatOptionSelectionChange } from '@angular/material/core';
 
 @Component({
     selector: 'qhana-experiment-workspace',
@@ -59,20 +60,22 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
         this.activePluginSubscription?.unsubscribe();
     }
 
-    changeActiveTemplate(templateDesc: TemplateDescription) {
-        this.templates.loadTemplate(templateDesc).subscribe(
-            template => {
-                if (template == null || template === this.activeTemplate) {
-                    this.activeTemplate = null;
-                    return;
-                }
-                this.activeTemplate = template;
-                
-                console.log(template)
+    changeActiveTemplate(templateDesc: TemplateDescription, event: MatOptionSelectionChange) {
+        if (event.isUserInput) {
+            this.templates.loadTemplate(templateDesc).subscribe(
+                template => {
+                    if (template == null || template === this.activeTemplate) {
+                        this.activeTemplate = null;
+                        return;
+                    }
+                    this.activeTemplate = template;
+                    
+                    console.log(template)
 
-                this.resetFilteredPluginLists();
-            }
-        );
+                    this.resetFilteredPluginLists();
+                }
+            );
+        }
     }
 
     private resetFilteredPluginLists() {
