@@ -116,10 +116,12 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
                                     plugin => timeLine.forEach(
                                         value => value.forEach(
                                             step => {
-                                                if (isInstanceOfPluginStatus(step.status)) {
-                                                    plugin.running = step.status;
-                                                } else {
-                                                    plugin.running = "UNKNOWN";
+                                                if (plugin.name == step.processorName) {
+                                                    if (isInstanceOfPluginStatus(step.status)) {
+                                                        plugin.running = step.status;
+                                                    } else {
+                                                        plugin.running = "UNKNOWN";
+                                                    }
                                                 }
                                             }
                                         )
