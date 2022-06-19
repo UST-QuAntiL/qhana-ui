@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { from, Observable, Subscription, merge } from 'rxjs';
 import { map, switchMap, catchError } from "rxjs/operators";
 import { CurrentExperimentService } from 'src/app/services/current-experiment.service';
-import { PluginDescription, PluginsService, QhanaPlugin } from 'src/app/services/plugins.service';
+import { isInstanceOfPluginStatus, PluginDescription, PluginsService, QhanaPlugin } from 'src/app/services/plugins.service';
 import { TemplatesService, TemplateDescription, QhanaTemplate } from 'src/app/services/templates.service';
 import { QhanaBackendService, TimelineStepApiObject, ApiObjectList  } from 'src/app/services/qhana-backend.service';
 import { FormSubmitData } from '../plugin-uiframe/plugin-uiframe.component';
@@ -125,16 +125,10 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
                             category.plugins.forEach(plugin => {
                                 if (timeLine !== null) {
                                     timeLine.forEach(value => value.forEach(step => {
-                                        if (plugin.name === step.processorName) {
-                                            if (step.status === "SUCCESS") {
-                                                plugin.running = "SUCCESS";
-                                            } else if (step.status === "PENDING") {
-                                                plugin.running = "PENDING";
-                                            } else if (step.status === "ERROR") {
-                                                plugin.running = "PENDING";
-                                            } else if (step.status === "UNKNOWN") {
-                                                plugin.running = "UNKNOWN";
-                                            }
+                                        if (isInstanceOfPluginStatus(step.status)) {
+                                            plugin.running = step.status;
+                                        } else {
+                                            plugin.running = "UNKNOWN";
                                         }
                                     }))
                                 }
