@@ -148,6 +148,11 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
                                 )
                             )
                         }
+
+                        this.activeTemplate?.categories.forEach(
+                            category => category.plugins.sort((a, b) => a.identifier.localeCompare(b.identifier))
+                        );
+
                     })();
                 }
             }
