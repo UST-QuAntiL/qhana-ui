@@ -1,11 +1,11 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { from, Observable, Subscription, merge } from 'rxjs';
+import { from, Subscription, merge } from 'rxjs';
 import { map, switchMap, catchError } from "rxjs/operators";
 import { CurrentExperimentService } from 'src/app/services/current-experiment.service';
 import { isInstanceOfPluginStatus, PluginDescription, PluginsService, QhanaPlugin } from 'src/app/services/plugins.service';
 import { TemplatesService, TemplateDescription, QhanaTemplate } from 'src/app/services/templates.service';
-import { QhanaBackendService, TimelineStepApiObject, ApiObjectList  } from 'src/app/services/qhana-backend.service';
+import { QhanaBackendService  } from 'src/app/services/qhana-backend.service';
 import { FormSubmitData } from '../plugin-uiframe/plugin-uiframe.component';
 import { MatOptionSelectionChange } from '@angular/material/core';
 
@@ -17,13 +17,16 @@ import { MatOptionSelectionChange } from '@angular/material/core';
 export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
 
     private routeSubscription: Subscription | null = null;
+    private pluginsSubscription: Subscription | null = null;
+    private templatesSubscription: Subscription | null = null;
 
     experimentId: string | null = null;
 
     searchValue: string = "";
-    templateList: Observable<TemplateDescription[]> | null = null;
+    pluginList: QhanaPlugin[] | null = null;
+    templateList: TemplateDescription[] | null = null;
 
-    filteredPluginLists: { [category: string]: PluginDescription[] } = {};
+    filteredPluginLists: { [category: string]: QhanaPlugin[] } = {};
 
     activeTemplate: QhanaTemplate | null = null;
 
@@ -51,18 +54,26 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
         ).subscribe(activePlugin => {
             this.changeActivePlugin(activePlugin);
         });
+        this.pluginsSubscription = this.plugins.plugins.subscribe(
+            plugins => this.pluginList = plugins
+        )
+        this.templatesSubscription = this.templates.templates.subscribe(
+            templates => this.templateList = templates
+        )
+        this.plugins.loadPlugins();
         this.templates.loadTemplates();
-        this.templateList = this.templates.templates;
     }
 
     ngOnDestroy(): void {
         this.routeSubscription?.unsubscribe();
         this.activePluginSubscription?.unsubscribe();
+        this.pluginsSubscription?.unsubscribe();
+        this.templatesSubscription?.unsubscribe();
     }
 
     changeActiveTemplate(templateDesc: TemplateDescription, event: MatOptionSelectionChange) {
         if (event.isUserInput) {
-            this.templates.loadTemplate(templateDesc).subscribe(
+            this.templates.loadTemplate(templateDesc, this.pluginList ?? []).subscribe(
                 template => {
                     if (template == null || template === this.activeTemplate) {
                         this.activeTemplate = null;
@@ -116,11 +127,11 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
                                     plugin => timeLine.forEach(
                                         value => value.forEach(
                                             step => {
-                                                if (plugin.name == step.processorName) {
+                                                if (plugin.metadata?.name == step.processorName) {
                                                     if (isInstanceOfPluginStatus(step.status)) {
-                                                        plugin.running = step.status;
+                                                        plugin.pluginDescription.running = step.status;
                                                     } else {
-                                                        plugin.running = "UNKNOWN";
+                                                        plugin.pluginDescription.running = "UNKNOWN";
                                                     }
                                                 }
                                             }
@@ -183,12 +194,12 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
         
         this.activeTemplate?.categories.forEach(
             category => this.filteredPluginLists[category.name] = category.plugins.filter(
-                plugin => plugin.name.toLowerCase().includes(searchValue) ||
-                        plugin.apiRoot.toLowerCase().includes(searchValue) ||
-                        plugin.version.toLowerCase().includes(searchValue) ||
-                        plugin.identifier.toLowerCase().includes(searchValue) ||
-                        plugin.description.toLocaleLowerCase().includes(searchValue) ||
-                        plugin.tags.some((tag: string) => tag.toLowerCase().includes(searchValue))
+                plugin => plugin.pluginDescription.name.toLowerCase().includes(searchValue) ||
+                        plugin.pluginDescription.apiRoot.toLowerCase().includes(searchValue) ||
+                        plugin.pluginDescription.version.toLowerCase().includes(searchValue) ||
+                        plugin.pluginDescription.identifier.toLowerCase().includes(searchValue) ||
+                        plugin.pluginDescription.description.toLocaleLowerCase().includes(searchValue) ||
+                        plugin.pluginDescription.tags.some((tag: string) => tag.toLowerCase().includes(searchValue))
                 
             )
         );

@@ -17,7 +17,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, from, Observable } from 'rxjs';
-import { catchError, mergeAll, mergeMap, toArray, map } from 'rxjs/operators';
+import { catchError, map, mergeAll, mergeMap, toArray } from 'rxjs/operators';
 import { PluginDescription, PluginsService, QhanaPlugin } from './plugins.service';
 import { QhanaBackendService } from './qhana-backend.service';
 
@@ -29,20 +29,57 @@ export interface TemplateDescription {
     apiRoot: string;
 }
 
+interface TemplateCategory {
+    name: string;
+    description: string;
+    plugins: QhanaPlugin[];
+}
+
 export interface QhanaTemplate {
     name: string;
     description: string;
     categories: TemplateCategory[];
 }
 
-interface TemplateCategory {
+
+interface PluginFilterOr {
+    'or': PluginFilterExpr[];
+}
+
+interface PluginFilterAnd {
+    'and': PluginFilterExpr[];
+}
+
+interface PluginFilterNot {
+    'not': PluginFilterExpr;
+}
+
+type PluginFilterExpr = PluginFilterOr | PluginFilterAnd | PluginFilterNot | string;
+
+interface CategoryDescription {
     name: string;
     description: string;
-    plugins: PluginDescription[];
+    pluginFilter: PluginFilterExpr;
 }
 
 interface CategoriesResponse {
-    categories: TemplateCategory[]
+    categories: CategoryDescription[];
+}
+
+function isInstanceOfPluginFilterOr(pluginFilter: PluginFilterExpr): pluginFilter is PluginFilterOr {
+    return pluginFilter != null && (pluginFilter as PluginFilterOr).or !== undefined;
+}
+
+function isInstanceOfPluginFilterAnd(pluginFilter: PluginFilterExpr): pluginFilter is PluginFilterAnd {
+    return pluginFilter != null && (pluginFilter as PluginFilterAnd).and !== undefined;
+}
+
+function isInstanceOfPluginFilterNot(pluginFilter: PluginFilterExpr): pluginFilter is PluginFilterNot  {
+    return pluginFilter != null && (pluginFilter as PluginFilterNot).not !== undefined;
+}
+
+function isInstanceOfString(pluginFilter: PluginFilterExpr): pluginFilter is string {
+    return pluginFilter != null && typeof pluginFilter === 'string';
 }
 
 @Injectable({
@@ -97,18 +134,56 @@ export class TemplatesService {
             });
         })
     }
-
-    loadTemplate(templateDesc: TemplateDescription): Observable<QhanaTemplate> {
-        return this.http.get<CategoriesResponse>(templateDesc.apiRoot).pipe(
-            map(
-                categoriesResponse => {
-                    return  {
-                        name: templateDesc.name,
-                        description: templateDesc.description,
-                        categories: categoriesResponse.categories,
-                    }
-                }
+    
+    pluginFilterMatchesTags(tags: string[], pluginFilter: PluginFilterExpr): boolean {
+        if (isInstanceOfPluginFilterOr(pluginFilter)) {
+            return pluginFilter.or.reduce<boolean>(
+                (res, nestedPluginFilter) => res || this.pluginFilterMatchesTags(tags, nestedPluginFilter),
+                false
             )
+        } else if (isInstanceOfPluginFilterAnd(pluginFilter)) {
+            return pluginFilter.and.reduce<boolean>(
+                (res, nestedPluginFilter) => res && this.pluginFilterMatchesTags(tags, nestedPluginFilter),
+                true
+            )
+        } else if (isInstanceOfPluginFilterNot(pluginFilter)) {
+            return !this.pluginFilterMatchesTags(tags, pluginFilter.not)
+        } else if (isInstanceOfString(pluginFilter)) {
+            return tags.includes(pluginFilter)
+        } else {
+            throw Error(`Unknown plugin filter ${pluginFilter}`)
+        }
+    }
+
+    loadTemplate(templateDesc: TemplateDescription, pluginList: QhanaPlugin[]): Observable<QhanaTemplate> {
+        return this.http.get<CategoriesResponse>(templateDesc.apiRoot).pipe(
+            map(categoriesResponse => {
+                let categories: TemplateCategory[] = []
+
+                categoriesResponse.categories.forEach(categoryDesc => {
+                    let plugins: QhanaPlugin[] = []
+                    
+                    pluginList.forEach(
+                        plugin => {
+                            if (this.pluginFilterMatchesTags(plugin.pluginDescription.tags, categoryDesc.pluginFilter)) {
+                                plugins.push(plugin)
+                            }
+                        }
+                    )
+
+                    categories.push({
+                        name: categoryDesc.name,
+                        description: categoryDesc.description,
+                        plugins: plugins,
+                    })
+                });
+                    
+                return {
+                    name: templateDesc.name,
+                    description: templateDesc.description,
+                    categories: categories,
+                    }
+            })
         )
     }
 }
