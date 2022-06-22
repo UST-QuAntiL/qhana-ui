@@ -39,13 +39,13 @@
                                         [routerLinkActive]="'active-list-item'">
                                         {{plugin.metadata.title ??
                                         plugin.pluginDescription.name}}(@{{plugin.metadata.version}})
-                                        <font *ngIf="plugin.pluginDescription.running == 'SUCCESS'" color="#00f700">
+                                        <font *ngIf="plugin.pluginDescription.running === 'SUCCESS'" color="#00f700">
                                             &#10004; </font>
-                                        <font *ngIf="plugin.pluginDescription.running == 'PENDING'" color="#00f700">
+                                        <font *ngIf="plugin.pluginDescription.running === 'PENDING'" color="#00f700">
                                             &#8986; </font>
-                                        <font *ngIf="plugin.pluginDescription.running == 'ERROR'" color="#FF0000">
+                                        <font *ngIf="plugin.pluginDescription.running === 'FAILURE'" color="#FF0000">
                                             &#10006; </font>
-                                        <font *ngIf="plugin.pluginDescription.running == 'UNKNOWN'" color="#FF0000">
+                                        <font *ngIf="plugin.pluginDescription.running === 'UNKNOWN'" color="#FF0000">
                                             &#063; </font>
                                     </a>
                                 </div>

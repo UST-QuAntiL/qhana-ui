@@ -20,9 +20,9 @@ import { BehaviorSubject, from, Observable, of } from 'rxjs';
 import { catchError, filter, map, mergeAll, mergeMap, toArray } from 'rxjs/operators';
 import { QhanaBackendService } from './qhana-backend.service';
 
-export type PluginStatus = "PENDING" | "SUCCESS" | "ERROR" | "UNKNOWN" | null;
+export type PluginStatus = "PENDING" | "SUCCESS" | "FAILURE" | "UNKNOWN" | null;
 export function isInstanceOfPluginStatus(pluginStatus: string | null): pluginStatus is PluginStatus {
-    if (["PENDING", "SUCCESS", "ERROR", "UNKNOWN", null].includes(pluginStatus)) {
+    if (["PENDING", "SUCCESS", "FAILURE", "UNKNOWN", null].includes(pluginStatus)) {
         return true;
     } else {
         return false;
@@ -38,6 +38,8 @@ export interface PluginDescription {
     tags: string[];
 
     running: PluginStatus;
+    endTime: string;
+    olderThan24: boolean;
 }
 
 export interface QhanaPlugin {
@@ -91,6 +93,8 @@ export class PluginsService {
                                     description: pluginMetadata.description,
                                     tags: pluginMetadata.tags,
                                     running: null,
+                                    endTime: "",
+                                    olderThan24: false,
                                 },
                                 metadata: pluginMetadata,
                             };

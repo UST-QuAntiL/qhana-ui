@@ -90,6 +90,7 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
             let itemCountTimeline: number = 0;
             const experimentId = this.experimentId;
             const itemsPerPage: number = 100;
+            const time = new Date();
     
             if (experimentId !== null) {
                 const timeLineList = this.backend.getTimelineStepsPage(experimentId, 0, itemsPerPage);
@@ -133,6 +134,13 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
                                                     } else {
                                                         plugin.pluginDescription.running = "UNKNOWN";
                                                     }
+                                                    if((time.getTime() - new Date(step.end).getTime()) > 24*60*60*1000){
+                                                        plugin.pluginDescription.olderThan24 = true;
+                                                    } else {
+                                                        plugin.pluginDescription.olderThan24 = false;
+
+                                                    }
+                                                    plugin.pluginDescription.endTime = step.end;
                                                 }
                                             }
                                         )
