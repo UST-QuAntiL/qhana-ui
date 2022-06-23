@@ -38,7 +38,7 @@ export interface PluginDescription {
     tags: string[];
 
     running: PluginStatus;
-    endTime: string;
+    timeAgo: string | [string, number?];
     olderThan24: boolean;
 }
 
@@ -93,7 +93,7 @@ export class PluginsService {
                                     description: pluginMetadata.description,
                                     tags: pluginMetadata.tags,
                                     running: null,
-                                    endTime: "",
+                                    timeAgo: "",
                                     olderThan24: false,
                                 },
                                 metadata: pluginMetadata,

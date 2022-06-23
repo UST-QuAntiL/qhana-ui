@@ -8,6 +8,8 @@ import { TemplatesService, TemplateDescription, QhanaTemplate } from 'src/app/se
 import { QhanaBackendService  } from 'src/app/services/qhana-backend.service';
 import { FormSubmitData } from '../plugin-uiframe/plugin-uiframe.component';
 import { MatOptionSelectionChange } from '@angular/material/core';
+import TimeAgo from 'javascript-time-ago';
+import en from 'javascript-time-ago/locale/en';
 
 @Component({
     selector: 'qhana-experiment-workspace',
@@ -33,6 +35,8 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
     activePluginSubscription: Subscription | null = null;
     activePlugin: QhanaPlugin | null = null;
     frontendUrl: string | null = null;
+    
+    timeAgo: TimeAgo | null = null;
 
     expandedPluginDescription: boolean = false;
 
@@ -62,6 +66,9 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
         )
         this.plugins.loadPlugins();
         this.templates.loadTemplates();
+
+        TimeAgo.addDefaultLocale(en);
+        this.timeAgo = new TimeAgo('en-US');
     }
 
     ngOnDestroy(): void {
@@ -134,13 +141,10 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
                                                     } else {
                                                         plugin.pluginDescription.running = "UNKNOWN";
                                                     }
-                                                    if((time.getTime() - new Date(step.end).getTime()) > 24*60*60*1000){
-                                                        plugin.pluginDescription.olderThan24 = true;
-                                                    } else {
-                                                        plugin.pluginDescription.olderThan24 = false;
-
-                                                    }
-                                                    plugin.pluginDescription.endTime = step.end;
+                                                    
+                                                    const endTime = new Date(step.end).getTime()
+                                                    plugin.pluginDescription.timeAgo = this.timeAgo?.format(endTime) ?? "";
+                                                    plugin.pluginDescription.olderThan24 = (time.getTime() - endTime) > 24*60*60*1000;
                                                 }
                                             }
                                         )
@@ -150,7 +154,7 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
                         }
 
                         this.activeTemplate?.categories.forEach(
-                            category => category.plugins.sort((a, b) => a.identifier.localeCompare(b.identifier))
+                            category => category.plugins.sort((a, b) => a.pluginDescription.identifier.localeCompare(b.pluginDescription.identifier))
                         );
 
                     })();

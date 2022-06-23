@@ -39,14 +39,33 @@
                                         [routerLinkActive]="'active-list-item'">
                                         {{plugin.metadata.title ??
                                         plugin.pluginDescription.name}}(@{{plugin.metadata.version}})
-                                        <font *ngIf="plugin.pluginDescription.running === 'SUCCESS'" color="#00f700">
-                                            &#10004; </font>
-                                        <font *ngIf="plugin.pluginDescription.running === 'PENDING'" color="#00f700">
-                                            &#8986; </font>
-                                        <font *ngIf="plugin.pluginDescription.running === 'FAILURE'" color="#FF0000">
-                                            &#10006; </font>
-                                        <font *ngIf="plugin.pluginDescription.running === 'UNKNOWN'" color="#FF0000">
-                                            &#063; </font>
+                                        <mat-icon
+                                            *ngIf="plugin.pluginDescription.running == 'SUCCESS' && !plugin.pluginDescription.olderThan24"
+                                            class="material-icons color_green" inline="false" aria-hidden="true">done
+                                        </mat-icon>
+                                        <mat-icon
+                                            *ngIf="plugin.pluginDescription.running == 'SUCCESS' && plugin.pluginDescription.olderThan24"
+                                            class="material-icons color_grey" inline="false" aria-hidden="true">done
+                                        </mat-icon>
+                                        <mat-icon
+                                            *ngIf="plugin.pluginDescription.running == 'FAILURE' && !plugin.pluginDescription.olderThan24"
+                                            inline="false" aria-hidden="true">error</mat-icon>
+                                        <mat-icon
+                                            *ngIf="plugin.pluginDescription.running == 'FAILURE' && plugin.pluginDescription.olderThan24"
+                                            class="material-icons color_grey" inline="false" aria-hidden="true">error
+                                        </mat-icon>
+                                        <font
+                                            *ngIf="plugin.pluginDescription.running == 'UNKNOWN' && !plugin.pluginDescription.olderThan24"
+                                            color="#FF0000">&#063;</font>
+                                        <font
+                                            *ngIf="plugin.pluginDescription.running == 'UNKNOWN' && plugin.pluginDescription.olderThan24"
+                                            color="#888888">&#063;</font>
+                                        <mat-spinner *ngIf="plugin.pluginDescription.running == 'PENDING'"
+                                            color="primary" mode="indeterminate" [diameter]=20 aria-hidden="true">
+                                        </mat-spinner>
+                                        <div *ngIf="plugin.pluginDescription.running != 'PENDING'"
+                                            style="font-size:11px; margin-left: auto; margin-right: 0;">
+                                            {{plugin.pluginDescription.timeAgo}}</div>
                                     </a>
                                 </div>
                             </mat-nav-list>
