@@ -20,9 +20,9 @@
                         <input [(ngModel)]="searchValue" (ngModelChange)="changeFilterPluginLists()" matInput>
                     </mat-form-field>
                 </div>
-                <mat-accordion [multi]="false">
+                <mat-accordion [multi]="searchValue !== ''">
                     <mat-list class="card-list">
-                        <mat-expansion-panel mat-list-item *ngFor="let category of activeTemplate?.categories">
+                        <mat-expansion-panel mat-list-item *ngFor="let category of activeTemplate?.categories" expanded="{{searchValue !== ''}}">
                             <mat-expansion-panel-header>
                                 <mat-panel-title>
                                     {{category.name}}
