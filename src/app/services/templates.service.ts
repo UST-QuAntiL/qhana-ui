@@ -29,7 +29,7 @@ export interface TemplateDescription {
     apiRoot: string;
 }
 
-interface TemplateCategory {
+export interface TemplateCategory {
     name: string;
     description: string;
     plugins: QhanaPlugin[];

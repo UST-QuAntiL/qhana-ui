@@ -3,8 +3,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { from, Subscription, merge } from 'rxjs';
 import { map, switchMap, catchError } from "rxjs/operators";
 import { CurrentExperimentService } from 'src/app/services/current-experiment.service';
-import { isInstanceOfPluginStatus, PluginDescription, PluginsService, QhanaPlugin } from 'src/app/services/plugins.service';
-import { TemplatesService, TemplateDescription, QhanaTemplate } from 'src/app/services/templates.service';
+import { isInstanceOfPluginStatus, PluginsService, QhanaPlugin } from 'src/app/services/plugins.service';
+import { TemplatesService, TemplateDescription, QhanaTemplate, TemplateCategory } from 'src/app/services/templates.service';
 import { QhanaBackendService  } from 'src/app/services/qhana-backend.service';
 import { FormSubmitData } from '../plugin-uiframe/plugin-uiframe.component';
 import { MatOptionSelectionChange } from '@angular/material/core';
@@ -39,6 +39,25 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
     timeAgo: TimeAgo | null = null;
 
     expandedPluginDescription: boolean = false;
+    
+    allPluginsDescription: TemplateDescription = {
+        name: "All Plugins",
+        description: "Shows all loaded Plugins",
+        identifier: "allPlugins",
+        apiRoot: "",
+    };
+
+    allPluginsCatergory: TemplateCategory = {
+        name: "All Plugins",
+        description: "Shows all loaded Plugins",
+        plugins: [],
+    }
+
+    allPluginsTemplate: QhanaTemplate = {
+        name: "All Plugins",
+        description: "Shows all loaded Plugins",
+        categories: [this.allPluginsCatergory],
+    }
 
     constructor(private route: ActivatedRoute, private experiment: CurrentExperimentService, private plugins: PluginsService, private templates: TemplatesService, private backend: QhanaBackendService, private router: Router) { }
 
@@ -62,7 +81,11 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
             plugins => this.pluginList = plugins
         )
         this.templatesSubscription = this.templates.templates.subscribe(
-            templates => this.templateList = templates
+            templates => {
+                this.templateList = templates;
+                this.templateList.push(this.allPluginsDescription);
+                this.templateList.sort((a, b) => a.name.localeCompare(b.name));
+            }
         )
         this.plugins.loadPlugins();
         this.templates.loadTemplates();
@@ -80,20 +103,28 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
 
     changeActiveTemplate(templateDesc: TemplateDescription, event: MatOptionSelectionChange) {
         if (event.isUserInput) {
-            this.templates.loadTemplate(templateDesc, this.pluginList ?? []).subscribe(
-                template => {
-                    if (template == null || template === this.activeTemplate) {
-                        this.activeTemplate = null;
-                        return;
+            if (templateDesc.identifier === "allPlugins") {
+                this.plugins.plugins.subscribe(plugins => this.allPluginsCatergory.plugins = plugins);
+                this.activeTemplate = this.allPluginsTemplate;
+
+                console.log(this.allPluginsTemplate)
+
+                this.resetFilteredPluginLists();
+            } else {
+                this.templates.loadTemplate(templateDesc, this.pluginList ?? []).subscribe(
+                    template => {
+                        if (template == null || template === this.activeTemplate) {
+                            this.activeTemplate = null;
+                            return;
+                        }
+                        this.activeTemplate = template;
+
+                        console.log(template)
+
+                        this.resetFilteredPluginLists();
                     }
-                    this.activeTemplate = template;
-                    
-                    console.log(template)
-
-                    this.resetFilteredPluginLists();
-                }
-            );
-
+                );
+            }
             let itemCountTimeline: number = 0;
             const experimentId = this.experimentId;
             const itemsPerPage: number = 100;
