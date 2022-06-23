@@ -30,6 +30,9 @@
                                 <mat-panel-description>
                                     {{category.description}}
                                 </mat-panel-description>
+                                <div class="plugin-runs">
+                                    {{getNumberOfSuccessfulRuns(category.plugins)}}/{{category.plugins.length}}
+                                </div>
                             </mat-expansion-panel-header>
                             <mat-nav-list class="card-list">
                                 <div *ngFor="let plugin of filteredPluginLists[category.name]">

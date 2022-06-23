@@ -253,6 +253,12 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
         );
     }
 
+    getNumberOfSuccessfulRuns(plugins: QhanaPlugin[]): number {
+        return plugins.filter(
+            plugin => plugin.pluginDescription.running === 'SUCCESS'
+        ).length;
+    }
+
     onPluginUiFormSubmit(formData: FormSubmitData) {
         const experimentId = this.experimentId;
         const plugin = this.activePlugin;
