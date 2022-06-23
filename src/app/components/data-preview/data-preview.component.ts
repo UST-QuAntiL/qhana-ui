@@ -33,6 +33,10 @@ interface PreviewData {
     dataType: string;
 }
 
+interface TableRowData {
+    [prop: string]: unknown,
+}
+
 @Component({
     selector: 'qhana-data-preview',
     templateUrl: './data-preview.component.html',
@@ -49,6 +53,8 @@ export class DataPreviewComponent implements OnChanges {
     dataUrl: SafeResourceUrl | null = null;
     effectiveMimetype: string | null = null;
     content: string = "";
+    tableContent: TableRowData[] = [];
+    tooLargeToPreview: boolean = false;
 
     constructor(private backend: QhanaBackendService, private sanitizer: DomSanitizer, private plugins: PluginsService) { }
 
@@ -74,6 +80,7 @@ export class DataPreviewComponent implements OnChanges {
     }
 
     async updateData() {
+        this.tooLargeToPreview = false;
         let contentType = this.previewData?.contentType ?? null;
         let mimetype = contentType;
         const previewOptions: PreviewOption[] = [];
@@ -121,6 +128,7 @@ export class DataPreviewComponent implements OnChanges {
                         // preview must be markdown and not too large!
                         blob.text().then((text) => this.content = text);
                     } else {
+                        this.tooLargeToPreview = blob.size >= 1048576;
                         this.content = ":warning: The data content is not of type markdown or too large to preview.";
                     }
                 })
@@ -132,19 +140,26 @@ export class DataPreviewComponent implements OnChanges {
                         // preview must be of the correct mimetype and not too large!
                         blob.text().then((text) => {
                             const params = new URLSearchParams(text);
-                            let mdString = "| **Parameter** | **Value** |\n|:---|:----|\n";
+                            const tableRows: TableRowData[] = [];
                             let lastParam: string = "";
                             params.forEach((value, key) => {
                                 if (key === lastParam) {
-                                    mdString += `|   | ${value.replace("|", "\\|")} |\n`;
+                                    tableRows.push({
+                                        param: "", // still the same param name
+                                        value: value,
+                                    });
                                     return;
                                 }
+                                tableRows.push({
+                                    param: key,
+                                    value: value,
+                                });
                                 lastParam = key;
-                                mdString += `| ${key} | ${value.replace("|", "\\|")} |\n`;
                             });
-                            this.content = mdString;
+                            this.tableContent = tableRows;
                         });
                     } else {
+                        this.tooLargeToPreview = blob.size >= 1048576;
                         this.content = ":warning: The data content is not of type markdown or too large to preview.";
                     }
                 })

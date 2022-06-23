@@ -33,6 +33,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatTableModule } from '@angular/material/table';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppRoutingModule } from './app-routing.module';
@@ -93,6 +94,7 @@ import { MarkdownHelpDialog } from './dialogs/markdown-help/markdown-help.compon
         BrowserAnimationsModule,
         HttpClientModule,
         MatToolbarModule,
+        MatTableModule,
         MatPaginatorModule,
         MatCardModule,
         MatButtonModule,
