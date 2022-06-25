@@ -51,9 +51,9 @@
                                     <mat-icon *ngIf="plugin.pluginDescription.running == 'FAILURE'"
                                         class="material-icons {{plugin.pluginDescription.olderThan24 ? 'color_grey' : ''}}"
                                         inline="false" aria-hidden="true">error</mat-icon>
-                                    <font *ngIf="plugin.pluginDescription.running == 'UNKNOWN'"
-                                        color="{{plugin.pluginDescription.olderThan24 ? '#888888' : '#FF0000'}}">&#063;
-                                    </font>
+                                    <mat-icon *ngIf="plugin.pluginDescription.running == 'UNKNOWN'"
+                                        class="material-icons {{plugin.pluginDescription.olderThan24 ? 'color_grey' : 'color_red'}}"
+                                        inline="false" aria-hidden="true">question_mark</mat-icon>
                                     <mat-spinner *ngIf="plugin.pluginDescription.running == 'PENDING'" color="primary"
                                         mode="indeterminate" [diameter]=20 aria-hidden="true"></mat-spinner>
                                     <div class="time-ago" *ngIf="plugin.pluginDescription.running != 'PENDING'">
