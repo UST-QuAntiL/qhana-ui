@@ -18,7 +18,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, from, Observable } from 'rxjs';
 import { catchError, map, mergeAll, mergeMap, toArray } from 'rxjs/operators';
-import { PluginDescription, PluginsService, QhanaPlugin } from './plugins.service';
+import { QhanaPlugin } from './plugins.service';
 import { QhanaBackendService } from './qhana-backend.service';
 
 
@@ -92,14 +92,13 @@ export class TemplatesService {
         return this.templatesSubject.asObservable();
     }
 
-    constructor(private http: HttpClient, private backend: QhanaBackendService, private pluginsService: PluginsService) { }
+    constructor(private http: HttpClient, private backend: QhanaBackendService) { }
 
     loadTemplates() {
         if (this.loading) {
             return;
         }
         this.loading = true;
-        this.pluginsService.loadPlugins();
 
         this.backend.getPluginEndpoints().subscribe(pluginEndpoints => {
             var observables: Observable<TemplateDescription>[] = [];
