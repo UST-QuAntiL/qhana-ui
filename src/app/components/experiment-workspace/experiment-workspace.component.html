@@ -3,10 +3,13 @@
         <mat-card class="sidebar card">
             <mat-card-title>
                 <h3>
-                    <mat-form-field appearance="fill">
+                    <mat-form-field appearance="fill" matTooltip="{{activeTemplate?.description}}"
+                    matTooltipPosition="right">
                         <mat-label>Template</mat-label>
                         <mat-select>
-                            <mat-option *ngFor="let template of templateList" matTooltip="{{template.description}}" matTooltipPosition="right" value="{{template.name}}" (onSelectionChange)="changeActiveTemplate(template, $event)">
+                            <mat-option *ngFor="let template of templateList" matTooltip="{{template.description}}"
+                                matTooltipPosition="right" value="{{template.name}}"
+                                (onSelectionChange)="changeActiveTemplate(template, $event)">
                                 {{template.name}}
                             </mat-option>
                         </mat-select>
@@ -22,7 +25,9 @@
                 </div>
                 <mat-accordion [multi]="searchValue !== ''">
                     <mat-list class="card-list">
-                        <mat-expansion-panel mat-list-item *ngFor="let category of activeTemplate?.categories; first as isFirst" expanded="{{searchValue !== '' || isFirst}}">
+                        <mat-expansion-panel mat-list-item
+                            *ngFor="let category of activeTemplate?.categories; first as isFirst"
+                            expanded="{{searchValue !== '' || isFirst}}">
                             <mat-expansion-panel-header>
                                 <mat-panel-title>
                                     {{category.name}}
@@ -41,33 +46,20 @@
                                         [routerLinkActive]="'active-list-item'">
                                         {{plugin.metadata.title ??
                                         plugin.pluginDescription.name}}(@{{plugin.metadata.version}})
-                                        <mat-icon
-                                            *ngIf="plugin.pluginDescription.running == 'SUCCESS' && !plugin.pluginDescription.olderThan24"
-                                            class="material-icons color_green" inline="false" aria-hidden="true">done
-                                        </mat-icon>
-                                        <mat-icon
-                                            *ngIf="plugin.pluginDescription.running == 'SUCCESS' && plugin.pluginDescription.olderThan24"
-                                            class="material-icons color_grey" inline="false" aria-hidden="true">done
-                                        </mat-icon>
-                                        <mat-icon
-                                            *ngIf="plugin.pluginDescription.running == 'FAILURE' && !plugin.pluginDescription.olderThan24"
-                                            inline="false" aria-hidden="true">error</mat-icon>
-                                        <mat-icon
-                                            *ngIf="plugin.pluginDescription.running == 'FAILURE' && plugin.pluginDescription.olderThan24"
-                                            class="material-icons color_grey" inline="false" aria-hidden="true">error
-                                        </mat-icon>
-                                        <font
-                                            *ngIf="plugin.pluginDescription.running == 'UNKNOWN' && !plugin.pluginDescription.olderThan24"
-                                            color="#FF0000">&#063;</font>
-                                        <font
-                                            *ngIf="plugin.pluginDescription.running == 'UNKNOWN' && plugin.pluginDescription.olderThan24"
-                                            color="#888888">&#063;</font>
-                                        <mat-spinner *ngIf="plugin.pluginDescription.running == 'PENDING'"
-                                            color="primary" mode="indeterminate" [diameter]=20 aria-hidden="true">
-                                        </mat-spinner>
-                                        <div *ngIf="plugin.pluginDescription.running != 'PENDING'"
-                                            style="font-size:11px; margin-left: auto; margin-right: 0;">
-                                            {{plugin.pluginDescription.timeAgo}}</div>
+                                        <mat-icon *ngIf="plugin.pluginDescription.running == 'SUCCESS'"
+                                        class="material-icons {{plugin.pluginDescription.olderThan24 ? 'color_grey' : 'color_green'}}"
+                                        inline="false" aria-hidden="true">done</mat-icon>
+                                    <mat-icon *ngIf="plugin.pluginDescription.running == 'FAILURE'"
+                                        class="material-icons {{plugin.pluginDescription.olderThan24 ? 'color_grey' : ''}}"
+                                        inline="false" aria-hidden="true">error</mat-icon>
+                                    <font *ngIf="plugin.pluginDescription.running == 'UNKNOWN'"
+                                        color="{{plugin.pluginDescription.olderThan24 ? '#888888' : '#FF0000'}}">&#063;
+                                    </font>
+                                    <mat-spinner *ngIf="plugin.pluginDescription.running == 'PENDING'" color="primary"
+                                        mode="indeterminate" [diameter]=20 aria-hidden="true"></mat-spinner>
+                                    <div *ngIf="plugin.pluginDescription.running != 'PENDING'"
+                                        style="font-size:11px; margin-left: auto; margin-right: 0;">
+                                        {{plugin.pluginDescription.timeAgo}}</div>
                                     </a>
                                 </div>
                             </mat-nav-list>
