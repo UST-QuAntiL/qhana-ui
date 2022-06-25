@@ -35,7 +35,7 @@
                                 <mat-panel-description>
                                     {{category.description}}
                                 </mat-panel-description>
-                                <div class="plugin-runs">
+                                <div class="plugin-runs" matTooltip="{{getNumberOfSuccessfulRuns(category.plugins)}} plugin(s) ran successful">
                                     {{getNumberOfSuccessfulRuns(category.plugins)}}/{{category.plugins.length}}
                                 </div>
                             </mat-expansion-panel-header>
