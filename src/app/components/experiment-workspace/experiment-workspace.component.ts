@@ -90,8 +90,68 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
         this.plugins.loadPlugins();
         this.templates.loadTemplates();
 
+        this.registerPluginStatusUpdater();
+    }
+    
+    registerPluginStatusUpdater(): void {
+        let itemCountTimeline: number = 0;
+        const experimentId = this.experimentId;
+        const itemsPerPage: number = 100;
+        const time = new Date();
+
         TimeAgo.addDefaultLocale(en);
         this.timeAgo = new TimeAgo('en-US');
+
+        if (experimentId !== null) {
+            const timeLineList = this.backend.getTimelineStepsPage(experimentId, 0, itemsPerPage);
+
+            if (timeLineList !== null) {
+                let timeLine = timeLineList.pipe(
+                    map(value => value.items),
+                    catchError(err => {
+                        throw err;
+                    })
+                );
+
+                timeLineList.subscribe(value => itemCountTimeline = value.itemCount);
+
+                (async () => {
+                    await delay(500);
+
+                    for (let i = 1; i<itemCountTimeline/itemsPerPage; i++) {
+                        let timeLinePage = this.backend.getTimelineStepsPage(experimentId, i, itemsPerPage).pipe(
+                            map(value => value.items),
+                            catchError(err => {
+                                throw err;
+                            })
+                        );
+                        timeLine = merge(timeLine, timeLinePage);
+                    }
+
+                    if (timeLine !== null) {
+                        this.pluginList?.forEach(
+                            plugin => timeLine.forEach(
+                                value => value.forEach(
+                                    step => {
+                                        if (plugin.metadata?.name == step.processorName) {
+                                            if (isInstanceOfPluginStatus(step.status)) {
+                                                plugin.pluginDescription.running = step.status;
+                                            } else {
+                                                plugin.pluginDescription.running = "UNKNOWN";
+                                            }
+                                            
+                                            const endTime = new Date(step.end).getTime()
+                                            plugin.pluginDescription.timeAgo = this.timeAgo?.format(endTime) ?? "";
+                                            plugin.pluginDescription.olderThan24 = (time.getTime() - endTime) > 24*60*60*1000;
+                                        }
+                                    } 
+                                )
+                            )
+                        )
+                    }
+                })();
+            }
+        }
     }
 
     ngOnDestroy(): void {
@@ -104,12 +164,8 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
     changeActiveTemplate(templateDesc: TemplateDescription, event: MatOptionSelectionChange) {
         if (event.isUserInput) {
             if (templateDesc.identifier === "allPlugins") {
-                this.plugins.plugins.subscribe(plugins => this.allPluginsCatergory.plugins = plugins);
+                this.allPluginsCatergory.plugins = this.pluginList ?? [];
                 this.activeTemplate = this.allPluginsTemplate;
-
-                console.log(this.allPluginsTemplate)
-
-                this.resetFilteredPluginLists();
             } else {
                 this.templates.loadTemplate(templateDesc, this.pluginList ?? []).subscribe(
                     template => {
@@ -118,79 +174,17 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
                             return;
                         }
                         this.activeTemplate = template;
-
-                        console.log(template)
-
-                        this.resetFilteredPluginLists();
                     }
                 );
             }
-            let itemCountTimeline: number = 0;
-            const experimentId = this.experimentId;
-            const itemsPerPage: number = 100;
-            const time = new Date();
-    
-            if (experimentId !== null) {
-                const timeLineList = this.backend.getTimelineStepsPage(experimentId, 0, itemsPerPage);
-    
-                if (timeLineList !== null) {
-                    let timeLine = timeLineList.pipe(
-                        map(value => value.items),
-                        catchError(err => {
-                            throw err;
-                        })
-                    );
-    
-                    timeLineList.subscribe(
-                        value => {
-                            itemCountTimeline = value.itemCount;
-                        }
-                    );
-    
-                    (async () => {
-                        await delay(500);
-    
-                        for (let i = 1; i<itemCountTimeline/itemsPerPage; i++) {
-                            let timeLinePage = this.backend.getTimelineStepsPage(experimentId, i, itemsPerPage).pipe(
-                                map(value => value.items),
-                                catchError(err => {
-                                    throw err;
-                                })
-                            );
-                            timeLine = merge(timeLine, timeLinePage);
-                        }
-    
-                        if (timeLine !== null) {
-                            this.activeTemplate?.categories.forEach(
-                                category => category.plugins.forEach(
-                                    plugin => timeLine.forEach(
-                                        value => value.forEach(
-                                            step => {
-                                                if (plugin.metadata?.name == step.processorName) {
-                                                    if (isInstanceOfPluginStatus(step.status)) {
-                                                        plugin.pluginDescription.running = step.status;
-                                                    } else {
-                                                        plugin.pluginDescription.running = "UNKNOWN";
-                                                    }
-                                                    
-                                                    const endTime = new Date(step.end).getTime()
-                                                    plugin.pluginDescription.timeAgo = this.timeAgo?.format(endTime) ?? "";
-                                                    plugin.pluginDescription.olderThan24 = (time.getTime() - endTime) > 24*60*60*1000;
-                                                }
-                                            }
-                                        )
-                                    )
-                                )
-                            )
-                        }
+            
+            this.resetFilteredPluginLists();
 
-                        this.activeTemplate?.categories.forEach(
-                            category => category.plugins.sort((a, b) => a.pluginDescription.identifier.localeCompare(b.pluginDescription.identifier))
-                        );
-
-                    })();
-                }
-            }
+            this.activeTemplate?.categories.forEach(
+                category => category.plugins.sort(
+                    (a, b) => a.pluginDescription.identifier.localeCompare(b.pluginDescription.identifier)
+                )
+            );
         }
     }
 

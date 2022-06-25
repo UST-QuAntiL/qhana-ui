@@ -41,7 +41,6 @@ export interface QhanaTemplate {
     categories: TemplateCategory[];
 }
 
-
 interface PluginFilterOr {
     'or': PluginFilterExpr[];
 }
