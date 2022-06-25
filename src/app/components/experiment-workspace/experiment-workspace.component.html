@@ -4,7 +4,7 @@
             <mat-card-title>
                 <h3>
                     <mat-form-field appearance="fill" matTooltip="{{activeTemplate?.description}}"
-                    matTooltipPosition="right">
+                        matTooltipPosition="right">
                         <mat-label>Template</mat-label>
                         <mat-select>
                             <mat-option *ngFor="let template of templateList" matTooltip="{{template.description}}"
@@ -40,13 +40,12 @@
                                 </div>
                             </mat-expansion-panel-header>
                             <mat-nav-list class="card-list">
-                                <div *ngFor="let plugin of filteredPluginLists[category.name]">
-                                    <a mat-list-item
-                                        [routerLink]="['/experiments', experimentId, 'workspace', plugin.pluginDescription.identifier]"
-                                        [routerLinkActive]="'active-list-item'">
-                                        {{plugin.metadata.title ??
-                                        plugin.pluginDescription.name}}(@{{plugin.metadata.version}})
-                                        <mat-icon *ngIf="plugin.pluginDescription.running == 'SUCCESS'"
+                                <a mat-list-item *ngFor="let plugin of filteredPluginLists[category.name]"
+                                    [routerLink]="['/experiments', experimentId, 'workspace', plugin.pluginDescription.identifier]"
+                                    [routerLinkActive]="'active-list-item'">
+                                    {{plugin.metadata.title ??
+                                    plugin.pluginDescription.name}}(@{{plugin.metadata.version}})
+                                    <mat-icon *ngIf="plugin.pluginDescription.running == 'SUCCESS'"
                                         class="material-icons {{plugin.pluginDescription.olderThan24 ? 'color_grey' : 'color_green'}}"
                                         inline="false" aria-hidden="true">done</mat-icon>
                                     <mat-icon *ngIf="plugin.pluginDescription.running == 'FAILURE'"
@@ -57,11 +56,9 @@
                                     </font>
                                     <mat-spinner *ngIf="plugin.pluginDescription.running == 'PENDING'" color="primary"
                                         mode="indeterminate" [diameter]=20 aria-hidden="true"></mat-spinner>
-                                    <div *ngIf="plugin.pluginDescription.running != 'PENDING'"
-                                        style="font-size:11px; margin-left: auto; margin-right: 0;">
+                                    <div class="time-ago" *ngIf="plugin.pluginDescription.running != 'PENDING'">
                                         {{plugin.pluginDescription.timeAgo}}</div>
-                                    </a>
-                                </div>
+                                </a>
                             </mat-nav-list>
                         </mat-expansion-panel>
                     </mat-list>
