@@ -4,7 +4,7 @@ import { from, Subscription, merge } from 'rxjs';
 import { map, switchMap, catchError } from "rxjs/operators";
 import { CurrentExperimentService } from 'src/app/services/current-experiment.service';
 import { isInstanceOfPluginStatus, PluginsService, QhanaPlugin } from 'src/app/services/plugins.service';
-import { TemplatesService, TemplateDescription, QhanaTemplate, TemplateCategory } from 'src/app/services/templates.service';
+import { TemplatesService, TemplateDescription, QhanaTemplate, TemplateCategory, pluginFilterMatchesTags } from 'src/app/services/templates.service';
 import { QhanaBackendService  } from 'src/app/services/qhana-backend.service';
 import { FormSubmitData } from '../plugin-uiframe/plugin-uiframe.component';
 import { MatOptionSelectionChange } from '@angular/material/core';
@@ -39,26 +39,6 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
     timeAgo: TimeAgo | null = null;
 
     expandedPluginDescription: boolean = false;
-    
-    allPluginsDescription: TemplateDescription = {
-        name: "All Plugins",
-        description: "Shows all loaded Plugins",
-        identifier: "allPlugins",
-        apiRoot: "",
-    };
-
-    allPluginsCatergory: TemplateCategory = {
-        name: "All Plugins",
-        description: "Shows all loaded Plugins",
-        plugins: [],
-    }
-
-    allPluginsTemplate: QhanaTemplate = {
-        name: "All Plugins",
-        description: "Shows all loaded Plugins",
-        categories: [this.allPluginsCatergory],
-    }
-
     constructor(private route: ActivatedRoute, private experiment: CurrentExperimentService, private plugins: PluginsService, private templates: TemplatesService, private backend: QhanaBackendService, private router: Router) { }
 
     ngOnInit(): void {
@@ -83,8 +63,6 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
         this.templatesSubscription = this.templates.templates.subscribe(
             templates => {
                 this.templateList = templates;
-                this.templateList.push(this.allPluginsDescription);
-                this.templateList.sort((a, b) => a.name.localeCompare(b.name));
             }
         )
         this.plugins.loadPlugins();
@@ -163,23 +141,30 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
 
     changeActiveTemplate(templateDesc: TemplateDescription, event: MatOptionSelectionChange) {
         if (event.isUserInput) {
-            if (templateDesc.identifier === "allPlugins") {
-                this.allPluginsCatergory.plugins = this.pluginList ?? [];
-                this.activeTemplate = this.allPluginsTemplate;
-            } else {
-                this.templates.loadTemplate(templateDesc, this.pluginList ?? []).subscribe(
-                    template => {
-                        if (template == null || template === this.activeTemplate) {
-                            this.activeTemplate = null;
-                            return;
-                        }
-                        this.activeTemplate = template;
+            let categories: TemplateCategory[] = []
+            templateDesc.categories.forEach(categoryDesc => {
+                let plugins: QhanaPlugin[] = []
+                this.pluginList?.forEach(plugin => {
+                    if (pluginFilterMatchesTags(plugin.pluginDescription.tags, categoryDesc.pluginFilter)) {
+                        plugins.push(plugin)
                     }
-                );
-            }
-            
-            this.resetFilteredPluginLists();
+                })
+                
+                categories.push({
+                    name: categoryDesc.name,
+                    description: categoryDesc.description,
+                    plugins: plugins,
+                })
+            });
 
+            this.activeTemplate = {
+                name: templateDesc.name,
+                description: templateDesc.description,
+                categories: categories,
+            }
+
+            this.resetFilteredPluginLists();
+            
             this.activeTemplate?.categories.forEach(
                 category => category.plugins.sort(
                     (a, b) => a.pluginDescription.identifier.localeCompare(b.pluginDescription.identifier)

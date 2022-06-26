@@ -16,18 +16,10 @@
 
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, from, Observable } from 'rxjs';
+import { BehaviorSubject, from, Observable, of } from 'rxjs';
 import { catchError, map, mergeAll, mergeMap, toArray } from 'rxjs/operators';
 import { QhanaPlugin } from './plugins.service';
 import { QhanaBackendService } from './qhana-backend.service';
-
-
-export interface TemplateDescription {
-    name: string;
-    description: string;
-    identifier: string;
-    apiRoot: string;
-}
 
 export interface TemplateCategory {
     name: string;
@@ -39,6 +31,19 @@ export interface QhanaTemplate {
     name: string;
     description: string;
     categories: TemplateCategory[];
+}
+
+interface CategoryDescription {
+    name: string;
+    description: string;
+    pluginFilter: PluginFilterExpr;
+}
+
+export interface TemplateDescription {
+    name: string;
+    description: string;
+    identifier: string;
+    categories: CategoryDescription[];
 }
 
 interface PluginFilterOr {
@@ -53,33 +58,7 @@ interface PluginFilterNot {
     'not': PluginFilterExpr;
 }
 
-type PluginFilterExpr = PluginFilterOr | PluginFilterAnd | PluginFilterNot | string;
-
-interface CategoryDescription {
-    name: string;
-    description: string;
-    pluginFilter: PluginFilterExpr;
-}
-
-interface CategoriesResponse {
-    categories: CategoryDescription[];
-}
-
-function isInstanceOfPluginFilterOr(pluginFilter: PluginFilterExpr): pluginFilter is PluginFilterOr {
-    return pluginFilter != null && (pluginFilter as PluginFilterOr).or !== undefined;
-}
-
-function isInstanceOfPluginFilterAnd(pluginFilter: PluginFilterExpr): pluginFilter is PluginFilterAnd {
-    return pluginFilter != null && (pluginFilter as PluginFilterAnd).and !== undefined;
-}
-
-function isInstanceOfPluginFilterNot(pluginFilter: PluginFilterExpr): pluginFilter is PluginFilterNot  {
-    return pluginFilter != null && (pluginFilter as PluginFilterNot).not !== undefined;
-}
-
-function isInstanceOfString(pluginFilter: PluginFilterExpr): pluginFilter is string {
-    return pluginFilter != null && typeof pluginFilter === 'string';
-}
+type PluginFilterExpr = PluginFilterOr | PluginFilterAnd | PluginFilterNot | string | boolean;
 
 @Injectable({
     providedIn: 'root'
@@ -113,6 +92,19 @@ export class TemplatesService {
                     ))
                 }
             });
+            
+            observables.push(of({
+                name: 'All Plugins',
+                description: 'Display All Loaded Plugins',
+                identifier: 'allPlugins',
+                categories: [
+                    {
+                        name: 'All Plugins',
+                        description: 'Display All Loaded Plugins',
+                        pluginFilter: true,
+                    }
+                ]
+            }))
 
             from(observables).pipe(
                 mergeAll(),
@@ -132,56 +124,46 @@ export class TemplatesService {
             });
         })
     }
+}
+
+function isInstanceOfPluginFilterOr(pluginFilter: PluginFilterExpr): pluginFilter is PluginFilterOr {
+    return pluginFilter != null && (pluginFilter as PluginFilterOr).or !== undefined;
+}
+
+function isInstanceOfPluginFilterAnd(pluginFilter: PluginFilterExpr): pluginFilter is PluginFilterAnd {
+    return pluginFilter != null && (pluginFilter as PluginFilterAnd).and !== undefined;
+}
+
+function isInstanceOfPluginFilterNot(pluginFilter: PluginFilterExpr): pluginFilter is PluginFilterNot  {
+    return pluginFilter != null && (pluginFilter as PluginFilterNot).not !== undefined;
+}
+
+function isInstanceOfString(pluginFilter: PluginFilterExpr): pluginFilter is string {
+    return pluginFilter != null && typeof pluginFilter === 'string';
+}
+
+function isInstanceOfBoolean(pluginFilter: PluginFilterExpr): pluginFilter is boolean {
+    return pluginFilter != null && typeof pluginFilter === 'boolean';
+}
     
-    pluginFilterMatchesTags(tags: string[], pluginFilter: PluginFilterExpr): boolean {
-        if (isInstanceOfPluginFilterOr(pluginFilter)) {
-            return pluginFilter.or.reduce<boolean>(
-                (res, nestedPluginFilter) => res || this.pluginFilterMatchesTags(tags, nestedPluginFilter),
-                false
-            )
-        } else if (isInstanceOfPluginFilterAnd(pluginFilter)) {
-            return pluginFilter.and.reduce<boolean>(
-                (res, nestedPluginFilter) => res && this.pluginFilterMatchesTags(tags, nestedPluginFilter),
-                true
-            )
-        } else if (isInstanceOfPluginFilterNot(pluginFilter)) {
-            return !this.pluginFilterMatchesTags(tags, pluginFilter.not)
-        } else if (isInstanceOfString(pluginFilter)) {
-            return tags.includes(pluginFilter)
-        } else {
-            throw Error(`Unknown plugin filter ${pluginFilter}`)
-        }
-    }
-
-    loadTemplate(templateDesc: TemplateDescription, pluginList: QhanaPlugin[]): Observable<QhanaTemplate> {
-        return this.http.get<CategoriesResponse>(templateDesc.apiRoot).pipe(
-            map(categoriesResponse => {
-                let categories: TemplateCategory[] = []
-
-                categoriesResponse.categories.forEach(categoryDesc => {
-                    let plugins: QhanaPlugin[] = []
-                    
-                    pluginList.forEach(
-                        plugin => {
-                            if (this.pluginFilterMatchesTags(plugin.pluginDescription.tags, categoryDesc.pluginFilter)) {
-                                plugins.push(plugin)
-                            }
-                        }
-                    )
-
-                    categories.push({
-                        name: categoryDesc.name,
-                        description: categoryDesc.description,
-                        plugins: plugins,
-                    })
-                });
-                    
-                return {
-                    name: templateDesc.name,
-                    description: templateDesc.description,
-                    categories: categories,
-                    }
-            })
-        )
+export function pluginFilterMatchesTags(tags: string[], pluginFilter: PluginFilterExpr): boolean {
+    if (isInstanceOfPluginFilterOr(pluginFilter)) {
+        return pluginFilter.or.reduce<boolean>(
+            (res, nestedPluginFilter) => res || pluginFilterMatchesTags(tags, nestedPluginFilter),
+            false,
+        );
+    } else if (isInstanceOfPluginFilterAnd(pluginFilter)) {
+        return pluginFilter.and.reduce<boolean>(
+            (res, nestedPluginFilter) => res && pluginFilterMatchesTags(tags, nestedPluginFilter),
+            true,
+        );
+    } else if (isInstanceOfPluginFilterNot(pluginFilter)) {
+        return !pluginFilterMatchesTags(tags, pluginFilter.not);
+    } else if (isInstanceOfString(pluginFilter)) {
+        return tags.includes(pluginFilter)
+    } else if (isInstanceOfBoolean(pluginFilter)) {
+        return pluginFilter;
+    } else {
+        throw Error(`Unknown plugin filter ${pluginFilter}`);
     }
 }
