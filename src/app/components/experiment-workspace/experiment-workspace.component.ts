@@ -58,7 +58,10 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
             this.changeActivePlugin(activePlugin);
         });
         this.pluginsSubscription = this.plugins.plugins.subscribe(
-            plugins => this.pluginList = plugins
+            plugins => {
+                this.pluginList = plugins
+                this.registerPluginStatusUpdater();
+            }
         )
         this.templatesSubscription = this.templates.templates.subscribe(
             templates => {
@@ -67,8 +70,6 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
         )
         this.plugins.loadPlugins();
         this.templates.loadTemplates();
-
-        this.registerPluginStatusUpdater();
     }
     
     registerPluginStatusUpdater(): void {
