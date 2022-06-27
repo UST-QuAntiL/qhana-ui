@@ -7,7 +7,7 @@
                         matTooltipPosition="right">
                         <mat-label>Template</mat-label>
                         <mat-select>
-                            <mat-option *ngFor="let template of templateList" matTooltip="{{template.description}}"
+                            <mat-option *ngFor="let template of templateList | async" matTooltip="{{template.description}}"
                                 matTooltipPosition="right" value="{{template.name}}"
                                 (onSelectionChange)="changeActiveTemplate(template, $event)">
                                 {{template.name}}

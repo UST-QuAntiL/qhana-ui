@@ -55,8 +55,6 @@ export class PluginsService {
 
     private loading: boolean = false;
 
-    private pluginList: QhanaPlugin[] = [];
-
     private pluginsSubject: BehaviorSubject<QhanaPlugin[]> = new BehaviorSubject<QhanaPlugin[]>([]);
 
     get plugins() {
@@ -130,7 +128,6 @@ export class PluginsService {
                     }
                     return 0;
                 })
-                this.pluginList = plugins;
                 this.pluginsSubject.next(plugins);
                 this.loading = false;
             });

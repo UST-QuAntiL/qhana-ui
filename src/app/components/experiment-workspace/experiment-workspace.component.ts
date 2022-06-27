@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { from, Subscription, merge } from 'rxjs';
+import { from, Subscription, merge, Observable } from 'rxjs';
 import { map, switchMap, catchError } from "rxjs/operators";
 import { CurrentExperimentService } from 'src/app/services/current-experiment.service';
 import { isInstanceOfPluginStatus, PluginsService, QhanaPlugin } from 'src/app/services/plugins.service';
@@ -19,14 +19,12 @@ import en from 'javascript-time-ago/locale/en';
 export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
 
     private routeSubscription: Subscription | null = null;
-    private pluginsSubscription: Subscription | null = null;
-    private templatesSubscription: Subscription | null = null;
 
     experimentId: string | null = null;
 
     searchValue: string = "";
-    pluginList: QhanaPlugin[] | null = null;
-    templateList: TemplateDescription[] | null = null;
+    pluginList: Observable<QhanaPlugin[]> | null = null;
+    templateList: Observable<TemplateDescription[]> | null = null;
 
     filteredPluginLists: { [category: string]: QhanaPlugin[] } = {};
 
@@ -57,19 +55,12 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
         ).subscribe(activePlugin => {
             this.changeActivePlugin(activePlugin);
         });
-        this.pluginsSubscription = this.plugins.plugins.subscribe(
-            plugins => {
-                this.pluginList = plugins
-                this.registerPluginStatusUpdater();
-            }
-        )
-        this.templatesSubscription = this.templates.templates.subscribe(
-            templates => {
-                this.templateList = templates;
-            }
-        )
         this.plugins.loadPlugins();
+        this.pluginList = this.plugins.plugins;
         this.templates.loadTemplates();
+        this.templateList = this.templates.templates;
+
+        this.registerPluginStatusUpdater();
     }
     
     registerPluginStatusUpdater(): void {
@@ -108,22 +99,24 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
                     }
 
                     if (timeLine !== null) {
-                        this.pluginList?.forEach(
-                            plugin => timeLine.forEach(
-                                value => value.forEach(
-                                    step => {
-                                        if (plugin.metadata?.name == step.processorName) {
-                                            if (isInstanceOfPluginStatus(step.status)) {
-                                                plugin.pluginDescription.running = step.status;
-                                            } else {
-                                                plugin.pluginDescription.running = "UNKNOWN";
+                        this.pluginList?.subscribe(
+                            plugins => plugins.forEach(
+                                plugin => timeLine.forEach(
+                                    value => value.forEach(
+                                        step => {
+                                            if (plugin.metadata?.name == step.processorName) {
+                                                if (isInstanceOfPluginStatus(step.status)) {
+                                                    plugin.pluginDescription.running = step.status;
+                                                } else {
+                                                    plugin.pluginDescription.running = "UNKNOWN";
+                                                }
+                                                
+                                                const endTime = new Date(step.end).getTime()
+                                                plugin.pluginDescription.timeAgo = this.timeAgo?.format(endTime) ?? "";
+                                                plugin.pluginDescription.olderThan24 = (time.getTime() - endTime) > 24*60*60*1000;
                                             }
-                                            
-                                            const endTime = new Date(step.end).getTime()
-                                            plugin.pluginDescription.timeAgo = this.timeAgo?.format(endTime) ?? "";
-                                            plugin.pluginDescription.olderThan24 = (time.getTime() - endTime) > 24*60*60*1000;
                                         }
-                                    } 
+                                    )
                                 )
                             )
                         )
@@ -136,8 +129,6 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
     ngOnDestroy(): void {
         this.routeSubscription?.unsubscribe();
         this.activePluginSubscription?.unsubscribe();
-        this.pluginsSubscription?.unsubscribe();
-        this.templatesSubscription?.unsubscribe();
     }
 
     changeActiveTemplate(templateDesc: TemplateDescription, event: MatOptionSelectionChange) {
@@ -145,11 +136,13 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
             let categories: TemplateCategory[] = []
             templateDesc.categories.forEach(categoryDesc => {
                 let plugins: QhanaPlugin[] = []
-                this.pluginList?.forEach(plugin => {
-                    if (pluginFilterMatchesTags(plugin.pluginDescription.tags, categoryDesc.pluginFilter)) {
-                        plugins.push(plugin)
-                    }
-                })
+                this.pluginList?.subscribe(
+                    pluginList => pluginList.forEach(plugin => {
+                        if (pluginFilterMatchesTags(plugin.pluginDescription.tags, categoryDesc.pluginFilter)) {
+                            plugins.push(plugin)
+                        }
+                    })
+                )
                 
                 categories.push({
                     name: categoryDesc.name,
