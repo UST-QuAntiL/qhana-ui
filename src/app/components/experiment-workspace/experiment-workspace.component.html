@@ -54,7 +54,7 @@
                                     <mat-icon *ngIf="plugin.pluginDescription.running == 'UNKNOWN'"
                                         class="material-icons {{plugin.pluginDescription.olderThan24 ? 'color_grey' : 'color_red'}}"
                                         inline="false" aria-hidden="true">question_mark</mat-icon>
-                                    <mat-spinner *ngIf="plugin.pluginDescription.running == 'PENDING'" color="primary"
+                                    <mat-spinner *ngIf="plugin.pluginDescription.running == 'PENDING'" class="material-icons" color="primary"
                                         mode="indeterminate" [diameter]=20 aria-hidden="true"></mat-spinner>
                                     <div class="time-ago" *ngIf="plugin.pluginDescription.running != 'PENDING'">
                                         {{plugin.pluginDescription.timeAgo}}</div>
