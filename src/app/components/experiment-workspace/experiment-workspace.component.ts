@@ -28,6 +28,7 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
 
     filteredPluginLists: { [category: string]: QhanaPlugin[] } = {};
 
+    activeTemplateSubscription: Subscription | null = null;
     activeTemplate: QhanaTemplate | null = null;
 
     activePluginSubscription: Subscription | null = null;
@@ -55,6 +56,19 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
         ).subscribe(activePlugin => {
             this.changeActivePlugin(activePlugin);
         });
+        this.activeTemplateSubscription = this.route.params.pipe(
+            map(params => params?.templateId ?? null),
+            switchMap(templateId => {
+                if (templateId == null) {
+                    return from([null]); // emits a single value null
+                }
+                return this.templates.getTemplate(templateId)
+            }),
+        ).subscribe(activeTemplate => {
+            if (activeTemplate != null) {
+                this.changeActiveTemplate(activeTemplate, null);
+            }
+        }) // TODO: repeat for active category. move out to own function, make cleaner!
         this.plugins.loadPlugins();
         this.pluginList = this.plugins.plugins;
         this.templates.loadTemplates();
@@ -129,10 +143,11 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
     ngOnDestroy(): void {
         this.routeSubscription?.unsubscribe();
         this.activePluginSubscription?.unsubscribe();
+        this.activeTemplateSubscription?.unsubscribe();
     }
 
-    changeActiveTemplate(templateDesc: TemplateDescription, event: MatOptionSelectionChange) {
-        if (event.isUserInput) {
+    changeActiveTemplate(templateDesc: TemplateDescription, event: MatOptionSelectionChange | null) {
+        if (event?.isUserInput ?? true) {
             let categories: TemplateCategory[] = []
             templateDesc.categories.forEach(categoryDesc => {
                 let plugins: QhanaPlugin[] = []
@@ -155,6 +170,7 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
                 name: templateDesc.name,
                 description: templateDesc.description,
                 categories: categories,
+                templateDescription: templateDesc,
             }
 
             this.resetFilteredPluginLists();

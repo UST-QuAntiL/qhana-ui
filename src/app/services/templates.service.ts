@@ -31,6 +31,7 @@ export interface QhanaTemplate {
     name: string;
     description: string;
     categories: TemplateCategory[];
+    templateDescription: TemplateDescription;
 }
 
 interface CategoryDescription {
@@ -69,6 +70,10 @@ export class TemplatesService {
 
     get templates() {
         return this.templatesSubject.asObservable();
+    }
+    
+    getTemplate(templateId: string) {
+        return this.templatesSubject.pipe(map(templateList => templateList.find(t => t.identifier === templateId) ?? null));
     }
 
     constructor(private http: HttpClient, private backend: QhanaBackendService) { }

@@ -9,7 +9,8 @@
                         <mat-select>
                             <mat-option *ngFor="let template of templateList | async" matTooltip="{{template.description}}"
                                 matTooltipPosition="right" value="{{template.name}}"
-                                (onSelectionChange)="changeActiveTemplate(template, $event)">
+                                [routerLink]="['/experiments', experimentId, 'workspace', template.identifier, activePlugin?.pluginDescription?.identifier]"
+                                [routerLinkActive]="'active-list-item'"> <!-- TODO: display active after first selection -->
                                 {{template.name}}
                             </mat-option>
                         </mat-select>
@@ -41,7 +42,7 @@
                             </mat-expansion-panel-header>
                             <mat-nav-list class="card-list">
                                 <a mat-list-item *ngFor="let plugin of filteredPluginLists[category.name]"
-                                    [routerLink]="['/experiments', experimentId, 'workspace', plugin.pluginDescription.identifier]"
+                                    [routerLink]="['/experiments', experimentId, 'workspace', activeTemplate?.templateDescription?.identifier, plugin.pluginDescription.identifier]"
                                     [routerLinkActive]="'active-list-item'">
                                     {{plugin.metadata.title ??
                                     plugin.pluginDescription.name}}(@{{plugin.metadata.version}})
