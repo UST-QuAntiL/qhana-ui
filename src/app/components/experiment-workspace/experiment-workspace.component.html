@@ -27,8 +27,7 @@
                 </div>
                 <mat-accordion [multi]="searchValue !== ''">
                     <mat-list class="card-list">
-                        <mat-expansion-panel mat-list-item
-                            *ngFor="let category of activeTemplate?.categories"
+                        <mat-expansion-panel mat-list-item *ngFor="let category of activeTemplate?.categories"
                             [routerLink]="['/experiments', experimentId, 'workspace', activeTemplate?.templateDescription?.identifier, category.name, activePlugin?.pluginDescription?.identifier]"
                             expanded="{{searchValue !== '' || category.name === activeCategory?.name}}">
                             <mat-expansion-panel-header>
@@ -38,14 +37,14 @@
                                 <mat-panel-description>
                                     {{category.description}}
                                 </mat-panel-description>
-                                <div class="plugin-runs" matTooltip="{{getNumberOfSuccessfulRuns(category.plugins)}} plugin(s) ran successful">
+                                <div class="plugin-runs"
+                                    matTooltip="{{getNumberOfSuccessfulRuns(category.plugins)}} plugin(s) ran successful">
                                     {{getNumberOfSuccessfulRuns(category.plugins)}}/{{category.plugins.length}}
                                 </div>
                             </mat-expansion-panel-header>
                             <mat-nav-list class="card-list">
                                 <a mat-list-item *ngFor="let plugin of filteredPluginLists[category.name]"
-                                    [routerLink]="['/experiments', experimentId, 'workspace', activeTemplate?.templateDescription?.identifier, activeCategory?.name, plugin.pluginDescription.identifier]"
-                                    [routerLinkActive]="'active-list-item'">
+                                    [routerLink]="['/experiments', experimentId, 'workspace', activeTemplate?.templateDescription?.identifier, activeCategory?.name, plugin.pluginDescription.identifier]">
                                     {{plugin.metadata.title ??
                                     plugin.pluginDescription.name}}(@{{plugin.metadata.version}})
                                     <mat-icon *ngIf="plugin.pluginDescription.running == 'SUCCESS'"
@@ -57,8 +56,9 @@
                                     <mat-icon *ngIf="plugin.pluginDescription.running == 'UNKNOWN'"
                                         class="material-icons {{plugin.pluginDescription.olderThan24 ? 'color_grey' : 'color_red'}}"
                                         inline="false" aria-hidden="true">question_mark</mat-icon>
-                                    <mat-spinner *ngIf="plugin.pluginDescription.running == 'PENDING'" class="material-icons" color="primary"
-                                        mode="indeterminate" [diameter]=20 aria-hidden="true"></mat-spinner>
+                                    <mat-spinner *ngIf="plugin.pluginDescription.running == 'PENDING'"
+                                        class="material-icons" color="primary" mode="indeterminate" [diameter]=20
+                                        aria-hidden="true"></mat-spinner>
                                     <div class="time-ago" *ngIf="plugin.pluginDescription.running != 'PENDING'">
                                         {{plugin.pluginDescription.timeAgo}}</div>
                                 </a>
