@@ -9,7 +9,7 @@
                         <mat-select>
                             <mat-option *ngFor="let template of templateList | async" matTooltip="{{template.description}}"
                                 matTooltipPosition="right" value="{{template.name}}"
-                                [routerLink]="['/experiments', experimentId, 'workspace', template.identifier, activePlugin?.pluginDescription?.identifier]"
+                                [routerLink]="['/experiments', experimentId, 'workspace', template.identifier, template.categories[0].name, activePlugin?.pluginDescription?.identifier]"
                                 [routerLinkActive]="'active-list-item'"> <!-- TODO: display active after first selection -->
                                 {{template.name}}
                             </mat-option>
@@ -27,8 +27,9 @@
                 <mat-accordion [multi]="searchValue !== ''">
                     <mat-list class="card-list">
                         <mat-expansion-panel mat-list-item
-                            *ngFor="let category of activeTemplate?.categories; first as isFirst"
-                            expanded="{{searchValue !== '' || isFirst}}">
+                            *ngFor="let category of activeTemplate?.categories"
+                            [routerLink]="['/experiments', experimentId, 'workspace', activeTemplate?.templateDescription?.identifier, category.name, activePlugin?.pluginDescription?.identifier]"
+                            expanded="{{searchValue !== '' || category.name === activeCategory?.name}}">
                             <mat-expansion-panel-header>
                                 <mat-panel-title>
                                     {{category.name}}
@@ -42,7 +43,7 @@
                             </mat-expansion-panel-header>
                             <mat-nav-list class="card-list">
                                 <a mat-list-item *ngFor="let plugin of filteredPluginLists[category.name]"
-                                    [routerLink]="['/experiments', experimentId, 'workspace', activeTemplate?.templateDescription?.identifier, plugin.pluginDescription.identifier]"
+                                    [routerLink]="['/experiments', experimentId, 'workspace', activeTemplate?.templateDescription?.identifier, activeCategory?.name, plugin.pluginDescription.identifier]"
                                     [routerLinkActive]="'active-list-item'">
                                     {{plugin.metadata.title ??
                                     plugin.pluginDescription.name}}(@{{plugin.metadata.version}})

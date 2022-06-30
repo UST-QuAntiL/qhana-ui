@@ -59,7 +59,14 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
             params => {
                 if (params.templateId != null) {
                     this.templates.getTemplate(params.templateId).subscribe(
-                        template => this.changeActiveTemplate(template)
+                        template => {
+                            this.changeActiveTemplate(template);
+                            if (params.categoryName != null) {
+                                this.activeCategory = this.activeTemplate?.categories.find(
+                                    category => category.name === params.categoryName
+                                ) ?? null;
+                            }
+                        }
                     );
                 }
                 if (params.pluginId != null) {
@@ -68,7 +75,7 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
                     );
                 }
             }
-        ); // TODO: add category
+        );
     }
     
     registerPluginStatusUpdater(): void {
