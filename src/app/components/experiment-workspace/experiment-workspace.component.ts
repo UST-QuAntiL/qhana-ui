@@ -1,13 +1,12 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { from, Subscription, merge, Observable } from 'rxjs';
-import { map, switchMap, catchError } from "rxjs/operators";
+import { Subscription, merge, Observable } from 'rxjs';
+import { map, catchError } from "rxjs/operators";
 import { CurrentExperimentService } from 'src/app/services/current-experiment.service';
 import { isInstanceOfPluginStatus, PluginsService, QhanaPlugin } from 'src/app/services/plugins.service';
 import { TemplatesService, TemplateDescription, QhanaTemplate, TemplateCategory, pluginFilterMatchesTags } from 'src/app/services/templates.service';
 import { QhanaBackendService  } from 'src/app/services/qhana-backend.service';
 import { FormSubmitData } from '../plugin-uiframe/plugin-uiframe.component';
-import { MatOptionSelectionChange } from '@angular/material/core';
 import TimeAgo from 'javascript-time-ago';
 import en from 'javascript-time-ago/locale/en';
 
