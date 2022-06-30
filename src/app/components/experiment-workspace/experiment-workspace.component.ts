@@ -28,11 +28,11 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
 
     filteredPluginLists: { [category: string]: QhanaPlugin[] } = {};
 
-    activeTemplateSubscription: Subscription | null = null;
+    parameterSubscription: Subscription | null = null;
     activeTemplate: QhanaTemplate | null = null;
-
-    activePluginSubscription: Subscription | null = null;
+    activeCategory: TemplateCategory | null = null;
     activePlugin: QhanaPlugin | null = null;
+
     frontendUrl: string | null = null;
     
     timeAgo: TimeAgo | null = null;
@@ -45,36 +45,30 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
             this.experimentId = params?.experimentId ?? null;
             this.experiment.setExperimentId(params?.experimentId ?? null);
         });
-        this.activePluginSubscription = this.route.params.pipe(
-            map(params => params?.pluginId ?? null),
-            switchMap(pluginId => {
-                if (pluginId == null) {
-                    return from([null]); // emits a single value null
-                }
-                return this.plugins.getPlugin(pluginId);
-            }),
-        ).subscribe(activePlugin => {
-            this.changeActivePlugin(activePlugin);
-        });
-        this.activeTemplateSubscription = this.route.params.pipe(
-            map(params => params?.templateId ?? null),
-            switchMap(templateId => {
-                if (templateId == null) {
-                    return from([null]); // emits a single value null
-                }
-                return this.templates.getTemplate(templateId)
-            }),
-        ).subscribe(activeTemplate => {
-            if (activeTemplate != null) {
-                this.changeActiveTemplate(activeTemplate, null);
-            }
-        }) // TODO: repeat for active category. move out to own function, make cleaner!
+        this.registerParameterSubscription();
         this.plugins.loadPlugins();
         this.pluginList = this.plugins.plugins;
         this.templates.loadTemplates();
         this.templateList = this.templates.templates;
 
         this.registerPluginStatusUpdater();
+    }
+    
+    registerParameterSubscription() {
+        this.parameterSubscription = this.route.params.subscribe(
+            params => {
+                if (params.templateId != null) {
+                    this.templates.getTemplate(params.templateId).subscribe(
+                        template => this.changeActiveTemplate(template)
+                    );
+                }
+                if (params.pluginId != null) {
+                    this.plugins.getPlugin(params.pluginId).subscribe(
+                        plugin => this.changeActivePlugin(plugin)
+                    );
+                }
+            }
+        ); // TODO: add category
     }
     
     registerPluginStatusUpdater(): void {
@@ -142,45 +136,46 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
 
     ngOnDestroy(): void {
         this.routeSubscription?.unsubscribe();
-        this.activePluginSubscription?.unsubscribe();
-        this.activeTemplateSubscription?.unsubscribe();
+        this.parameterSubscription?.unsubscribe();
     }
 
-    changeActiveTemplate(templateDesc: TemplateDescription, event: MatOptionSelectionChange | null) {
-        if (event?.isUserInput ?? true) {
-            let categories: TemplateCategory[] = []
-            templateDesc.categories.forEach(categoryDesc => {
-                let plugins: QhanaPlugin[] = []
-                this.pluginList?.subscribe(
-                    pluginList => pluginList.forEach(plugin => {
-                        if (pluginFilterMatchesTags(plugin.pluginDescription.tags, categoryDesc.pluginFilter)) {
-                            plugins.push(plugin)
-                        }
-                    })
-                )
-                
-                categories.push({
-                    name: categoryDesc.name,
-                    description: categoryDesc.description,
-                    plugins: plugins,
-                })
-            });
-
-            this.activeTemplate = {
-                name: templateDesc.name,
-                description: templateDesc.description,
-                categories: categories,
-                templateDescription: templateDesc,
-            }
-
-            this.resetFilteredPluginLists();
-            
-            this.activeTemplate?.categories.forEach(
-                category => category.plugins.sort(
-                    (a, b) => a.pluginDescription.identifier.localeCompare(b.pluginDescription.identifier)
-                )
-            );
+    changeActiveTemplate(templateDesc: TemplateDescription | null) {
+        if (templateDesc == null) {
+            return;
         }
+
+        let categories: TemplateCategory[] = [];
+        templateDesc.categories.forEach(categoryDesc => {
+            let plugins: QhanaPlugin[] = [];
+            this.pluginList?.subscribe(
+                pluginList => pluginList.forEach(plugin => {
+                    if (pluginFilterMatchesTags(plugin.pluginDescription.tags, categoryDesc.pluginFilter)) {
+                        plugins.push(plugin);
+                    }
+                })
+            );
+            
+            categories.push({
+                name: categoryDesc.name,
+                description: categoryDesc.description,
+                plugins: plugins,
+            });
+        });
+
+        this.activeTemplate = {
+            name: templateDesc.name,
+            description: templateDesc.description,
+            categories: categories,
+            templateDescription: templateDesc,
+        };
+
+        this.resetFilteredPluginLists();
+        
+        this.activeTemplate?.categories.forEach(
+            category => category.plugins.sort(
+                (a, b) => a.pluginDescription.identifier.localeCompare(b.pluginDescription.identifier)
+            )
+        );
     }
 
     private resetFilteredPluginLists() {
@@ -237,7 +232,6 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
                         plugin.pluginDescription.identifier.toLowerCase().includes(searchValue) ||
                         plugin.pluginDescription.description.toLocaleLowerCase().includes(searchValue) ||
                         plugin.pluginDescription.tags.some((tag: string) => tag.toLowerCase().includes(searchValue))
-                
             )
         );
     }
