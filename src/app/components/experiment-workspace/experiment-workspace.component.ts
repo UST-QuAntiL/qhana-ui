@@ -155,7 +155,7 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
             let plugins: QhanaPlugin[] = [];
             this.pluginList?.subscribe(
                 pluginList => pluginList.forEach(plugin => {
-                    if (pluginFilterMatchesTags(plugin.pluginDescription.tags, categoryDesc.pluginFilter)) {
+                    if (pluginFilterMatchesTags(plugin.pluginDescription.tags, categoryDesc.pluginFilter, plugin.pluginDescription.name)) {
                         plugins.push(plugin);
                     }
                 })

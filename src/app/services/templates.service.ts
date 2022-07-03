@@ -151,21 +151,21 @@ function isInstanceOfBoolean(pluginFilter: PluginFilterExpr): pluginFilter is bo
     return pluginFilter != null && typeof pluginFilter === 'boolean';
 }
     
-export function pluginFilterMatchesTags(tags: string[], pluginFilter: PluginFilterExpr): boolean {
+export function pluginFilterMatchesTags(tags: string[], pluginFilter: PluginFilterExpr, pluginName: string): boolean {
     if (isInstanceOfPluginFilterOr(pluginFilter)) {
         return pluginFilter.or.reduce<boolean>(
-            (res, nestedPluginFilter) => res || pluginFilterMatchesTags(tags, nestedPluginFilter),
+            (res, nestedPluginFilter) => res || pluginFilterMatchesTags(tags, nestedPluginFilter, pluginName),
             false,
         );
     } else if (isInstanceOfPluginFilterAnd(pluginFilter)) {
         return pluginFilter.and.reduce<boolean>(
-            (res, nestedPluginFilter) => res && pluginFilterMatchesTags(tags, nestedPluginFilter),
+            (res, nestedPluginFilter) => res && pluginFilterMatchesTags(tags, nestedPluginFilter, pluginName),
             true,
         );
     } else if (isInstanceOfPluginFilterNot(pluginFilter)) {
-        return !pluginFilterMatchesTags(tags, pluginFilter.not);
+        return !pluginFilterMatchesTags(tags, pluginFilter.not, pluginName);
     } else if (isInstanceOfString(pluginFilter)) {
-        return tags.includes(pluginFilter)
+        return tags.includes(pluginFilter) || pluginFilter === pluginName;
     } else if (isInstanceOfBoolean(pluginFilter)) {
         return pluginFilter;
     } else {
