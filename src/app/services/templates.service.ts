@@ -24,7 +24,7 @@ import { QhanaBackendService } from './qhana-backend.service';
 export interface TemplateCategory {
     name: string;
     description: string;
-    plugins: QhanaPlugin[];
+    plugins: Observable<QhanaPlugin[]>;
 }
 
 export interface QhanaTemplate {

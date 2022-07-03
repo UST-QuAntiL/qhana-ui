@@ -38,12 +38,12 @@
                                     {{category.description}}
                                 </mat-panel-description>
                                 <div class="plugin-runs"
-                                    matTooltip="{{getNumberOfSuccessfulRuns(category.plugins)}} plugin(s) ran successful">
-                                    {{getNumberOfSuccessfulRuns(category.plugins)}}/{{category.plugins.length}}
+                                    matTooltip="{{getNumberOfSuccessfulRuns(category.plugins) | async}} plugin(s) ran successful">
+                                    {{getNumberOfSuccessfulRuns(category.plugins) | async}}/{{(category.plugins | async)?.length}}
                                 </div>
                             </mat-expansion-panel-header>
                             <mat-nav-list class="card-list">
-                                <a mat-list-item *ngFor="let plugin of filteredPluginLists[category.name]"
+                                <a mat-list-item *ngFor="let plugin of filteredPluginLists[category.name] | async"
                                     [routerLink]="['/experiments', experimentId, 'workspace', activeTemplate?.templateDescription?.identifier, activeCategory?.name, plugin.pluginDescription.identifier]">
                                     {{plugin.metadata.title ??
                                     plugin.pluginDescription.name}}(@{{plugin.metadata.version}})

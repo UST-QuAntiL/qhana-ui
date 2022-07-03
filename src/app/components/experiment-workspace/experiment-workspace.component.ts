@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription, merge, Observable } from 'rxjs';
-import { map, catchError } from "rxjs/operators";
+import { Subscription, merge, Observable, of } from 'rxjs';
+import { map, catchError, filter } from "rxjs/operators";
 import { CurrentExperimentService } from 'src/app/services/current-experiment.service';
 import { isInstanceOfPluginStatus, PluginsService, QhanaPlugin } from 'src/app/services/plugins.service';
 import { TemplatesService, TemplateDescription, QhanaTemplate, TemplateCategory, pluginFilterMatchesTags } from 'src/app/services/templates.service';
@@ -25,7 +25,7 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
     pluginList: Observable<QhanaPlugin[]> | null = null;
     templateList: Observable<TemplateDescription[]> | null = null;
 
-    filteredPluginLists: { [category: string]: QhanaPlugin[] } = {};
+    filteredPluginLists: { [category: string]: Observable<QhanaPlugin[]> } = {};
 
     parameterSubscription: Subscription | null = null;
     activeTemplate: QhanaTemplate | null = null;
@@ -152,14 +152,11 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
 
         let categories: TemplateCategory[] = [];
         templateDesc.categories.forEach(categoryDesc => {
-            let plugins: QhanaPlugin[] = [];
-            this.pluginList?.subscribe(
-                pluginList => pluginList.forEach(plugin => {
-                    if (pluginFilterMatchesTags(plugin.pluginDescription.tags, categoryDesc.pluginFilter, plugin.pluginDescription.name)) {
-                        plugins.push(plugin);
-                    }
-                })
-            );
+            let plugins: Observable<QhanaPlugin[]> = this.pluginList?.pipe(
+                map(pluginList => pluginList.filter(
+                    plugin => pluginFilterMatchesTags(plugin.pluginDescription.tags, categoryDesc.pluginFilter, plugin.pluginDescription.name)
+                ))
+            ) ?? of([]);
             
             categories.push({
                 name: categoryDesc.name,
@@ -177,11 +174,13 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
 
         this.resetFilteredPluginLists();
         
+        /*
         this.activeTemplate?.categories.forEach(
             category => category.plugins.sort(
                 (a, b) => a.pluginDescription.identifier.localeCompare(b.pluginDescription.identifier)
             )
         );
+        */
     }
 
     private resetFilteredPluginLists() {
@@ -231,21 +230,27 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
         }
         
         this.activeTemplate?.categories.forEach(
-            category => this.filteredPluginLists[category.name] = category.plugins.filter(
-                plugin => plugin.pluginDescription.name.toLowerCase().includes(searchValue) ||
+            category => this.filteredPluginLists[category.name] = category.plugins.pipe(
+                map(pluginList => pluginList.filter(
+                    plugin => plugin.pluginDescription.name.toLowerCase().includes(searchValue) ||
                         plugin.pluginDescription.apiRoot.toLowerCase().includes(searchValue) ||
                         plugin.pluginDescription.version.toLowerCase().includes(searchValue) ||
                         plugin.pluginDescription.identifier.toLowerCase().includes(searchValue) ||
                         plugin.pluginDescription.description.toLocaleLowerCase().includes(searchValue) ||
                         plugin.pluginDescription.tags.some((tag: string) => tag.toLowerCase().includes(searchValue))
+
+                ))
             )
         );
     }
 
-    getNumberOfSuccessfulRuns(plugins: QhanaPlugin[]): number {
-        return plugins.filter(
-            plugin => plugin.pluginDescription.running === 'SUCCESS'
-        ).length;
+    getNumberOfSuccessfulRuns(plugins: Observable<QhanaPlugin[]>): Observable<number> {
+        return plugins.pipe(
+            map(pluginList => pluginList.filter(
+                    plugin => plugin.pluginDescription.running === 'SUCCESS'
+                ).length
+            )
+        );
     }
 
     onPluginUiFormSubmit(formData: FormSubmitData) {
