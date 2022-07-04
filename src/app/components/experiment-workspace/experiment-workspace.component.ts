@@ -1,11 +1,11 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription, merge, Observable, of } from 'rxjs';
-import { map, catchError, filter } from "rxjs/operators";
+import { map, catchError } from "rxjs/operators";
 import { CurrentExperimentService } from 'src/app/services/current-experiment.service';
 import { isInstanceOfPluginStatus, PluginsService, QhanaPlugin } from 'src/app/services/plugins.service';
 import { TemplatesService, TemplateDescription, QhanaTemplate, TemplateCategory, pluginFilterMatchesTags } from 'src/app/services/templates.service';
-import { QhanaBackendService  } from 'src/app/services/qhana-backend.service';
+import { QhanaBackendService } from 'src/app/services/qhana-backend.service';
 import { FormSubmitData } from '../plugin-uiframe/plugin-uiframe.component';
 import TimeAgo from 'javascript-time-ago';
 import en from 'javascript-time-ago/locale/en';
@@ -33,7 +33,7 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
     activePlugin: QhanaPlugin | null = null;
 
     frontendUrl: string | null = null;
-    
+
     timeAgo: TimeAgo | null = null;
 
     expandedPluginDescription: boolean = false;
@@ -52,7 +52,7 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
 
         this.registerPluginStatusUpdater();
     }
-    
+
     registerParameterSubscription() {
         this.parameterSubscription = this.route.params.subscribe(
             params => {
@@ -76,9 +76,8 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
             }
         );
     }
-    
+
     registerPluginStatusUpdater(): void {
-        let itemCountTimeline: number = 0;
         const experimentId = this.experimentId;
         const itemsPerPage: number = 100;
         const time = new Date();
@@ -97,12 +96,8 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
                     })
                 );
 
-                timeLineList.subscribe(value => itemCountTimeline = value.itemCount);
-
-                (async () => {
-                    await delay(500);
-
-                    for (let i = 1; i<itemCountTimeline/itemsPerPage; i++) {
+                timeLineList.subscribe(value => {
+                    for (let i = 1; i < value.itemCount / itemsPerPage; i++) {
                         let timeLinePage = this.backend.getTimelineStepsPage(experimentId, i, itemsPerPage).pipe(
                             map(value => value.items),
                             catchError(err => {
@@ -124,10 +119,10 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
                                                 } else {
                                                     plugin.pluginDescription.running = "UNKNOWN";
                                                 }
-                                                
+
                                                 const endTime = new Date(step.end).getTime()
                                                 plugin.pluginDescription.timeAgo = this.timeAgo?.format(endTime) ?? "";
-                                                plugin.pluginDescription.olderThan24 = (time.getTime() - endTime) > 24*60*60*1000;
+                                                plugin.pluginDescription.olderThan24 = (time.getTime() - endTime) > 24 * 60 * 60 * 1000;
                                             }
                                         }
                                     )
@@ -135,7 +130,7 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
                             )
                         )
                     }
-                })();
+                });
             }
         }
     }
@@ -154,12 +149,12 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
         templateDesc.categories.forEach(categoryDesc => {
             let plugins: Observable<QhanaPlugin[]> = this.pluginList?.pipe(
                 map(pluginList => pluginList.sort(
-                        (a, b) => a.pluginDescription.identifier.localeCompare(b.pluginDescription.identifier)
-                    ).filter(
-                        plugin => pluginFilterMatchesTags(plugin.pluginDescription.tags, categoryDesc.pluginFilter, plugin.pluginDescription.name)
+                    (a, b) => a.pluginDescription.identifier.localeCompare(b.pluginDescription.identifier)
+                ).filter(
+                    plugin => pluginFilterMatchesTags(plugin.pluginDescription.tags, categoryDesc.pluginFilter, plugin.pluginDescription.name)
                 ))
             ) ?? of([]);
-            
+
             categories.push({
                 name: categoryDesc.name,
                 description: categoryDesc.description,
@@ -222,7 +217,7 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
             this.resetFilteredPluginLists();
             return;
         }
-        
+
         this.activeTemplate?.categories.forEach(
             category => this.filteredPluginLists[category.name] = category.plugins.pipe(
                 map(pluginList => pluginList.filter(
@@ -241,8 +236,8 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
     getNumberOfSuccessfulRuns(plugins: Observable<QhanaPlugin[]>): Observable<number> {
         return plugins.pipe(
             map(pluginList => pluginList.filter(
-                    plugin => plugin.pluginDescription.running === 'SUCCESS'
-                ).length
+                plugin => plugin.pluginDescription.running === 'SUCCESS'
+            ).length
             )
         );
     }
@@ -264,8 +259,4 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
             resultLocation: formData.resultUrl,
         }).subscribe(timelineStep => this.router.navigate(['/experiments', experimentId, 'timeline', timelineStep.sequence.toString()]));
     }
-}
-
-function delay(ms: number) {
-    return new Promise( resolve => setTimeout(resolve, ms) );
 }
