@@ -153,8 +153,10 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
         let categories: TemplateCategory[] = [];
         templateDesc.categories.forEach(categoryDesc => {
             let plugins: Observable<QhanaPlugin[]> = this.pluginList?.pipe(
-                map(pluginList => pluginList.filter(
-                    plugin => pluginFilterMatchesTags(plugin.pluginDescription.tags, categoryDesc.pluginFilter, plugin.pluginDescription.name)
+                map(pluginList => pluginList.sort(
+                        (a, b) => a.pluginDescription.identifier.localeCompare(b.pluginDescription.identifier)
+                    ).filter(
+                        plugin => pluginFilterMatchesTags(plugin.pluginDescription.tags, categoryDesc.pluginFilter, plugin.pluginDescription.name)
                 ))
             ) ?? of([]);
             
@@ -173,14 +175,6 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
         };
 
         this.resetFilteredPluginLists();
-        
-        /*
-        this.activeTemplate?.categories.forEach(
-            category => category.plugins.sort(
-                (a, b) => a.pluginDescription.identifier.localeCompare(b.pluginDescription.identifier)
-            )
-        );
-        */
     }
 
     private resetFilteredPluginLists() {
