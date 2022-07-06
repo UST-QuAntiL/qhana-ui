@@ -18,7 +18,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, from, Observable, of } from 'rxjs';
 import { catchError, map, mergeAll, mergeMap, toArray } from 'rxjs/operators';
-import { QhanaPlugin } from './plugins.service';
+import { PluginDescription, QhanaPlugin } from './plugins.service';
 import { QhanaBackendService } from './qhana-backend.service';
 
 export interface TemplateCategory {
@@ -151,21 +151,21 @@ function isInstanceOfBoolean(pluginFilter: PluginFilterExpr): pluginFilter is bo
     return pluginFilter != null && typeof pluginFilter === 'boolean';
 }
     
-export function pluginFilterMatchesTags(tags: string[], pluginFilter: PluginFilterExpr, pluginName: string): boolean {
+export function pluginMatchesFilter(pluginDesc: PluginDescription, pluginFilter: PluginFilterExpr): boolean {
     if (isInstanceOfPluginFilterOr(pluginFilter)) {
         return pluginFilter.or.reduce<boolean>(
-            (res, nestedPluginFilter) => res || pluginFilterMatchesTags(tags, nestedPluginFilter, pluginName),
+            (res, nestedPluginFilter) => res || pluginMatchesFilter(pluginDesc, nestedPluginFilter),
             false,
         );
     } else if (isInstanceOfPluginFilterAnd(pluginFilter)) {
         return pluginFilter.and.reduce<boolean>(
-            (res, nestedPluginFilter) => res && pluginFilterMatchesTags(tags, nestedPluginFilter, pluginName),
+            (res, nestedPluginFilter) => res && pluginMatchesFilter(pluginDesc, nestedPluginFilter),
             true,
         );
     } else if (isInstanceOfPluginFilterNot(pluginFilter)) {
-        return !pluginFilterMatchesTags(tags, pluginFilter.not, pluginName);
+        return !pluginMatchesFilter(pluginDesc, pluginFilter.not);
     } else if (isInstanceOfString(pluginFilter)) {
-        return tags.includes(pluginFilter) || pluginFilter === pluginName;
+        return pluginDesc.tags.includes(pluginFilter) || pluginFilter === pluginDesc.identifier;
     } else if (isInstanceOfBoolean(pluginFilter)) {
         return pluginFilter;
     } else {
