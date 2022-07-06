@@ -71,7 +71,7 @@ export class TemplatesService {
     get templates() {
         return this.templatesSubject.asObservable();
     }
-    
+
     getTemplate(templateId: string) {
         return this.templatesSubject.pipe(map(templateList => templateList.find(t => t.identifier === templateId) ?? null));
     }
@@ -97,7 +97,7 @@ export class TemplatesService {
                     ))
                 }
             });
-            
+
             observables.push(of({
                 name: 'All Plugins',
                 description: 'Display All Loaded Plugins',
@@ -131,7 +131,7 @@ function isInstanceOfPluginFilterAnd(pluginFilter: PluginFilterExpr): pluginFilt
     return pluginFilter != null && (pluginFilter as PluginFilterAnd).and !== undefined;
 }
 
-function isInstanceOfPluginFilterNot(pluginFilter: PluginFilterExpr): pluginFilter is PluginFilterNot  {
+function isInstanceOfPluginFilterNot(pluginFilter: PluginFilterExpr): pluginFilter is PluginFilterNot {
     return pluginFilter != null && (pluginFilter as PluginFilterNot).not !== undefined;
 }
 
@@ -142,7 +142,7 @@ function isInstanceOfString(pluginFilter: PluginFilterExpr): pluginFilter is str
 function isInstanceOfBoolean(pluginFilter: PluginFilterExpr): pluginFilter is boolean {
     return pluginFilter != null && typeof pluginFilter === 'boolean';
 }
-    
+
 export function pluginMatchesFilter(pluginDesc: PluginDescription, pluginFilter: PluginFilterExpr): boolean {
     if (isInstanceOfPluginFilterOr(pluginFilter)) {
         return pluginFilter.or.reduce<boolean>(
@@ -157,7 +157,7 @@ export function pluginMatchesFilter(pluginDesc: PluginDescription, pluginFilter:
     } else if (isInstanceOfPluginFilterNot(pluginFilter)) {
         return !pluginMatchesFilter(pluginDesc, pluginFilter.not);
     } else if (isInstanceOfString(pluginFilter)) {
-        return pluginDesc.tags.includes(pluginFilter) || pluginFilter === pluginDesc.identifier;
+        return pluginDesc.tags.includes(pluginFilter) || pluginFilter === pluginDesc.identifier || pluginFilter === pluginDesc.name;
     } else if (isInstanceOfBoolean(pluginFilter)) {
         return pluginFilter;
     } else {
