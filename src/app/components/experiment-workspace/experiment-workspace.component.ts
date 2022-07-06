@@ -149,7 +149,21 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
         templateDesc.categories.forEach(categoryDesc => {
             let plugins: Observable<QhanaPlugin[]> = this.pluginList?.pipe(
                 map(pluginList => pluginList.sort(
-                    (a, b) => a.pluginDescription.identifier.localeCompare(b.pluginDescription.identifier)
+                    (a, b) => {
+                        if (a.metadata.title > b.metadata.title) {
+                            return 1;
+                        }
+                        if (a.metadata.title < b.metadata.title) {
+                            return -1;
+                        }
+                        if (a.pluginDescription.version > b.pluginDescription.version) {
+                            return 1;
+                        }
+                        if (a.pluginDescription.version < b.pluginDescription.version) {
+                            return -1;
+                        }
+                        return 0;
+                    }
                 ).filter(
                     plugin => pluginMatchesFilter(plugin.pluginDescription, categoryDesc.pluginFilter)
                 ))
