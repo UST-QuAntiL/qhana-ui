@@ -32,7 +32,7 @@ const routes: Routes = [
     { path: 'experiments/:experimentId', redirectTo: "info" },
     { path: 'experiments/:experimentId/info', component: ExperimentComponent },
     { path: 'experiments/:experimentId/workspace', component: ExperimentWorkspaceComponent },
-    { path: 'experiments/:experimentId/workspace/:templateId/:categoryName/:pluginId', component: ExperimentWorkspaceComponent },
+    { path: 'experiments/:experimentId/workspace/:templateId/:categoryId/:pluginId', component: ExperimentWorkspaceComponent },
     { path: 'experiments/:experimentId/data', component: ExperimentDataComponent },
     { path: 'experiments/:experimentId/data/:dataName', component: DataDetailComponent },
     { path: 'experiments/:experimentId/timeline', component: ExperimentTimelineComponent },

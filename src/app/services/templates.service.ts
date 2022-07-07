@@ -24,6 +24,7 @@ import { QhanaBackendService } from './qhana-backend.service';
 export interface TemplateCategory {
     name: string;
     description: string;
+    identifier: string;
     plugins: Observable<QhanaPlugin[]>;
 }
 
@@ -37,6 +38,7 @@ export interface QhanaTemplate {
 interface CategoryDescription {
     name: string;
     description: string;
+    identifier: string;
     pluginFilter: PluginFilterExpr;
 }
 
@@ -101,11 +103,12 @@ export class TemplatesService {
             observables.push(of({
                 name: 'All Plugins',
                 description: 'Display All Loaded Plugins',
-                identifier: 'allPlugins',
+                identifier: 'all-plugins',
                 categories: [
                     {
                         name: 'All Plugins',
                         description: 'Display All Loaded Plugins',
+                        identifier: 'all-plugins',
                         pluginFilter: true,
                     }
                 ]

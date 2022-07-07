@@ -8,7 +8,6 @@ import { TemplatesService, TemplateDescription, QhanaTemplate, TemplateCategory,
 import { QhanaBackendService } from 'src/app/services/qhana-backend.service';
 import { FormSubmitData } from '../plugin-uiframe/plugin-uiframe.component';
 import TimeAgo from 'javascript-time-ago';
-import en from 'javascript-time-ago/locale/en';
 
 @Component({
     selector: 'qhana-experiment-workspace',
@@ -60,9 +59,9 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
                     this.templates.getTemplate(params.templateId).subscribe(
                         template => {
                             this.changeActiveTemplate(template);
-                            if (params.categoryName != null) {
-                                this.activeCategory = this.activeTemplate?.categories.find(
-                                    category => category.name === params.categoryName
+                            if (params.categoryId != null && this.activeTemplate != null) {
+                                this.activeCategory = this.activeTemplate.categories.find(
+                                    category => category.identifier === params.categoryId
                                 ) ?? null;
                             }
                         }
@@ -82,7 +81,6 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
         const itemsPerPage: number = 100;
         const time = new Date();
 
-        TimeAgo.addDefaultLocale(en);
         this.timeAgo = new TimeAgo('en-US');
 
         if (experimentId !== null) {
@@ -172,6 +170,7 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
             categories.push({
                 name: categoryDesc.name,
                 description: categoryDesc.description,
+                identifier: categoryDesc.identifier,
                 plugins: plugins,
             });
         });

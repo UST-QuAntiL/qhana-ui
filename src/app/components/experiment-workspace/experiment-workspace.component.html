@@ -28,8 +28,11 @@
                 <mat-accordion [multi]="searchValue !== ''">
                     <mat-list class="card-list">
                         <mat-expansion-panel mat-list-item *ngFor="let category of activeTemplate?.categories"
-                            [routerLink]="['/experiments', experimentId, 'workspace', activeTemplate?.templateDescription?.identifier, category.name, activePlugin?.pluginDescription?.identifier]"
-                            expanded="{{searchValue !== '' || category.name === activeCategory?.name}}">
+                            [routerLink]="['/experiments', experimentId, 'workspace',
+                                            activeTemplate?.templateDescription?.identifier,
+                                            category.identifier,
+                                            activePlugin?.pluginDescription?.identifier]"
+                            expanded="{{searchValue !== '' || category.identifier === activeCategory?.identifier}}">
                             <mat-expansion-panel-header>
                                 <mat-panel-title>
                                     {{category.name}}
@@ -44,7 +47,7 @@
                             </mat-expansion-panel-header>
                             <mat-nav-list class="card-list">
                                 <a mat-list-item *ngFor="let plugin of filteredPluginLists[category.name] | async"
-                                    [routerLink]="['/experiments', experimentId, 'workspace', activeTemplate?.templateDescription?.identifier, activeCategory?.name, plugin.pluginDescription.identifier]">
+                                    [routerLink]="['/experiments', experimentId, 'workspace', activeTemplate?.templateDescription?.identifier, category.identifier, plugin.pluginDescription.identifier]">
                                     {{plugin.metadata.title ??
                                     plugin.pluginDescription.name}}(@{{plugin.metadata.version}})
                                     <mat-icon *ngIf="plugin.pluginDescription.running == 'SUCCESS'"
