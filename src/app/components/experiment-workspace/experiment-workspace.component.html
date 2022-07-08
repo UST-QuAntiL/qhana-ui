@@ -10,7 +10,7 @@
                             <mat-option *ngFor="let template of templateList | async"
                                 matTooltip="{{template.description}}" matTooltipPosition="right"
                                 value="{{template.name}}"
-                                [routerLink]="['/experiments', experimentId, 'workspace', template.identifier, template.categories[0].name, activePlugin?.pluginDescription?.identifier]"
+                                [routerLink]="['/experiments', experimentId, 'workspace', template.identifier, template.categories[0].identifier, activePlugin?.pluginDescription?.identifier]"
                                 [routerLinkActive]="'active-list-item'">
                                 {{template.name}}
                             </mat-option>
