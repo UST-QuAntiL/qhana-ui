@@ -2,21 +2,18 @@
     <div class="sidebar-container">
         <mat-card class="sidebar card">
             <mat-card-title>
-                <h3>
-                    <mat-form-field appearance="fill" matTooltip="{{activeTemplate?.description}}"
-                        matTooltipPosition="right">
-                        <mat-label>Template</mat-label>
-                        <mat-select [value]="activeTemplate?.name">
-                            <mat-option *ngFor="let template of templateList | async"
-                                matTooltip="{{template.description}}" matTooltipPosition="right"
-                                value="{{template.name}}"
-                                [routerLink]="['/experiments', experimentId, 'workspace', template.identifier, template.categories[0].identifier, activePlugin?.pluginDescription?.identifier]"
-                                [routerLinkActive]="'active-list-item'">
-                                {{template.name}}
-                            </mat-option>
-                        </mat-select>
-                    </mat-form-field>
-                </h3>
+                <mat-form-field appearance="fill" matTooltip="{{activeTemplate?.description}}"
+                    matTooltipPosition="right">
+                    <mat-label>Template</mat-label>
+                    <mat-select [value]="activeTemplate?.name">
+                        <mat-option *ngFor="let template of templateList | async" matTooltip="{{template.description}}"
+                            matTooltipPosition="right" value="{{template.name}}"
+                            [routerLink]="['/experiments', experimentId, 'workspace', template.identifier, template.categories[0].identifier, activePlugin?.pluginDescription?.identifier]"
+                            [routerLinkActive]="'active-list-item'">
+                            {{template.name}}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
             </mat-card-title>
             <mat-card-content>
                 <div class="sidebar-content-header">
