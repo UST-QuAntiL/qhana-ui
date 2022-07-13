@@ -1,10 +1,10 @@
 import { Component, ElementRef, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { take } from 'rxjs/operators';
 import { ChooseDataComponent } from 'src/app/dialogs/choose-data/choose-data.component';
 import { ChoosePluginComponent } from 'src/app/dialogs/choose-plugin/choose-plugin.component';
 import { PluginsService, QhanaPlugin } from 'src/app/services/plugins.service';
-import { take } from 'rxjs/operators';
 import { ExperimentDataApiObject, QhanaBackendService } from 'src/app/services/qhana-backend.service';
 
 export interface FormSubmitData {
@@ -277,6 +277,11 @@ export class PluginUiframeComponent implements OnChanges, OnDestroy {
         if (this.pluginOrigin == null || event.origin !== this.pluginOrigin) {
             return; // unsafe event
         }
+        const iframe: HTMLIFrameElement | null = this.uiframe?.nativeElement ?? null;
+        if (iframe?.contentWindow !== event.source) {
+            return; // message is from another iframe
+        }
+
         const data = event.data;
         if (typeof data === "string") {
             // handle string messages
