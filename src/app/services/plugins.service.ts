@@ -20,11 +20,26 @@ import { BehaviorSubject, from, Observable, of } from 'rxjs';
 import { catchError, filter, map, mergeAll, mergeMap, toArray } from 'rxjs/operators';
 import { QhanaBackendService } from './qhana-backend.service';
 
+export type PluginStatus = "PENDING" | "SUCCESS" | "FAILURE" | "UNKNOWN" | null;
+export function isInstanceOfPluginStatus(pluginStatus: string | null): pluginStatus is PluginStatus {
+    if (["PENDING", "SUCCESS", "FAILURE", "UNKNOWN", null].includes(pluginStatus)) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 export interface PluginDescription {
     apiRoot: string;
     name: string;
     version: string;
     identifier: string;
+    description: string;
+    tags: string[];
+
+    running: PluginStatus;
+    timeAgo: string | [string, number?];
+    olderThan24: boolean;
 }
 
 export interface QhanaPlugin {
@@ -39,8 +54,6 @@ export interface QhanaPlugin {
 export class PluginsService {
 
     private loading: boolean = false;
-
-    private pluginList: QhanaPlugin[] = [];
 
     private pluginsSubject: BehaviorSubject<QhanaPlugin[]> = new BehaviorSubject<QhanaPlugin[]>([]);
 
@@ -75,6 +88,11 @@ export class PluginsService {
                                     name: pluginMetadata.name,
                                     version: pluginMetadata.version,
                                     identifier: pluginMetadata.identifier,
+                                    description: pluginMetadata.description,
+                                    tags: pluginMetadata.tags,
+                                    running: null,
+                                    timeAgo: "",
+                                    olderThan24: false,
                                 },
                                 metadata: pluginMetadata,
                             };
@@ -110,7 +128,6 @@ export class PluginsService {
                     }
                     return 0;
                 })
-                this.pluginList = plugins;
                 this.pluginsSubject.next(plugins);
                 this.loading = false;
             });
@@ -133,7 +150,7 @@ export class PluginsService {
         );
     }
 
-    private loadPluginMetadata(plugin: PluginDescription): Observable<QhanaPlugin> {
+    loadPluginMetadata(plugin: PluginDescription): Observable<QhanaPlugin> {
         return this.http.get<QhanaPlugin>(plugin.apiRoot).pipe(
             map(pluginMetadata => {
                 return {

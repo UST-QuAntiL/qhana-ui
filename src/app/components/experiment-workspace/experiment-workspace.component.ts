@@ -1,11 +1,13 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { from, Observable, of, Subscription } from 'rxjs';
-import { map, switchMap } from "rxjs/operators";
+import { Subscription, merge, Observable, of } from 'rxjs';
+import { map, catchError } from "rxjs/operators";
 import { CurrentExperimentService } from 'src/app/services/current-experiment.service';
-import { PluginsService, QhanaPlugin } from 'src/app/services/plugins.service';
+import { isInstanceOfPluginStatus, PluginsService, QhanaPlugin } from 'src/app/services/plugins.service';
+import { TemplatesService, TemplateDescription, QhanaTemplate, TemplateCategory, pluginMatchesFilter } from 'src/app/services/templates.service';
 import { QhanaBackendService } from 'src/app/services/qhana-backend.service';
 import { FormSubmitData } from '../plugin-uiframe/plugin-uiframe.component';
+import TimeAgo from 'javascript-time-ago';
 
 @Component({
     selector: 'qhana-experiment-workspace',
@@ -20,63 +22,173 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
 
     searchValue: string = "";
     pluginList: Observable<QhanaPlugin[]> | null = null;
-    filteredPluginList: Observable<QhanaPlugin[]> | null = null;
+    templateList: Observable<TemplateDescription[]> | null = null;
 
-    activePluginSubscription: Subscription | null = null;
+    filteredPluginLists: { [category: string]: Observable<QhanaPlugin[]> } = {};
+
+    parameterSubscription: Subscription | null = null;
+    activeTemplate: QhanaTemplate | null = null;
+    activeCategory: TemplateCategory | null = null;
     activePlugin: QhanaPlugin | null = null;
+
     frontendUrl: string | null = null;
 
-    expandedPluginDescription: boolean = false;
+    timeAgo: TimeAgo | null = null;
 
-    constructor(private route: ActivatedRoute, private experiment: CurrentExperimentService, private plugins: PluginsService, private backend: QhanaBackendService, private router: Router) { }
+    expandedPluginDescription: boolean = false;
+    constructor(private route: ActivatedRoute, private experiment: CurrentExperimentService, private plugins: PluginsService, private templates: TemplatesService, private backend: QhanaBackendService, private router: Router) { }
 
     ngOnInit(): void {
         this.routeSubscription = this.route.params.subscribe(params => {
             this.experimentId = params?.experimentId ?? null;
             this.experiment.setExperimentId(params?.experimentId ?? null);
         });
-        this.activePluginSubscription = this.route.params.pipe(
-            map(params => params?.pluginId ?? null),
-            switchMap(pluginId => {
-                if (pluginId == null) {
-                    return from([null]); // emits a single value null
-                }
-                return this.plugins.getPlugin(pluginId);
-            }),
-        ).subscribe(activePlugin => {
-            this.changeActivePlugin(activePlugin);
-        });
+        this.registerParameterSubscription();
         this.plugins.loadPlugins();
         this.pluginList = this.plugins.plugins;
-        this.filteredPluginList = this.pluginList;
+        this.templates.loadTemplates();
+        this.templateList = this.templates.templates;
+
+        this.registerPluginStatusUpdater();
+    }
+
+    registerParameterSubscription() {
+        this.parameterSubscription = this.route.params.subscribe(
+            params => {
+                if (params.templateId != null) {
+                    this.templates.getTemplate(params.templateId).subscribe(
+                        template => {
+                            this.changeActiveTemplate(template);
+                            if (params.categoryId != null && this.activeTemplate != null) {
+                                this.activeCategory = this.activeTemplate.categories.find(
+                                    category => category.identifier === params.categoryId
+                                ) ?? null;
+                            }
+                        }
+                    );
+                }
+                if (params.pluginId != null) {
+                    this.plugins.getPlugin(params.pluginId).subscribe(
+                        plugin => this.changeActivePlugin(plugin)
+                    );
+                }
+            }
+        );
+    }
+
+    registerPluginStatusUpdater(): void {
+        const experimentId = this.experimentId;
+        const itemsPerPage: number = 100;
+        const time = new Date();
+
+        this.timeAgo = new TimeAgo('en-US');
+
+        if (experimentId !== null) {
+            const timeLineList = this.backend.getTimelineStepsPage(experimentId, 0, itemsPerPage);
+
+            if (timeLineList !== null) {
+                let timeLine = timeLineList.pipe(
+                    map(value => value.items),
+                    catchError(err => {
+                        throw err;
+                    })
+                );
+
+                timeLineList.subscribe(value => {
+                    for (let i = 1; i < value.itemCount / itemsPerPage; i++) {
+                        let timeLinePage = this.backend.getTimelineStepsPage(experimentId, i, itemsPerPage).pipe(
+                            map(value => value.items),
+                            catchError(err => {
+                                throw err;
+                            })
+                        );
+                        timeLine = merge(timeLine, timeLinePage);
+                    }
+
+                    if (timeLine !== null) {
+                        this.pluginList?.subscribe(
+                            plugins => plugins.forEach(
+                                plugin => timeLine.forEach(
+                                    value => value.forEach(
+                                        step => {
+                                            if (plugin.metadata?.name == step.processorName) {
+                                                if (isInstanceOfPluginStatus(step.status)) {
+                                                    plugin.pluginDescription.running = step.status;
+                                                } else {
+                                                    plugin.pluginDescription.running = "UNKNOWN";
+                                                }
+
+                                                const endTime = new Date(step.end).getTime()
+                                                plugin.pluginDescription.timeAgo = this.timeAgo?.format(endTime) ?? "";
+                                                plugin.pluginDescription.olderThan24 = (time.getTime() - endTime) > 24 * 60 * 60 * 1000;
+                                            }
+                                        }
+                                    )
+                                )
+                            )
+                        )
+                    }
+                });
+            }
+        }
     }
 
     ngOnDestroy(): void {
         this.routeSubscription?.unsubscribe();
-        this.activePluginSubscription?.unsubscribe();
+        this.parameterSubscription?.unsubscribe();
     }
 
-    changeFilterPluginList(): void {
-        let searchValue: string = this.searchValue.toLowerCase();
-        if (this.pluginList == null || !this.searchValue || this.searchValue.trim() === "") {
-            this.filteredPluginList = this.pluginList;
-        } else {
-            if (this.pluginList !== null && this.searchValue) {
-                this.pluginList.pipe(
-                    map(pluginList =>
-                        pluginList.filter(plugin => {
-                            // console.log(plugin.metadata);
-                            return (plugin.pluginDescription.name.toLowerCase().includes(searchValue) ||
-                                plugin.pluginDescription.apiRoot.toLowerCase().includes(searchValue) ||
-                                plugin.pluginDescription.version.toLowerCase().includes(searchValue) ||
-                                plugin.pluginDescription.identifier.toLowerCase().includes(searchValue) ||
-                                (plugin.metadata.title && plugin.metadata.title.toLowerCase().includes(searchValue)) ||
-                                (plugin.metadata.tags && plugin.metadata.tags.some((tag: string) => tag.toLowerCase().includes(searchValue))))
-                        })
-                    )
-                ).subscribe(pluginList => this.filteredPluginList = of(pluginList));
-            }
+    changeActiveTemplate(templateDesc: TemplateDescription | null) {
+        if (templateDesc == null) {
+            return;
         }
+
+        let categories: TemplateCategory[] = [];
+        templateDesc.categories.forEach(categoryDesc => {
+            let plugins: Observable<QhanaPlugin[]> = this.pluginList?.pipe(
+                map(pluginList => pluginList.sort(
+                    (a, b) => {
+                        if (a.metadata.title > b.metadata.title) {
+                            return 1;
+                        }
+                        if (a.metadata.title < b.metadata.title) {
+                            return -1;
+                        }
+                        if (a.pluginDescription.version > b.pluginDescription.version) {
+                            return 1;
+                        }
+                        if (a.pluginDescription.version < b.pluginDescription.version) {
+                            return -1;
+                        }
+                        return 0;
+                    }
+                ).filter(
+                    plugin => pluginMatchesFilter(plugin.pluginDescription, categoryDesc.pluginFilter)
+                ))
+            ) ?? of([]);
+
+            categories.push({
+                name: categoryDesc.name,
+                description: categoryDesc.description,
+                identifier: categoryDesc.identifier,
+                plugins: plugins,
+            });
+        });
+
+        this.activeTemplate = {
+            name: templateDesc.name,
+            description: templateDesc.description,
+            categories: categories,
+            templateDescription: templateDesc,
+        };
+
+        this.resetFilteredPluginLists();
+    }
+
+    private resetFilteredPluginLists() {
+        this.activeTemplate?.categories.forEach(
+            category => this.filteredPluginLists[category.name] = category.plugins
+        );
     }
 
     onKeyDown(event: KeyboardEvent) {
@@ -112,6 +224,37 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
         this.expandedPluginDescription = false;
     }
 
+    changeFilterPluginLists(): void {
+        let searchValue: string = this.searchValue.toLowerCase();
+        if (!this.searchValue || this.searchValue.trim() === "") {
+            this.resetFilteredPluginLists();
+            return;
+        }
+
+        this.activeTemplate?.categories.forEach(
+            category => this.filteredPluginLists[category.name] = category.plugins.pipe(
+                map(pluginList => pluginList.filter(
+                    plugin => plugin.pluginDescription.name.toLowerCase().includes(searchValue) ||
+                        plugin.pluginDescription.apiRoot.toLowerCase().includes(searchValue) ||
+                        plugin.pluginDescription.version.toLowerCase().includes(searchValue) ||
+                        plugin.pluginDescription.identifier.toLowerCase().includes(searchValue) ||
+                        plugin.pluginDescription.description.toLocaleLowerCase().includes(searchValue) ||
+                        plugin.pluginDescription.tags.some((tag: string) => tag.toLowerCase().includes(searchValue))
+
+                ))
+            )
+        );
+    }
+
+    getNumberOfSuccessfulRuns(plugins: Observable<QhanaPlugin[]>): Observable<number> {
+        return plugins.pipe(
+            map(pluginList => pluginList.filter(
+                plugin => plugin.pluginDescription.running === 'SUCCESS'
+            ).length
+            )
+        );
+    }
+
     onPluginUiFormSubmit(formData: FormSubmitData) {
         const experimentId = this.experimentId;
         const plugin = this.activePlugin;
@@ -128,7 +271,5 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
             processorVersion: plugin.pluginDescription.version,
             resultLocation: formData.resultUrl,
         }).subscribe(timelineStep => this.router.navigate(['/experiments', experimentId, 'timeline', timelineStep.sequence.toString()]));
-
     }
-
 }

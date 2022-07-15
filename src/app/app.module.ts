@@ -58,8 +58,7 @@ import { ChooseDataComponent } from './dialogs/choose-data/choose-data.component
 import { ChoosePluginComponent } from './dialogs/choose-plugin/choose-plugin.component';
 import { CreateExperimentDialog } from './dialogs/create-experiment/create-experiment.component';
 import { MarkdownHelpDialog } from './dialogs/markdown-help/markdown-help.component';
-
-
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @NgModule({
     declarations: [
@@ -108,6 +107,7 @@ import { MarkdownHelpDialog } from './dialogs/markdown-help/markdown-help.compon
         MatProgressSpinnerModule,
         MatProgressBarModule,
         MatExpansionModule,
+        MatTooltipModule,
     ],
     providers: [
         { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: "outline" } }
