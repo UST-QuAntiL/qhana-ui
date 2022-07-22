@@ -118,7 +118,7 @@ export class TemplatesService {
                 mergeAll(),
                 toArray(),
             ).subscribe(templates => {
-                templates.sort((a, b) => a.name.localeCompare(b.name));
+                templates.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
                 this.templatesSubject.next(templates);
                 this.loading = false;
             });

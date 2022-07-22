@@ -148,10 +148,10 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
             let plugins: Observable<QhanaPlugin[]> = this.pluginList?.pipe(
                 map(pluginList => pluginList.sort(
                     (a, b) => {
-                        if (a.metadata.title > b.metadata.title) {
+                        if (a.metadata.title.toLowerCase() > b.metadata.title.toLowerCase()) {
                             return 1;
                         }
-                        if (a.metadata.title < b.metadata.title) {
+                        if (a.metadata.title.toLowerCase() < b.metadata.title.toLowerCase()) {
                             return -1;
                         }
                         if (a.pluginDescription.version > b.pluginDescription.version) {
