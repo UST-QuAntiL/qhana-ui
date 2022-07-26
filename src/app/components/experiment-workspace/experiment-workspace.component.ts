@@ -1,13 +1,14 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription, merge, Observable, of } from 'rxjs';
-import { map, catchError } from "rxjs/operators";
+import { Subscription, Observable, of } from 'rxjs';
+import { map, } from "rxjs/operators";
 import { CurrentExperimentService } from 'src/app/services/current-experiment.service';
 import { isInstanceOfPluginStatus, PluginsService, QhanaPlugin } from 'src/app/services/plugins.service';
 import { TemplatesService, TemplateDescription, QhanaTemplate, TemplateCategory, pluginMatchesFilter } from 'src/app/services/templates.service';
-import { QhanaBackendService } from 'src/app/services/qhana-backend.service';
+import { QhanaBackendService, ApiObjectList, TimelineStepApiObject } from 'src/app/services/qhana-backend.service';
 import { FormSubmitData } from '../plugin-uiframe/plugin-uiframe.component';
 import TimeAgo from 'javascript-time-ago';
+import { ThemeTaskListItem } from '@milkdown/core';
 
 @Component({
     selector: 'qhana-experiment-workspace',
@@ -34,6 +35,7 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
     frontendUrl: string | null = null;
 
     timeAgo: TimeAgo | null = null;
+    stepsPerPage: number = 5;
 
     expandedPluginDescription: boolean = false;
     constructor(private route: ActivatedRoute, private experiment: CurrentExperimentService, private plugins: PluginsService, private templates: TemplatesService, private backend: QhanaBackendService, private router: Router) { }
@@ -49,7 +51,7 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
         this.templates.loadTemplates();
         this.templateList = this.templates.templates;
 
-        this.registerPluginStatusUpdater();
+        this.loadPluginStatus();
     }
 
     registerParameterSubscription() {
@@ -76,60 +78,55 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
         );
     }
 
-    registerPluginStatusUpdater(): void {
-        const experimentId = this.experimentId;
-        const itemsPerPage: number = 100;
-        const time = new Date();
-
+    loadPluginStatus(): void {
         this.timeAgo = new TimeAgo('en-US');
 
-        if (experimentId !== null) {
-            const timeLineList = this.backend.getTimelineStepsPage(experimentId, 0, itemsPerPage);
+        const firstPage = this.loadStatusFromPage(0);
 
-            if (timeLineList !== null) {
-                let timeLine = timeLineList.pipe(
-                    map(value => value.items),
-                    catchError(err => {
-                        throw err;
-                    })
-                );
-
-                timeLineList.subscribe(value => {
-                    for (let i = 1; i < value.itemCount / itemsPerPage; i++) {
-                        let timeLinePage = this.backend.getTimelineStepsPage(experimentId, i, itemsPerPage).pipe(
-                            map(value => value.items),
-                            catchError(err => {
-                                throw err;
-                            })
-                        );
-                        timeLine = merge(timeLine, timeLinePage);
-                    }
-
-                    if (timeLine !== null) {
-                        this.pluginList?.subscribe(
-                            plugins => plugins.forEach(
-                                plugin => timeLine.forEach(
-                                    value => value.forEach(
-                                        step => {
-                                            if (plugin.metadata?.name == step.processorName) {
-                                                if (isInstanceOfPluginStatus(step.status)) {
-                                                    plugin.pluginDescription.running = step.status;
-                                                } else {
-                                                    plugin.pluginDescription.running = "UNKNOWN";
-                                                }
-
-                                                const endTime = new Date(step.end).getTime()
-                                                plugin.pluginDescription.timeAgo = this.timeAgo?.format(endTime) ?? "";
-                                                plugin.pluginDescription.olderThan24 = (time.getTime() - endTime) > 24 * 60 * 60 * 1000;
-                                            }
-                                        }
-                                    )
-                                )
-                            )
-                        )
-                    }
-                });
+        firstPage?.subscribe(
+            value => { 
+                for (let i = 1; i < value.itemCount / this.stepsPerPage; i++) {
+                    this.loadStatusFromPage(i);
+                }
             }
+        );
+    }
+
+    loadStatusFromPage(num: number): Observable<ApiObjectList<TimelineStepApiObject>> | null {
+        if (this.experimentId == null) {
+            return null;
+        }
+        const time = new Date();
+        
+        const timelinePage = this.backend.getTimelineStepsPage(this.experimentId, num, this.stepsPerPage)        
+        timelinePage.pipe(
+            map(value => value.items)
+        ).subscribe(
+            steps => steps.forEach(
+                step => this.pluginList?.subscribe(
+                    plugins => plugins.forEach(
+                        plugin => {
+                            this.updatePluginStatus(plugin, step, time);
+                        }
+                    )
+                )
+            )
+        );
+        
+        return timelinePage;
+    }
+    
+    updatePluginStatus(plugin: QhanaPlugin, step: TimelineStepApiObject, time: Date): void {
+        if (plugin.metadata?.name == step.processorName) {
+            if (isInstanceOfPluginStatus(step.status)) {
+                plugin.pluginDescription.running = step.status;
+            } else {
+                plugin.pluginDescription.running = "UNKNOWN";
+            }
+
+            const endTime = new Date(step.end).getTime()
+            plugin.pluginDescription.timeAgo = this.timeAgo?.format(endTime) ?? "";
+            plugin.pluginDescription.olderThan24 = (time.getTime() - endTime) > 24 * 60 * 60 * 1000;
         }
     }
 
