@@ -22,11 +22,7 @@ import { QhanaBackendService } from './qhana-backend.service';
 
 export type PluginStatus = "PENDING" | "SUCCESS" | "FAILURE" | "UNKNOWN" | null;
 export function isInstanceOfPluginStatus(pluginStatus: string | null): pluginStatus is PluginStatus {
-    if (["PENDING", "SUCCESS", "FAILURE", "UNKNOWN", null].includes(pluginStatus)) {
-        return true;
-    } else {
-        return false;
-    }
+    return ["PENDING", "SUCCESS", "FAILURE", "UNKNOWN", null].includes(pluginStatus)
 }
 
 export interface PluginDescription {
@@ -37,7 +33,7 @@ export interface PluginDescription {
     description: string;
     tags: string[];
 
-    running: PluginStatus;
+    running?: PluginStatus;
     timeAgo: string | [string, number?];
     olderThan24: boolean;
 }
@@ -113,21 +109,7 @@ export class PluginsService {
                 filter<QhanaPlugin | "error", QhanaPlugin>((value): value is QhanaPlugin => value !== "error"),
                 toArray(),
             ).subscribe(plugins => {
-                plugins.sort((a, b) => {
-                    if (a.pluginDescription.name > b.pluginDescription.name) {
-                        return 1;
-                    }
-                    if (a.pluginDescription.name < b.pluginDescription.name) {
-                        return -1;
-                    }
-                    if (a.pluginDescription.version > b.pluginDescription.version) {
-                        return 1;
-                    }
-                    if (a.pluginDescription.version < b.pluginDescription.version) {
-                        return -1;
-                    }
-                    return 0;
-                })
+                plugins.sort(this.comparePlugins);
                 this.pluginsSubject.next(plugins);
                 this.loading = false;
             });
@@ -160,6 +142,22 @@ export class PluginsService {
                 };
             }),
         );
+    }
+    
+    comparePlugins(a: QhanaPlugin, b: QhanaPlugin): number {
+        if (a.metadata.title.toLowerCase() > b.metadata.title.toLowerCase()) {
+            return 1;
+        }
+        if (a.metadata.title.toLowerCase() < b.metadata.title.toLowerCase()) {
+            return -1;
+        }
+        if (a.pluginDescription.version > b.pluginDescription.version) {
+            return 1;
+        }
+        if (a.pluginDescription.version < b.pluginDescription.version) {
+            return -1;
+        }
+        return 0;
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 University of Stuttgart
+ * Copyright 2022 University of Stuttgart
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,10 @@ import { catchError, map, mergeAll, mergeMap, toArray } from 'rxjs/operators';
 import { PluginDescription, QhanaPlugin } from './plugins.service';
 import { QhanaBackendService } from './qhana-backend.service';
 
+/*
+ * These two interfaces hold the information of templates.
+ */
+
 export interface TemplateCategory {
     name: string;
     description: string;
@@ -35,7 +39,11 @@ export interface QhanaTemplate {
     templateDescription: TemplateDescription;
 }
 
-interface CategoryDescription {
+/*
+ * These two interfaces hold the information from which actual templates are built.
+ */
+
+export interface CategoryDescription {
     name: string;
     description: string;
     identifier: string;
@@ -127,15 +135,27 @@ export class TemplatesService {
 }
 
 function isInstanceOfPluginFilterOr(pluginFilter: PluginFilterExpr): pluginFilter is PluginFilterOr {
-    return pluginFilter != null && (pluginFilter as PluginFilterOr).or !== undefined;
+    if (pluginFilter != null) {
+        const _or = (pluginFilter as PluginFilterOr).or;
+        return _or != null && Array.isArray(_or);
+    }
+    return false;
 }
 
 function isInstanceOfPluginFilterAnd(pluginFilter: PluginFilterExpr): pluginFilter is PluginFilterAnd {
-    return pluginFilter != null && (pluginFilter as PluginFilterAnd).and !== undefined;
+    if (pluginFilter != null) {
+        const _and = (pluginFilter as PluginFilterAnd).and;
+        return _and != null && Array.isArray(_and);
+    }
+    return false;
 }
 
 function isInstanceOfPluginFilterNot(pluginFilter: PluginFilterExpr): pluginFilter is PluginFilterNot {
-    return pluginFilter != null && (pluginFilter as PluginFilterNot).not !== undefined;
+    if (pluginFilter != null) {
+        const _not = (pluginFilter as PluginFilterNot).not;
+        return _not != null && isInstanceOfPluginFilter(_not);
+    }
+    return false;
 }
 
 function isInstanceOfString(pluginFilter: PluginFilterExpr): pluginFilter is string {
@@ -146,24 +166,40 @@ function isInstanceOfBoolean(pluginFilter: PluginFilterExpr): pluginFilter is bo
     return pluginFilter != null && typeof pluginFilter === 'boolean';
 }
 
+function isInstanceOfPluginFilter(pluginFilter: PluginFilterExpr): pluginFilter is PluginFilterExpr {
+    return isInstanceOfPluginFilterOr(pluginFilter)
+        || isInstanceOfPluginFilterAnd(pluginFilter)
+        || isInstanceOfPluginFilterNot(pluginFilter)
+        || isInstanceOfString(pluginFilter)
+        || isInstanceOfBoolean(pluginFilter);
+}
+
 export function pluginMatchesFilter(pluginDesc: PluginDescription, pluginFilter: PluginFilterExpr): boolean {
     if (isInstanceOfPluginFilterOr(pluginFilter)) {
         return pluginFilter.or.reduce<boolean>(
             (res, nestedPluginFilter) => res || pluginMatchesFilter(pluginDesc, nestedPluginFilter),
             false,
         );
-    } else if (isInstanceOfPluginFilterAnd(pluginFilter)) {
+    } 
+
+    if (isInstanceOfPluginFilterAnd(pluginFilter)) {
         return pluginFilter.and.reduce<boolean>(
             (res, nestedPluginFilter) => res && pluginMatchesFilter(pluginDesc, nestedPluginFilter),
             true,
         );
-    } else if (isInstanceOfPluginFilterNot(pluginFilter)) {
-        return !pluginMatchesFilter(pluginDesc, pluginFilter.not);
-    } else if (isInstanceOfString(pluginFilter)) {
-        return pluginDesc.tags.includes(pluginFilter) || pluginFilter === pluginDesc.identifier || pluginFilter === pluginDesc.name;
-    } else if (isInstanceOfBoolean(pluginFilter)) {
-        return pluginFilter;
-    } else {
-        throw Error(`Unknown plugin filter ${pluginFilter}`);
     }
+
+    if (isInstanceOfPluginFilterNot(pluginFilter)) {
+        return !pluginMatchesFilter(pluginDesc, pluginFilter.not);
+    }
+
+    if (isInstanceOfString(pluginFilter)) {
+        return pluginDesc.tags.includes(pluginFilter) || pluginFilter === pluginDesc.identifier || pluginFilter === pluginDesc.name;
+    }
+
+    if (isInstanceOfBoolean(pluginFilter)) {
+        return pluginFilter;
+    }
+    
+    throw Error(`Unknown plugin filter ${pluginFilter}`);
 }
