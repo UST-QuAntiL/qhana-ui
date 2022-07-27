@@ -35,7 +35,7 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
     frontendUrl: string | null = null;
 
     timeAgo: TimeAgo | null = null;
-    stepsPerPage: number = 5;
+    stepsPerPage: number = 100;
 
     expandedPluginDescription: boolean = false;
     constructor(private route: ActivatedRoute, private experiment: CurrentExperimentService, private plugins: PluginsService, private templates: TemplatesService, private backend: QhanaBackendService, private router: Router) { }
