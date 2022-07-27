@@ -21,17 +21,10 @@ import { catchError, map, mergeAll, mergeMap, toArray } from 'rxjs/operators';
 import { PluginDescription, QhanaPlugin } from './plugins.service';
 import { QhanaBackendService } from './qhana-backend.service';
 
-/*
- * These two interfaces hold the information of templates.
+/**
+ * QhanaTemplate holds all nescessary information for displaying the template.
+ * This includes a list of categories.
  */
-
-export interface TemplateCategory {
-    name: string;
-    description: string;
-    identifier: string;
-    plugins: Observable<QhanaPlugin[]>;
-}
-
 export interface QhanaTemplate {
     name: string;
     description: string;
@@ -39,22 +32,40 @@ export interface QhanaTemplate {
     templateDescription: TemplateDescription;
 }
 
-/*
- * These two interfaces hold the information from which actual templates are built.
+/**
+ * TemplateCategory holds all nescessary information for displaying the category.
+ * This includes a list of plugins that are part of the category.
  */
-
-export interface CategoryDescription {
+export interface TemplateCategory {
     name: string;
     description: string;
     identifier: string;
-    pluginFilter: PluginFilterExpr;
+    plugins: Observable<QhanaPlugin[]>;
 }
 
+/**
+ * TemplateDescription holds all nescessary information for building an instance of QhanaTemplate.
+ * The templates are loaded from the plugin runner in this form.
+ * It includes a list of descriptions of categories - for details see the documentation for that interface.
+ */
 export interface TemplateDescription {
     name: string;
     description: string;
     identifier: string;
     categories: CategoryDescription[];
+}
+
+/**
+ * CategoryDescription holds all nescessary information for building an instance of TemplateCategory.
+ * The categories are loaded from the plugin runner in this form.
+ * Instead of a list of plugins or plugin identifiers, it holds a filter expression,
+ * with which the template service can build the actual category.
+ */
+export interface CategoryDescription {
+    name: string;
+    description: string;
+    identifier: string;
+    pluginFilter: PluginFilterExpr;
 }
 
 interface PluginFilterOr {
@@ -135,7 +146,7 @@ export class TemplatesService {
 }
 
 function isInstanceOfPluginFilterOr(pluginFilter: PluginFilterExpr): pluginFilter is PluginFilterOr {
-    if (pluginFilter != null) {
+    if (pluginFilter != null && Object.keys(pluginFilter) === ['or']) {
         const _or = (pluginFilter as PluginFilterOr).or;
         return _or != null && Array.isArray(_or);
     }
@@ -143,7 +154,7 @@ function isInstanceOfPluginFilterOr(pluginFilter: PluginFilterExpr): pluginFilte
 }
 
 function isInstanceOfPluginFilterAnd(pluginFilter: PluginFilterExpr): pluginFilter is PluginFilterAnd {
-    if (pluginFilter != null) {
+    if (pluginFilter != null && Object.keys(pluginFilter) === ['and']) {
         const _and = (pluginFilter as PluginFilterAnd).and;
         return _and != null && Array.isArray(_and);
     }
@@ -151,7 +162,7 @@ function isInstanceOfPluginFilterAnd(pluginFilter: PluginFilterExpr): pluginFilt
 }
 
 function isInstanceOfPluginFilterNot(pluginFilter: PluginFilterExpr): pluginFilter is PluginFilterNot {
-    if (pluginFilter != null) {
+    if (pluginFilter != null && Object.keys(pluginFilter) === ['not']) {
         const _not = (pluginFilter as PluginFilterNot).not;
         return _not != null && isInstanceOfPluginFilter(_not);
     }

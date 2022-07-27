@@ -34,8 +34,8 @@ export interface PluginDescription {
     tags: string[];
 
     running?: PluginStatus;
-    timeAgo: string | [string, number?];
-    olderThan24: boolean;
+    timeAgo?: string | [string, number?];
+    olderThan24?: boolean;
 }
 
 export interface QhanaPlugin {
@@ -109,7 +109,7 @@ export class PluginsService {
                 filter<QhanaPlugin | "error", QhanaPlugin>((value): value is QhanaPlugin => value !== "error"),
                 toArray(),
             ).subscribe(plugins => {
-                plugins.sort(this.comparePlugins);
+                plugins.sort(comparePlugins);
                 this.pluginsSubject.next(plugins);
                 this.loading = false;
             });
@@ -143,21 +143,21 @@ export class PluginsService {
             }),
         );
     }
-    
-    comparePlugins(a: QhanaPlugin, b: QhanaPlugin): number {
-        if (a.metadata.title.toLowerCase() > b.metadata.title.toLowerCase()) {
-            return 1;
-        }
-        if (a.metadata.title.toLowerCase() < b.metadata.title.toLowerCase()) {
-            return -1;
-        }
-        if (a.pluginDescription.version > b.pluginDescription.version) {
-            return 1;
-        }
-        if (a.pluginDescription.version < b.pluginDescription.version) {
-            return -1;
-        }
-        return 0;
-    }
 
+}
+    
+export function comparePlugins(a: QhanaPlugin, b: QhanaPlugin): number {
+    if (a.metadata.title.toLowerCase() > b.metadata.title.toLowerCase()) {
+        return 1;
+    }
+    if (a.metadata.title.toLowerCase() < b.metadata.title.toLowerCase()) {
+        return -1;
+    }
+    if (a.pluginDescription.version > b.pluginDescription.version) {
+        return 1;
+    }
+    if (a.pluginDescription.version < b.pluginDescription.version) {
+        return -1;
+    }
+    return 0;
 }

@@ -1,14 +1,13 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription, Observable, of } from 'rxjs';
-import { map, } from "rxjs/operators";
+import { map } from "rxjs/operators";
 import { CurrentExperimentService } from 'src/app/services/current-experiment.service';
-import { isInstanceOfPluginStatus, PluginsService, QhanaPlugin } from 'src/app/services/plugins.service';
+import { isInstanceOfPluginStatus, PluginsService, QhanaPlugin, comparePlugins } from 'src/app/services/plugins.service';
 import { TemplatesService, TemplateDescription, QhanaTemplate, TemplateCategory, pluginMatchesFilter } from 'src/app/services/templates.service';
 import { QhanaBackendService, ApiObjectList, TimelineStepApiObject } from 'src/app/services/qhana-backend.service';
 import { FormSubmitData } from '../plugin-uiframe/plugin-uiframe.component';
 import TimeAgo from 'javascript-time-ago';
-import { ThemeTaskListItem } from '@milkdown/core';
 
 @Component({
     selector: 'qhana-experiment-workspace',
@@ -145,7 +144,7 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
             let plugins: Observable<QhanaPlugin[]> = this.pluginList?.pipe(
                 map(pluginList => pluginList.filter(
                     plugin => pluginMatchesFilter(plugin.pluginDescription, categoryDesc.pluginFilter)
-                ).sort(this.plugins.comparePlugins))
+                ).sort(comparePlugins))
             ) ?? of([]);
 
             categories.push({
