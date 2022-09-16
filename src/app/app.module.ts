@@ -33,6 +33,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppRoutingModule } from './app-routing.module';
@@ -41,7 +42,6 @@ import { StepStatusComponent } from './components-small/step-status/step-status.
 import { DataDetailComponent } from './components/data-detail/data-detail.component';
 import { DataPreviewComponent } from './components/data-preview/data-preview.component';
 import { ExperimentDataComponent } from './components/experiment-data/experiment-data.component';
-import { ExperimentNavComponent } from './components/experiment-nav/experiment-nav.component';
 import { ExperimentTimelineComponent } from './components/experiment-timeline/experiment-timeline.component';
 import { ExperimentWorkspaceComponent } from './components/experiment-workspace/experiment-workspace.component';
 import { ExperimentComponent } from './components/experiment/experiment.component';
@@ -52,13 +52,13 @@ import { PluginUiframeComponent } from './components/plugin-uiframe/plugin-uifra
 import { PreviewListComponent } from './components/preview-list/preview-list.component';
 import { SettingsPageComponent } from './components/settings-page/settings-page.component';
 import { SubstepsDetailsComponent } from './components/substeps-details/substeps-details.component';
+import { TimelineStepNavComponent } from './components/timeline-step-nav/timeline-step-nav.component';
 import { TimelineStepComponent } from './components/timeline-step/timeline-step.component';
 import { TimelineSubstepsComponent } from './components/timeline-substeps/timeline-substeps.component';
 import { ChooseDataComponent } from './dialogs/choose-data/choose-data.component';
 import { ChoosePluginComponent } from './dialogs/choose-plugin/choose-plugin.component';
 import { CreateExperimentDialog } from './dialogs/create-experiment/create-experiment.component';
 import { MarkdownHelpDialog } from './dialogs/markdown-help/markdown-help.component';
-import { MatTooltipModule } from '@angular/material/tooltip';
 
 @NgModule({
     declarations: [
@@ -66,7 +66,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
         NavbarComponent,
         ExperimentsPageComponent,
         ExperimentComponent,
-        ExperimentNavComponent,
+        TimelineStepNavComponent,
         ExperimentWorkspaceComponent,
         ExperimentDataComponent,
         ExperimentTimelineComponent,

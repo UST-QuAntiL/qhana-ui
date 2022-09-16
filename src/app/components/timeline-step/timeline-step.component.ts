@@ -4,6 +4,7 @@ import { BehaviorSubject, from, Observable, of, Subject, Subscription, timer } f
 import { catchError, concatMap, debounceTime, filter, mergeAll, mergeMap, take, throttleTime } from 'rxjs/operators';
 import { CurrentExperimentService } from 'src/app/services/current-experiment.service';
 import { QhanaBackendService, TimelineStepApiObject, TimelineSubStepApiObject } from 'src/app/services/qhana-backend.service';
+import { TabDefinition } from '../timeline-step-nav/timeline-step-nav.component';
 
 interface Progress {
     start: number;
@@ -27,13 +28,20 @@ export class TimelineStepComponent implements OnInit, OnDestroy {
     private notesUpdates: BehaviorSubject<string> = new BehaviorSubject<string>("");
     private lastSavedNotes: string = "";
 
-    private stepSequence: string | null = null;
 
     watching: "watching" | "paused" | "error" | null = null;
 
     backendUrl: string;
 
     experimentId: string = "";
+    stepId: string | null = null;
+    stepTabId: string = "overview";
+
+    tabs: TabDefinition[] = [
+        { tabId: "steps", name: "Sub-Steps" },
+        { tabId: "inputs", name: "Inputs" },
+        { tabId: "outputs", name: "Outputs" }
+    ];
 
     timelineStep: TimelineStepApiObject | null = null;
     resultQuality: "UNKNOWN" | "NEUTRAL" | "GOOD" | "BAD" | "ERROR" | "UNUSABLE" = "UNKNOWN";
@@ -54,13 +62,18 @@ export class TimelineStepComponent implements OnInit, OnDestroy {
             debounceTime(500)
         ).subscribe(this.saveNotes);
         this.routeSubscription = this.route.params.subscribe(params => {
+            let hasChanged = this.experimentId !== params.experimentId;
             this.experimentId = params.experimentId;
             this.experiment.setExperimentId(params.experimentId);
-            this.stepSequence = params.step;
-            this.stepNotes = null;
-            this.lastSavedNotes = "";
-            this.notesStatus = "original";
-            this.loadData(params.experimentId, params.step);
+            hasChanged = hasChanged || (this.stepId !== params.step);
+            this.stepId = params.step;
+            this.stepTabId = params.stepTabId ?? "overview";
+            if (hasChanged) {
+                this.stepNotes = null;
+                this.lastSavedNotes = "";
+                this.notesStatus = "original";
+                this.loadData(params.experimentId, params.step);
+            }
         });
     }
 
@@ -81,8 +94,8 @@ export class TimelineStepComponent implements OnInit, OnDestroy {
             this.manualRefresh.next(1);
             return; // already watching
         }
-        if (this.experimentId && this.stepSequence) {
-            this.loadData(this.experimentId, this.stepSequence);
+        if (this.experimentId && this.stepId) {
+            this.loadData(this.experimentId, this.stepId);
         }
     }
 
@@ -197,20 +210,20 @@ export class TimelineStepComponent implements OnInit, OnDestroy {
         if (text === this.lastSavedNotes) {
             return; // notes are already saved!
         }
-        if (this.stepSequence == null) {
+        if (this.stepId == null) {
             return;
         }
-        this.backend.saveTimelineStepNotes(this.experimentId, this.stepSequence, text).subscribe(result => {
+        this.backend.saveTimelineStepNotes(this.experimentId, this.stepId, text).subscribe(result => {
             this.lastSavedNotes = text;
             this.notesStatus = 'saved';
         });
     }
 
     saveResultQuality(newQuality: "UNKNOWN" | "NEUTRAL" | "GOOD" | "BAD" | "ERROR" | "UNUSABLE") {
-        if (this.stepSequence == null) {
+        if (this.stepId == null) {
             return;
         }
-        this.backend.saveTimelineStepResultQuality(this.experimentId, this.stepSequence, newQuality).subscribe(result => {
+        this.backend.saveTimelineStepResultQuality(this.experimentId, this.stepId, newQuality).subscribe(result => {
             // assume everything is ok (the correct result quality will already be selected)
         });
     }

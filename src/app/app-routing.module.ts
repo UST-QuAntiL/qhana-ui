@@ -37,6 +37,7 @@ const routes: Routes = [
     { path: 'experiments/:experimentId/data/:dataName', component: DataDetailComponent },
     { path: 'experiments/:experimentId/timeline', component: ExperimentTimelineComponent },
     { path: 'experiments/:experimentId/timeline/:step', component: TimelineStepComponent },
+    { path: 'experiments/:experimentId/timeline/:step/:stepTabId', component: TimelineStepComponent },
 ];
 
 @NgModule({
