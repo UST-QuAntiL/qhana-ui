@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { debounceTime, filter, map } from 'rxjs/operators';
 import { CurrentExperimentService } from 'src/app/services/current-experiment.service';
@@ -32,7 +32,7 @@ export class ExperimentComponent implements OnInit, OnDestroy {
     experimentDescription: string = ""; // only updated on initial experiment load
     currentExperimentDescription: string = "";
 
-    constructor(private route: ActivatedRoute, private experimentService: CurrentExperimentService, private backend: QhanaBackendService) { }
+    constructor(private route: ActivatedRoute, private router: Router, private experimentService: CurrentExperimentService, private backend: QhanaBackendService) { }
 
     ngOnInit(): void {
         this.routeSubscription = this.route.params.pipe(map(params => params.experimentId)).subscribe(experimentId => {
@@ -62,6 +62,16 @@ export class ExperimentComponent implements OnInit, OnDestroy {
         this.experimentSubscription?.unsubscribe();
         this.autoSaveTitleSubscription?.unsubscribe();
         this.autoSaveDescriptionSubscription?.unsubscribe();
+    }
+
+    cloneExperiment() {
+        const experimentId = this.experimentId;
+        if (experimentId == null) {
+            return; // no experiment to clone...
+        }
+        this.backend.cloneExperiment(experimentId).subscribe(clonedExperiment => {
+            this.router.navigate(['/experiments', clonedExperiment.experimentId, "info"]);
+        });
     }
 
     editExperimentName() {

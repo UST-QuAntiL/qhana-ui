@@ -258,6 +258,10 @@ export class QhanaBackendService {
         return this.http.put<ExperimentApiObject>(`${this.rootUrl}/experiments/${experimentId}`, { name, description });
     }
 
+    public cloneExperiment(experimentId: number | string): Observable<ExperimentApiObject> {
+        return this.http.post<ExperimentApiObject>(`${this.rootUrl}/experiments/${experimentId}/clone`, undefined, { responseType: "json" });
+    }
+
     public getExperimentDataPage(experimentId: number | string, page: number = 0, itemCount: number = 10): Observable<ApiObjectList<ExperimentDataApiObject>> {
         return this.http.get<ApiObjectList<ExperimentDataApiObject>>(`${this.rootUrl}/experiments/${experimentId}/data?page=${page}&item-count=${itemCount}`);
     }

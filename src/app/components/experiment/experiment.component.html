@@ -1,7 +1,11 @@
 <div class="big-content" *ngIf="experiment != null">
     <div class="title">
         <h1 class="t-page-headline">Experiment</h1>
-        <a [routerLink]="['/experiments']" mat-raised-button color="primary">Change Experiment</a>
+        <button class="clone-button" mat-raised-button color="primary" (click)="cloneExperiment()">
+            Clone Experiment
+            <mat-icon aria-hidden="true">content_copy</mat-icon>
+        </button>
+
     </div>
     <mat-card class="experiment-card card">
         <mat-card-title class="t-headline experiment-title">
