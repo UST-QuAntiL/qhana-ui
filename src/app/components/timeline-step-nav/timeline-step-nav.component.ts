@@ -13,7 +13,7 @@ export interface TabDefinition {
 export class TimelineStepNavComponent {
     @Input() active: string = "";
     @Input() experimentId: string | number = "";
-    @Input() timelieStep: string | number = 1;
+    @Input() timelineStep: string | number = 1;
     @Input() tabs: TabDefinition[] = [];
 
     constructor() { }

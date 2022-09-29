@@ -1,10 +1,10 @@
 <nav mat-tab-nav-bar class="big-nav-tabs">
-    <a mat-tab-link [routerLink]="['/experiments', experimentId, 'timeline', timelieStep, 'overview']"
+    <a mat-tab-link [routerLink]="['/experiments', experimentId, 'timeline', timelineStep, 'overview']"
         [active]="active === 'overview'">
         Overview
     </a>
     <a mat-tab-link *ngFor="let tab of tabs"
-        [routerLink]="['/experiments', experimentId, 'timeline', timelieStep, tab.tabId]"
+        [routerLink]="['/experiments', experimentId, 'timeline', timelineStep, tab.tabId]"
         [active]="active === tab.tabId">
         {{tab.name}}
     </a>
