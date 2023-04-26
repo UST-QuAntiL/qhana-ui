@@ -17,7 +17,7 @@
 import { Injectable } from '@angular/core';
 import { AsyncSubject, Subject } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { ApiLink, ApiObject, ApiResponse, ChangedApiObject, DeletedApiObject, GenericApiObject, isApiObject, isApiResponse, isChangedApiObject, isDeletedApiObject, isNewApiObject, matchesLinkRel, NewApiObject } from './api-data-types';
+import { ApiLink, ApiObject, ApiResponse, ChangedApiObject, DeletedApiObject, GenericApiObject, NewApiObject, isApiObject, isApiResponse, isChangedApiObject, isDeletedApiObject, isNewApiObject, matchesLinkRel } from './api-data-types';
 
 
 export class ResponseError extends Error {
@@ -144,7 +144,6 @@ export class PluginRegistryBaseService {
     }
 
 
-
     private async cacheResults(request: RequestInfo, responseData: ApiResponse<unknown>) {
         if (this.apiCache == null) {
             return;
@@ -195,9 +194,12 @@ export class PluginRegistryBaseService {
             }
             await Promise.all(promises);
         }
+    }
 
-        // add to subscriptions
+    private async broadcastToSubscriptions(responseData: ApiResponse<unknown>) {
         this.apiResponseSubject.next(responseData);
+
+        const embedded = responseData?.embedded;
         if (embedded != null) {
             for (const response of embedded) {
                 this.apiResponseSubject.next(response);
@@ -223,6 +225,7 @@ export class PluginRegistryBaseService {
 
             if (isApiResponse(responseData)) {
                 await this.cacheResults(input, responseData);
+                await this.broadcastToSubscriptions(responseData);
             }
 
             return responseData;
