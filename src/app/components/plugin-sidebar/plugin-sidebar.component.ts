@@ -7,7 +7,7 @@ import { ChangeUiTemplateComponent } from 'src/app/dialogs/change-ui-template/ch
 import { DeleteDialog } from 'src/app/dialogs/delete-dialog/delete-dialog.dialog';
 import { ApiLink, ApiResponse, CollectionApiObject, PageApiObject } from 'src/app/services/api-data-types';
 import { PluginRegistryBaseService } from 'src/app/services/registry.service';
-import { TemplateApiObject, TemplatesService, TemplateTabApiObject } from 'src/app/services/templates.service';
+import { TemplateApiObject, TemplateTabApiObject, TemplatesService } from 'src/app/services/templates.service';
 
 
 export interface PluginGroup {
@@ -244,6 +244,21 @@ export class PluginSidebarComponent implements OnInit, OnDestroy {
                 link: tab.data.plugins,
             });
         });
+    }
+
+    getTabFilter(groupLink: ApiLink) {
+        return (tabLink: ApiLink): boolean => {
+            if (tabLink.resourceKey == null) {
+                return false;
+            }
+            if (tabLink.resourceKey?.["?group"] !== groupLink.resourceKey?.["?group"]) {
+                return false;
+            }
+            if (tabLink.resourceKey?.templateId !== groupLink.resourceKey?.templateId) {
+                return false;
+            }
+            return true;
+        }
     }
 
     private navigate(template: string | null = null, plugin: string | null = null, tab: string | null = null) {
