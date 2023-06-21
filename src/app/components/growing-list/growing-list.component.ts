@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, SimpleChanges, TrackByFunction } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { from, isObservable, Observable, Subject, Subscription } from 'rxjs';
+import { Observable, Subject, Subscription, from, isObservable } from 'rxjs';
 import { concatMap, filter } from 'rxjs/operators';
 import { DeleteDialog } from 'src/app/dialogs/delete-dialog/delete-dialog.dialog';
 import { ApiLink, ApiObject, isCollectionApiObject, matchesLinkRel } from 'src/app/services/api-data-types';
@@ -15,8 +15,15 @@ import { PluginRegistryBaseService } from 'src/app/services/registry.service';
 export class GrowingListComponent implements OnInit, OnDestroy {
     @Input() rels: string[] | string[][] | null = null;
     @Input() query: URLSearchParams | null = null;
-    @Input() newItemRels: string | string[] | null = null;
     @Input() apiLink: ApiLink | null = null;
+
+    // if set, add new items with the rels here to the list
+    @Input() newItemRels: string | string[] | null = null;
+    // additional filter to check if new items should be added to the list
+    @Input() newItemsFilter: ((apiLink: ApiLink) => boolean) | null = null
+    // if true (the default) changed items will be removed from the list
+    // if they do not match the newItemsFilter (only if the filter is not null)
+    @Input() applyNewItemsFilterToChanged: boolean = true;
 
     @Input() set search(value: string | null) {
         this.normalizedSearch = value?.toLowerCase()?.trim() ?? null;
@@ -225,9 +232,9 @@ export class GrowingListComponent implements OnInit, OnDestroy {
     }
 
     private async onNewObjectQueued(newObjectLink: ApiLink) {
-        if (this.apiLink != null) {
-            // make sure the new object is part of the collection
-            this.reloadAll();
+        const passedFilter = this.newItemsFilter?.(newObjectLink) ?? true;
+        if (!passedFilter) {
+            // object did not pass the filter, do not add it to the list
             return;
         }
         this.items = [...this.items, newObjectLink];
@@ -238,6 +245,14 @@ export class GrowingListComponent implements OnInit, OnDestroy {
 
     private async onChangedObjectQueued(changedObjectLink: ApiLink) {
         const existing = this.items.find(link => link.href === changedObjectLink.href);
+        if (existing && this.applyNewItemsFilterToChanged && this.newItemsFilter != null) {
+            // changed objects should additionally be checked by the newItemsFilter
+            if (!this.newItemsFilter(changedObjectLink)) {
+                // changed object did not pass the newItemsFilter, handle as a deleted object!
+                await this.onDeletedObjectQueued(changedObjectLink);
+                return;
+            }
+        }
         if (existing && existing.name !== changedObjectLink.name) {
             // only update here if the name has changed! (as this component only directly deals with the api links)
             const newItems = [...this.items];
@@ -248,11 +263,6 @@ export class GrowingListComponent implements OnInit, OnDestroy {
             newItems[index] = changedObjectLink;
             this.items = newItems;
             this.itemsChanged.emit([...this.items]);
-        } else if (existing) {
-            // some other property changed that may have removed it from list
-            // TODO: This should not trigger a full reload of everything
-            this.reloadAll();
-            return;
         }
 
         const newItemRels = this.newItemRels;
