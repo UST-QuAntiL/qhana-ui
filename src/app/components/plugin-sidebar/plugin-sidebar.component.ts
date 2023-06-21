@@ -163,6 +163,11 @@ export class PluginSidebarComponent implements OnInit, OnDestroy {
                 const tabId = changedObject.changed.resourceKey?.uiTemplateTabId ?? null;
                 const tabIndex = this.pluginGroups.findIndex(group => group.link.resourceKey?.['?template-tab'] === tabId);
                 this.pluginGroups[tabIndex] = { ...this.pluginGroups[tabIndex] };
+                const tabResponse = await this.registry.getByApiLink<TemplateTabApiObject>(changedObject.changed);
+                if (tabResponse) {
+                    this.pluginGroups[tabIndex].name = tabResponse.data.name;
+                    this.pluginGroups[tabIndex].description = tabResponse.data.description;
+                }
             });
 
         // romove deleted template tabs
