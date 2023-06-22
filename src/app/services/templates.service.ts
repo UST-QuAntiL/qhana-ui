@@ -73,20 +73,33 @@ export class TemplatesService {
         }
 
         // need to fetch template resource from plugin registry
-        const query = new URLSearchParams();
-        query.set("template-id", defaultTemplateId.toString());
-        const templatePage = await this.registry.getByRel<PageApiObject>([["ui-template", "collection"]], query, true);
-        if (templatePage?.data.collectionSize === 1) {
-            // only expect one template since IDs are unique
-            const templateResponse = await this.registry.getByApiLink<TemplateApiObject>(templatePage.data.items[0], null, false);
-            this.defaultTemplateSubject.next(templateResponse?.data ?? null);
-        } else {
-            console.warn(`Template API returned an ambiguous response for template id ${defaultTemplateId}`, templatePage);
+        const defaultTemplate = await this.getTemplate(defaultTemplateId.toString(), true);
+        if (defaultTemplate != null) {
+            this.defaultTemplateSubject.next(defaultTemplate?.data ?? null);
         }
     }
 
     async addTemplate(newTemplate: TemplateApiObject) {
         const createLink = await this.registry.searchResolveRels(["create", "ui-template"]);
         return this.registry.submitByApiLink<TemplateApiObject>(createLink, newTemplate);
+    }
+
+    async getTemplate(templateId: string, ignoreCache: boolean | "ignore-embedded" = true) {
+        const query = new URLSearchParams();
+        query.set("template-id", templateId.toString());
+        const templatePage = await this.registry.getByRel<PageApiObject>([["ui-template", "collection"]], query, ignoreCache);
+        if (templatePage?.data.collectionSize === 1) {
+            // only expect one template since IDs are unique
+            return await this.registry.getByApiLink<TemplateApiObject>(templatePage.data.items[0], null, false);
+        } else {
+            console.warn(`Template API returned an ambiguous response for template id ${templateId}`, templatePage);
+            return null;
+        }
+    }
+
+    async getTemplateTabGroups(templateId: string, ignoreCache: boolean | "ignore-embedded" = false) {
+        const templateResponse = await this.getTemplate(templateId, ignoreCache);
+        console.log(templateResponse)
+        return templateResponse?.data?.groups ?? [];
     }
 }
