@@ -76,19 +76,39 @@ export class GrowingListComponent implements OnInit, OnDestroy {
         })).subscribe();
 
         this.setupGrowingList();
+
+
+        this.newItemsSubscription = this.registry.newApiObjectSubject
+            .pipe(filter(newObject => this.newItemRels != null && matchesLinkRel(newObject.new, this.newItemRels)))
+            .subscribe(newObject => this.updateQueue.next(() => this.onNewObjectQueued(newObject.new)));
+        this.changedItemsSubscription = this.registry.changedApiObjectSubject
+            .pipe(filter(changedObject => {
+                const isInList = this.items.some(item => item.href === changedObject.changed.href);
+                const maybeNew = this.newItemRels != null && matchesLinkRel(changedObject.changed, this.newItemRels);
+                return isInList || maybeNew;
+            }))
+            .subscribe(changedObject => this.updateQueue.next(() => this.onChangedObjectQueued(changedObject.changed)));
+        this.deletedItemsSubscription = this.registry.deletedApiObjectSubject
+            .pipe(filter(deletedObject => this.items.some(item => item.href === deletedObject.deleted.href)))
+            .subscribe(deletedObject => this.updateQueue.next(() => this.onDeletedObjectQueued(deletedObject.deleted)));
     }
 
     ngOnDestroy(): void {
-        this.unsubscribeAll();
+        this.updateQueueSubscription?.unsubscribe();
+        this.newItemsSubscription?.unsubscribe();
+        this.changedItemsSubscription?.unsubscribe();
+        this.deletedItemsSubscription?.unsubscribe();
     }
 
     ngOnChanges(changes: SimpleChanges): void {
-        if (changes.apiLink?.previousValue || changes.rels?.previousValue || changes.query?.previousValue || changes.newItemRels?.previousValue) {
-            this.unsubscribeAll();
-            this.newItemsSubscription = null;
-            this.changedItemsSubscription = null;
-            this.deletedItemsSubscription = null;
-            this.updateQueueSubscription = null;
+        let linkChanged = false;
+        if (changes.apiLink) {
+            // only consider link changed when href changes
+            if (changes.apiLink?.previousValue?.href !== changes.apiLink?.currentValue?.href) {
+                linkChanged = true;
+            }
+        }
+        if (linkChanged || changes.rels?.previousValue || changes.query?.previousValue) {
             this.startApiLink = null;
             this.startQueryArgs = null;
             this.loadMoreApiLink = null;
@@ -100,13 +120,6 @@ export class GrowingListComponent implements OnInit, OnDestroy {
         }
     }
 
-    private unsubscribeAll(): void {
-        this.newItemsSubscription?.unsubscribe();
-        this.changedItemsSubscription?.unsubscribe();
-        this.deletedItemsSubscription?.unsubscribe();
-        this.updateQueueSubscription?.unsubscribe();
-    }
-
     private setupGrowingList() {
         if (this.apiLink != null) {
             this.replaceApiLink(this.apiLink);
@@ -116,24 +129,6 @@ export class GrowingListComponent implements OnInit, OnDestroy {
                 this.registry.resolveRecursiveRels(rels).then((apiLink) => this.replaceApiLink(apiLink));
             }
         }
-
-        // handle api updates
-        const newItemRels = this.newItemRels;
-        if (newItemRels) {
-            this.newItemsSubscription = this.registry.newApiObjectSubject
-                .pipe(filter(newObject => matchesLinkRel(newObject.new, newItemRels)))
-                .subscribe(newObject => this.updateQueue.next(() => this.onNewObjectQueued(newObject.new)));
-        }
-        this.changedItemsSubscription = this.registry.changedApiObjectSubject
-            .pipe(filter(changedObject => {
-                const isInList = this.items.some(item => item.href === changedObject.changed.href);
-                const maybeNew = newItemRels != null && matchesLinkRel(changedObject.changed, newItemRels);
-                return isInList || maybeNew;
-            }))
-            .subscribe(changedObject => this.updateQueue.next(() => this.onChangedObjectQueued(changedObject.changed)));
-        this.deletedItemsSubscription = this.registry.deletedApiObjectSubject
-            .pipe(filter(deletedObject => this.items.some(item => item.href === deletedObject.deleted.href)))
-            .subscribe(deletedObject => this.updateQueue.next(() => this.onDeletedObjectQueued(deletedObject.deleted)));
     }
 
     replaceApiLink(newApiLink: ApiLink): void {
