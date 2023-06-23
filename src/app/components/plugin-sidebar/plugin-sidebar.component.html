@@ -31,8 +31,14 @@
                     </h2>
                 </summary>
                 <mat-divider></mat-divider>
-                <button mat-button class="w-100 all-plugins-button" (click)="selectTemplate(null)">show all
-                    plugins</button>
+                <button mat-button class="w-100 all-plugins-button" (click)="selectTemplate(null)"
+                    *ngIf="defaultTemplate">
+                    use default template
+                </button>
+                <mat-divider *ngIf="defaultTemplate"></mat-divider>
+                <button mat-button class="w-100 all-plugins-button" (click)="selectTemplate(null, 'all-plugins')">
+                    show all plugins
+                </button>
                 <mat-divider></mat-divider>
                 <qhana-growing-list [rels]="['ui-template', 'collection']" [newItemRels]="['ui-template']"
                     [highlighted]="highlightedTemplates" [highlightByKey]="'uiTemplateId'"
@@ -49,21 +55,8 @@
         </div>
         <div class="template-tab-sidebar" [hidden]="activeArea != 'detail'">
             <mat-divider></mat-divider>
-            <ng-container *ngIf="workspaceTabsLink">
-                <h3 class="sidebar-header">Workspace Tabs</h3>
-                <qhana-growing-list [apiLink]="workspaceTabsLink" [deleteButton]="this.selectedTemplate ? true : false"
-                    [highlighted]="highlightedTemplateTabs" [highlightByKey]="'uiTemplateTabId'"
-                    (clickItem)="selectTab($event)" [newItemRels]="['ui-template-tab']"
-                    [newItemsFilter]="getTabFilter(workspaceTabsLink)"></qhana-growing-list>
-            </ng-container>
-            <ng-container *ngIf="experimentNavigationTabsLink">
-                <h3 class="sidebar-header">Experiment Navigation Tabs</h3>
-                <qhana-growing-list [apiLink]="experimentNavigationTabsLink"
-                    [deleteButton]="this.selectedTemplate ? true : false" [highlighted]="highlightedTemplateTabs"
-                    [highlightByKey]="'uiTemplateTabId'" (clickItem)="selectTab($event)"
-                    [newItemRels]="['ui-template-tab']"
-                    [newItemsFilter]="getTabFilter(experimentNavigationTabsLink)"></qhana-growing-list>
-            </ng-container>
+            <qhana-tab-group-list [templateId]="templateId" [selectedTab]="tabId"
+                (clickedOnTab)="selectTab($event)"></qhana-tab-group-list>
         </div>
         <details class="plugin-group" [open]="group.open" *ngFor="let group of pluginGroups"
             [hidden]="activeArea == 'detail' || activeArea == 'templates'">

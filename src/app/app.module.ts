@@ -82,6 +82,7 @@ import { ChangeUiTemplateComponent } from './dialogs/change-ui-template/change-u
 import { ReactiveFormsModule } from '@angular/forms';
 import { TemplateDetailsComponent } from './components-small/template-details/template-details.component';
 import { ExperimentWorkspaceDetailComponent } from './components/experiment-workspace-detail/experiment-workspace-detail.component';
+import { TabGroupListComponent } from './components/tab-group-list/tab-group-list.component';
 
 @NgModule({
     declarations: [
@@ -124,6 +125,7 @@ import { ExperimentWorkspaceDetailComponent } from './components/experiment-work
         TemplateDetailsComponent,
         ExperimentWorkspaceDetailComponent,
         ImportExperimentComponent,
+        TabGroupListComponent,
     ],
     imports: [
         BrowserModule,

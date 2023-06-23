@@ -1,0 +1,6 @@
+<ng-container *ngFor="let tabGroupLink of tabGroups; trackBy: trackByHref">
+    <h3 class="sidebar-header">{{getTabName(tabGroupLink, "Tab Group")}}</h3>
+    <qhana-growing-list class="tab-list" [apiLink]="tabGroupLink" [deleteButton]="true"
+        [highlighted]="highlightedTemplateTabs" [highlightByKey]="'uiTemplateTabId'" (clickItem)="selectTab($event)"
+        [newItemRels]="['ui-template-tab']" [newItemsFilter]="getTabFilter(tabGroupLink)"></qhana-growing-list>
+</ng-container>

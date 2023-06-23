@@ -40,8 +40,6 @@ export class PluginSidebarComponent implements OnInit, OnDestroy {
 
     highlightedPlugins: Set<string> = new Set();
 
-    highlightedTemplateTabs: Set<string> = new Set();
-
     defaultPluginGroups: PluginGroup[] = [];
 
     defaultTemplate: TemplateApiObject | null = null;
@@ -49,6 +47,7 @@ export class PluginSidebarComponent implements OnInit, OnDestroy {
     pluginGroups: PluginGroup[] = this.defaultPluginGroups;
 
     // route params
+    useDefaultTemplate: boolean = true;
     templateId: string | null = null;
     pluginId: string | null = null;
     tabId: string | null = null;
@@ -65,7 +64,12 @@ export class PluginSidebarComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.routeParamSubscription = this.route.queryParamMap.subscribe(params => {
-            this.templateId = params.get('template');
+            let templateId = params.get('template');
+            this.useDefaultTemplate = templateId !== "all-plugins";
+            if (templateId === "all-plugins") {
+                templateId = null;
+            }
+            this.templateId = templateId;
             this.pluginId = params.get('plugin');
             this.tabId = params.get('tab');
             if (this.templateId != null) {
@@ -79,12 +83,10 @@ export class PluginSidebarComponent implements OnInit, OnDestroy {
                 this.highlightedPlugins.clear();
             }
             if (this.tabId != null) {
-                this.highlightedTemplateTabs = new Set<string>([this.tabId]);
                 if (this.activeArea !== "detail") {
                     this.switchActiveArea("detail");
                 }
             } else {
-                this.highlightedTemplateTabs.clear();
                 if (this.activeArea === "detail") {
                     this.switchActiveArea("plugins");
                 }
@@ -108,7 +110,7 @@ export class PluginSidebarComponent implements OnInit, OnDestroy {
 
         this.templates.defaultTemplate.subscribe(template => {
             this.defaultTemplate = template;
-            if (this.templateId == null) {
+            if (this.templateId == null && this.useDefaultTemplate) {
                 this.switchActiveTemplateLink(template?.self ?? null);
             }
         });
@@ -210,11 +212,15 @@ export class PluginSidebarComponent implements OnInit, OnDestroy {
 
     private switchActiveTemplateLink(activeTemplate: ApiLink | null) {
         if (activeTemplate == null) {
-            this.selectedTemplate = null;
-            this.selectedTemplateName = "All Plugins";
-            this.activeArea = "plugins";
-            this.pluginGroups = this.defaultPluginGroups;
-            return;
+            if (this.useDefaultTemplate && this.defaultTemplate != null) {
+                activeTemplate = this.defaultTemplate.self;
+            } else {
+                this.selectedTemplate = null;
+                this.selectedTemplateName = "All Plugins";
+                this.activeArea = "plugins";
+                this.pluginGroups = this.defaultPluginGroups;
+                return;
+            }
         }
         const tabId = this.route.snapshot.queryParamMap.get('tab');
         this.selectedTemplate = activeTemplate;
@@ -332,10 +338,12 @@ export class PluginSidebarComponent implements OnInit, OnDestroy {
         }
     }
 
-    selectTemplate(templateLink: ApiLink | null) {
+    selectTemplate(templateLink: ApiLink | null, specialTemplateId: "all-plugins" | null = null) {
+        this.useDefaultTemplate = specialTemplateId == null;
+
         this.switchActiveTemplateLink(templateLink);
         if (templateLink == null) {
-            this.navigate(null, null, null);
+            this.navigate(specialTemplateId, null, null);
             return;
         }
         this.navigate(templateLink.resourceKey?.uiTemplateId ?? null, null, null);
