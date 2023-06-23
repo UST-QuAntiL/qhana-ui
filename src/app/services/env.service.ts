@@ -16,7 +16,7 @@
 
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
-import { ApiObject, isApiObject } from './api-data-types';
+import { ApiObject, isApiObject, isDeletedApiObject } from './api-data-types';
 import { PluginRegistryBaseService } from './registry.service';
 
 
@@ -51,15 +51,21 @@ export class EnvService {
 
     private lastMapStr: string | null = null;
     private urlMapSubject: BehaviorSubject<Map<RegExp, string> | null> = new BehaviorSubject<Map<RegExp, string> | null>(null);
+    private uiTemplateSubject: BehaviorSubject<string | null> = new BehaviorSubject<string | null>(null);
 
     public get urlMap(): Observable<Map<RegExp, string> | null> {
         return this.urlMapSubject.asObservable();
+    }
+
+    public get uiTemplateId(): Observable<string | null> {
+        return this.uiTemplateSubject.asObservable();
     }
 
     constructor(private registryService: PluginRegistryBaseService) {
         this.subscribe();
         // just kick off get, updates are handled by subscription setup above
         this.registryService.getByRel([["env", "collection"]], new URLSearchParams([["name", "UI_URL_MAP"]]), true);
+        this.registryService.getByRel([["env", "collection"]], new URLSearchParams([["name", "DEFAULT_UI_TEMPLATE"]]), true);
     }
 
     private unsubscribe() {
@@ -69,11 +75,19 @@ export class EnvService {
     private subscribe() {
         this.registrySubscription = this.registryService.apiObjectSubject.subscribe((apiObject => {
             if (apiObject.self.resourceType !== "env") {
-                return;  // only look at service api objects
+                return;  // only look at env api objects
             }
             if (isEnvApiObject(apiObject)) {
                 if (apiObject.name === "UI_URL_MAP") {
                     this.updateUrlMap(apiObject.value);
+                }
+                if (apiObject.name === "DEFAULT_UI_TEMPLATE") {
+                    this.uiTemplateSubject.next(apiObject.value);
+                }
+            }
+            if (isDeletedApiObject(apiObject)) {
+                if (apiObject.deleted.name === "DEFAULT_UI_TEMPLATE") {
+                    this.uiTemplateSubject.next(null);
                 }
             }
         }));
