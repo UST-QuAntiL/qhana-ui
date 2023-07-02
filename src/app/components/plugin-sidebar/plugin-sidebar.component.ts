@@ -128,9 +128,13 @@ export class PluginSidebarComponent implements OnInit, OnDestroy {
 
     private async handleNewTemplateTab(newTabLink: ApiLink) {
         if ((this.workspaceTabsLink == null || this.experimentNavigationTabsLink == null) && this.selectedTemplate != null) {
-            const templateResponse = await this.registry.getByApiLink<TemplateApiObject>(this.selectedTemplate, null, true);
-            const workspaceGroupLink = templateResponse?.data?.groups?.find(group => group.resourceKey?.["?group"] === "workspace");
-            const experimentNavigationGroupLink = templateResponse?.data?.groups?.find(group => group.resourceKey?.["?group"] === "experiment-navigation");
+            if (newTabLink.resourceKey?.uiTemplateId == null) {
+                console.warn("New tab has no uiTemplateId", newTabLink);
+                return;
+            }
+            const tabGroups = await this.templates.getTemplateTabGroups(newTabLink.resourceKey?.uiTemplateId);
+            const workspaceGroupLink = tabGroups.find(group => group.resourceKey?.["?group"] === "workspace");
+            const experimentNavigationGroupLink = tabGroups.find(group => group.resourceKey?.["?group"] === "experiment-navigation");
             this.workspaceTabsLink = workspaceGroupLink ?? null;
             this.experimentNavigationTabsLink = experimentNavigationGroupLink ?? null;
         }
@@ -230,12 +234,16 @@ export class PluginSidebarComponent implements OnInit, OnDestroy {
     }
 
     private async loadPluginTemplate(activeTemplate: ApiLink) {
+        if (activeTemplate.resourceKey?.uiTemplateId == null) {
+            console.warn("No template id found in template link", activeTemplate);
+            return;
+        }
         const pluginGroups: PluginGroup[] = [];
         this.pluginGroups = pluginGroups;
-        const templateResponse = await this.registry.getByApiLink<TemplateApiObject>(activeTemplate);
-        const workspaceGroupLink = templateResponse?.data?.groups?.find(group => group.resourceKey?.["?group"] === "workspace");
+        const tabGroups = await this.templates.getTemplateTabGroups(activeTemplate.resourceKey?.uiTemplateId);
+        const workspaceGroupLink = tabGroups.find(group => group.resourceKey?.["?group"] === "workspace");
         this.workspaceTabsLink = workspaceGroupLink ?? null;
-        const experimentNavigationGroupLink = templateResponse?.data?.groups?.find(group => group.resourceKey?.["?group"] === "experiment-navigation");
+        const experimentNavigationGroupLink = tabGroups.find(group => group.resourceKey?.["?group"] === "experiment-navigation");
         this.experimentNavigationTabsLink = experimentNavigationGroupLink ?? null;
         if (workspaceGroupLink == null) {
             return;

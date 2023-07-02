@@ -216,7 +216,6 @@ export class TemplatesService {
 
     async getTemplateTabGroups(templateId: string, ignoreCache: boolean | "ignore-embedded" = false) {
         const templateResponse = await this.getTemplate(templateId, ignoreCache);
-        console.log(templateResponse)
         return templateResponse?.data?.groups ?? [];
     }
 }
