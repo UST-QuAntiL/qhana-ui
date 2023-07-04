@@ -20,13 +20,13 @@ import { PluginRegistryBaseService } from 'src/app/services/registry.service';
 import { TemplatesService } from 'src/app/services/templates.service';
 
 
-const TAB_GROUP_SORT_KEYS: { [group: string]: number } = {
+export const TAB_GROUP_SORT_KEYS: { [group: string]: number } = {
     "DEFAULT": 10000,
     "workspace": 10,
     "experiment-navigation": 20,
 }
 
-const TAB_GROUP_NAME_OVERRIDES: { [group: string]: string } = {
+export const TAB_GROUP_NAME_OVERRIDES: { [group: string]: string } = {
     "workspace": "Workspace Tabs (Sidebar)",
     "experiment-navigation": "Experiment Navigation Tabs",
 }

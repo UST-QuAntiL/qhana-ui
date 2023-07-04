@@ -6,11 +6,13 @@ import { filter } from 'rxjs/operators';
 import { DeleteDialog } from 'src/app/dialogs/delete-dialog/delete-dialog.dialog';
 import { ApiLink, CollectionApiObject, PageApiObject } from 'src/app/services/api-data-types';
 import { PluginRegistryBaseService } from 'src/app/services/registry.service';
-import { TemplateTabApiObject } from 'src/app/services/templates.service';
+import { TemplateTabApiObject, TemplatesService } from 'src/app/services/templates.service';
 import { TemplateApiObject } from 'src/app/services/templates.service';
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { MatChipInputEvent } from '@angular/material/chips';
 import { Subscription } from 'rxjs';
+import { TAB_GROUP_NAME_OVERRIDES, TAB_GROUP_SORT_KEYS } from '../tab-group-list/tab-group-list.component';
+import { KeyValue } from '@angular/common';
 
 @Component({
     selector: 'qhana-experiment-workspace-detail',
@@ -53,7 +55,7 @@ export class ExperimentWorkspaceDetailComponent implements OnInit {
     private changedTabSubscription: Subscription | null = null;
     private routeParamSubscription: Subscription | null = null;
 
-    constructor(private route: ActivatedRoute, private router: Router, private registry: PluginRegistryBaseService, private fb: FormBuilder, private dialog: MatDialog) { }
+    constructor(private route: ActivatedRoute, private router: Router, private registry: PluginRegistryBaseService, private fb: FormBuilder, private dialog: MatDialog, private templates: TemplatesService) { }
 
     ngOnInit() {
         this.routeParamSubscription = this.route.queryParamMap.subscribe(async params => {
@@ -194,9 +196,8 @@ export class ExperimentWorkspaceDetailComponent implements OnInit {
             console.warn("Template not found");
             return;
         }
-        const template = await this.registry.getByApiLink<TemplateApiObject>(this.templateLink);
-        this.templateObject = template?.data ?? null;
-        const groupLinks = template?.data?.groups;
+        this.templateObject = (await this.templates.getTemplate(templateId))?.data ?? null;
+        const groupLinks = await this.templates.getTemplateTabGroups(templateId);
         if (groupLinks == null) {
             console.warn("No group links found");
             return;
@@ -329,5 +330,15 @@ export class ExperimentWorkspaceDetailComponent implements OnInit {
         }
 
         this.cancelEditTemplate();
+    }
+
+    getTabName(group: string): string {
+        return TAB_GROUP_NAME_OVERRIDES[group] ?? group;
+    }
+
+    tabOrder = (a: KeyValue<string, ApiLink[]>, b: KeyValue<string, ApiLink[]>): number => {
+        const aSortKey = TAB_GROUP_SORT_KEYS[a.key] ?? 0;
+        const bSortKey = TAB_GROUP_SORT_KEYS[b.key] ?? 0;
+        return aSortKey - bSortKey;
     }
 }

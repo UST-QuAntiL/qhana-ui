@@ -66,8 +66,10 @@
             <qhana-template-details [templateLink]="templateLink"></qhana-template-details>
         </mat-expansion-panel>
         <mat-divider></mat-divider>
-        <h3 mat-subheader *ngIf="templateTabLinks['workspace']?.length">Workspace Tabs</h3>
-        <mat-expansion-panel *ngFor="let tab of templateTabLinks['workspace']" [expanded]="tabId == tab.resourceKey?.uiTemplateTabId"
+
+        <ng-container *ngFor="let group of templateTabLinks | keyvalue: tabOrder">
+            <h3 mat-subheader>{{getTabName(group.key)}}</h3>
+            <mat-expansion-panel *ngFor="let tab of group.value" [expanded]="tabId == tab.resourceKey?.uiTemplateTabId"
             (afterExpand)="selectTab(tab.resourceKey?.uiTemplateTabId ?? 'null')" (closed)="deselectTab(tab.resourceKey?.uiTemplateTabId ?? null)" 
             [id]="'tab-' + tab.resourceKey?.uiTemplateTabId">
             <mat-expansion-panel-header>
@@ -80,20 +82,6 @@
             </mat-expansion-panel-header>
             <qhana-template-details [tabLink]="tab"></qhana-template-details>
         </mat-expansion-panel>
-        <mat-divider></mat-divider>
-        <h3 mat-subheader *ngIf="templateTabLinks['experiment-navigation']?.length">Experiment Navigation Tabs</h3>
-        <mat-expansion-panel *ngFor="let tab of templateTabLinks['experiment-navigation']" [expanded]="tabId == tab.resourceKey?.uiTemplateTabId"
-            (afterExpand)="selectTab(tab.resourceKey?.uiTemplateTabId ?? 'null')" (closed)="deselectTab(tab.resourceKey?.uiTemplateTabId ?? null)" 
-            [id]="'tab-' + tab.resourceKey?.uiTemplateTabId">
-            <mat-expansion-panel-header>
-                <mat-panel-title>
-                    {{tab.name}}
-                </mat-panel-title>
-                <mat-panel-description>
-                    {{templateTabObjects[tab.resourceKey?.uiTemplateTabId ?? '']?.description}}
-                </mat-panel-description>
-            </mat-expansion-panel-header>
-            <qhana-template-details [tabLink]="tab"></qhana-template-details>
-        </mat-expansion-panel>
+        </ng-container>
     </mat-accordion>
 </div>
