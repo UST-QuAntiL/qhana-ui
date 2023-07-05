@@ -11,7 +11,7 @@ import { TemplateApiObject } from 'src/app/services/templates.service';
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { MatChipInputEvent } from '@angular/material/chips';
 import { Subscription } from 'rxjs';
-import { TAB_GROUP_NAME_OVERRIDES, TAB_GROUP_SORT_KEYS } from '../tab-group-list/tab-group-list.component';
+import { TAB_GROUP_NAME_OVERRIDES, TAB_GROUP_SORT_KEYS } from 'src/app/components/tab-group-list/tab-group-list.component';
 import { KeyValue } from '@angular/common';
 
 @Component({
@@ -174,6 +174,9 @@ export class ExperimentWorkspaceDetailComponent implements OnInit {
                 if (group == null) {
                     console.warn("changed tab has no group", changedObject.changed);
                     return;
+                }
+                if (!Object.hasOwn(this.templateTabLinks, group)) {
+                    this.templateTabLinks[group] = [];
                 }
                 if (!this.templateTabLinks[group].includes(changedObject.changed)) {
                     for (const group in this.templateTabLinks) {

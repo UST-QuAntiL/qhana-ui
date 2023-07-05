@@ -29,6 +29,8 @@ import { TimelineStepComponent } from './components/timeline-step/timeline-step.
 const routes: Routes = [
     { path: '', component: ExperimentsPageComponent },
     { path: 'settings', component: SettingsPageComponent },
+    { path: 'extra/:templateTabId', component: PluginTabComponent },
+    { path: 'extra/:templateTabId/plugin/:pluginId', component: PluginTabComponent },
     { path: 'experiments', component: ExperimentsPageComponent },
     { path: 'experiments/:experimentId', redirectTo: "info" },
     { path: 'experiments/:experimentId/info', component: ExperimentComponent },

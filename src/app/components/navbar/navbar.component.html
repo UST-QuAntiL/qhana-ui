@@ -27,6 +27,13 @@
             {{tab.name}}
         </a>
     </ng-container>
+    <ng-container *ngIf="(currentExperiment|async) == null">
+        <a class="navigation-link" mat-button
+            [routerLink]="['extra', tab.resourceKey?.uiTemplateTabId]" [queryParams]="{template: templateId}"
+            routerLinkActive="active" *ngFor="let tab of extraTabs">
+            {{tab.name}}
+        </a>
+    </ng-container>
 
     <div class="toolbar-spacer"></div>
 

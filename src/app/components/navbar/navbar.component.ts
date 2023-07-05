@@ -102,7 +102,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
         this.experimentExtraTabsGroupLink = experimentNavGroup;
 
         const generalNavGroup = template.groups.find(group => group.resourceKey?.["?group"] === "navigation") ?? null;
-        const generalTabsLinkChanged = this.experimentExtraTabsGroupLink?.href !== experimentNavGroup?.href;
+        const generalTabsLinkChanged = this.generalExtraTabsGroupLink?.href !== generalNavGroup?.href;
         this.generalExtraTabsGroupLink = generalNavGroup;
 
         if (experimentTabsLinkChanged) {
@@ -152,11 +152,13 @@ export class NavbarComponent implements OnInit, OnDestroy {
     }
 
     private updateExtraTabs() {
-        if (this.experimentId != null) {
-            // only show experiment navigatio tabs if an experiment is active
-            this.extraTabs = this.experimentExtraTabs;
-        } else {
-            this.extraTabs = this.generalExtraTabs;
-        }
+        this.experimentId.subscribe(experimentId => {
+            if (experimentId != null) {
+                // only show experiment navigation tabs if an experiment is active
+                this.extraTabs = this.experimentExtraTabs;
+            } else {
+                this.extraTabs = this.generalExtraTabs;
+            }
+        });
     }
 }

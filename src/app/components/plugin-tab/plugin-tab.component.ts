@@ -63,7 +63,6 @@ export class PluginTabComponent implements OnInit, OnDestroy {
 
         if ((pluginsResponse?.data?.collectionSize ?? 0) < 25) {
             pluginsResponse?.data?.items?.forEach(pluginLink => plugins.push(pluginLink));
-            console.log(this.plugins)
             this.onPluginIdChanges(this.currentPluginId, true);
         }
     }
@@ -116,10 +115,11 @@ export class PluginTabComponent implements OnInit, OnDestroy {
         }
 
         if (navigate) {
+            const experimentPrefix = this.currentExperimentId != null ? ['/experiments', this.currentExperimentId] : [];
             if (pluginLink != null) {
-                this.router.navigate(['/experiments', this.currentExperimentId, 'extra', this.currentTabId, 'plugin', pluginLink.resourceKey?.pluginId], { queryParamsHandling: 'preserve' });
+                this.router.navigate([...experimentPrefix, 'extra', this.currentTabId, 'plugin', pluginLink.resourceKey?.pluginId], { queryParamsHandling: 'preserve' });
             } else {
-                this.router.navigate(['/experiments', this.currentExperimentId, 'extra', this.currentTabId], { queryParamsHandling: 'preserve' });
+                this.router.navigate([...experimentPrefix, 'extra', this.currentTabId], { queryParamsHandling: 'preserve' });
             }
         }
     }

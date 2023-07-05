@@ -3,6 +3,7 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { ApiLink, ApiResponse } from 'src/app/services/api-data-types';
 import { PluginRegistryBaseService } from 'src/app/services/registry.service';
 import { TemplateApiObject, TemplateTabApiObject } from 'src/app/services/templates.service';
+import { TAB_GROUP_NAME_OVERRIDES } from "src/app/components/tab-group-list/tab-group-list.component";
 
 export function isInSetValidator(validValues: any[]): Validators {
     return (control: FormControl): { [key: string]: any } | null => {
@@ -28,17 +29,12 @@ export class TemplateDetailsComponent implements OnInit {
     @Input() templateLink: ApiLink | null = null;
     @Input() tabLink: ApiLink | null = null;
 
-    locations: Location[] = [
-        { value: "workspace", description: "Workspace (appears in the plugin sidebar)" },
-        { value: "experiment-navigation", description: "Experiment Navigation (appears in the top navigation bar)" }
-    ];
-
     private initialValues = {
         name: "",
         description: "",
         sortKey: 0,
         filterString: "{}",
-        location: this.locations[0].value
+        location: TAB_GROUP_NAME_OVERRIDES["workspace"]
     };
 
     templateForm: FormGroup = this.fb.group({
@@ -46,7 +42,7 @@ export class TemplateDetailsComponent implements OnInit {
         description: this.initialValues.description,
         sortKey: this.initialValues.sortKey,
         filterString: [this.initialValues.filterString, Validators.minLength(2)], // TODO: validate using JSON schema
-        location: [this.initialValues.location, [Validators.required, isInSetValidator(this.locations.map(location => location.value))]]
+        location: [this.initialValues.location, [Validators.required, isInSetValidator(Object.keys(TAB_GROUP_NAME_OVERRIDES))]]
     });
 
     constructor(private registry: PluginRegistryBaseService, private fb: FormBuilder) { }
@@ -92,5 +88,9 @@ export class TemplateDetailsComponent implements OnInit {
                 this.templateForm.controls.name.setErrors(null);
             }
         }
+    }
+
+    getLocations(): { [group: string]: string } {
+        return TAB_GROUP_NAME_OVERRIDES;
     }
 }
