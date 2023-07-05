@@ -170,9 +170,23 @@ export class PluginSidebarComponent implements OnInit, OnDestroy {
                 const tabIndex = this.pluginGroups.findIndex(group => group.link.resourceKey?.['?template-tab'] === tabId);
                 this.pluginGroups[tabIndex] = { ...this.pluginGroups[tabIndex] };
                 const tabResponse = await this.registry.getByApiLink<TemplateTabApiObject>(changedObject.changed);
-                if (tabResponse) {
+                if (tabResponse == null) {
+                    console.warn("Could not load template tab", changedObject.changed);
+                    return;
+                }
+                if (tabIndex < 0) {
+                    this.pluginGroups.push({
+                        name: tabResponse.data.name,
+                        open: false,
+                        description: tabResponse.data.description,
+                        link: tabResponse.data.plugins,
+                    });
+                } else {
                     this.pluginGroups[tabIndex].name = tabResponse.data.name;
                     this.pluginGroups[tabIndex].description = tabResponse.data.description;
+                }
+                if (tabResponse.data.location !== 'workspace') {
+                    this.pluginGroups.splice(tabIndex, 1);
                 }
             });
 
