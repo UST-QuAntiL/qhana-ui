@@ -34,7 +34,6 @@ export class PluginSidebarComponent implements OnInit, OnDestroy {
     selectedTemplate: ApiLink | null = null;
     selectedTemplateName: string | "All Plugins" = "All Plugins";
     workspaceTabsLink: ApiLink | null = null;
-    experimentNavigationTabsLink: ApiLink | null = null;
 
     highlightedTemplates: Set<string> = new Set();
 
@@ -127,16 +126,14 @@ export class PluginSidebarComponent implements OnInit, OnDestroy {
     }
 
     private async handleNewTemplateTab(newTabLink: ApiLink) {
-        if ((this.workspaceTabsLink == null || this.experimentNavigationTabsLink == null) && this.selectedTemplate != null) {
+        if (this.workspaceTabsLink == null && this.selectedTemplate != null) {
             if (newTabLink.resourceKey?.uiTemplateId == null) {
                 console.warn("New tab has no uiTemplateId", newTabLink);
                 return;
             }
             const tabGroups = await this.templates.getTemplateTabGroups(newTabLink.resourceKey?.uiTemplateId);
             const workspaceGroupLink = tabGroups.find(group => group.resourceKey?.["?group"] === "workspace");
-            const experimentNavigationGroupLink = tabGroups.find(group => group.resourceKey?.["?group"] === "experiment-navigation");
             this.workspaceTabsLink = workspaceGroupLink ?? null;
-            this.experimentNavigationTabsLink = experimentNavigationGroupLink ?? null;
         }
         // add plugins to corresponding group
         const tabResponse = await this.registry.getByApiLink<TemplateTabApiObject>(newTabLink);
@@ -257,8 +254,6 @@ export class PluginSidebarComponent implements OnInit, OnDestroy {
         const tabGroups = await this.templates.getTemplateTabGroups(activeTemplate.resourceKey?.uiTemplateId);
         const workspaceGroupLink = tabGroups.find(group => group.resourceKey?.["?group"] === "workspace");
         this.workspaceTabsLink = workspaceGroupLink ?? null;
-        const experimentNavigationGroupLink = tabGroups.find(group => group.resourceKey?.["?group"] === "experiment-navigation");
-        this.experimentNavigationTabsLink = experimentNavigationGroupLink ?? null;
         if (workspaceGroupLink == null) {
             return;
         }
