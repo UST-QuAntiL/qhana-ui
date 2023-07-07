@@ -34,7 +34,7 @@ export class TemplateDetailsComponent implements OnInit {
         description: "",
         sortKey: 0,
         filterString: "{}",
-        location: TAB_GROUP_NAME_OVERRIDES["workspace"]
+        location: "workspace"
     };
 
     templateForm: FormGroup = this.fb.group({
