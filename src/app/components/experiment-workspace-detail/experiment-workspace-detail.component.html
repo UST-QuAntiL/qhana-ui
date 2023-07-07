@@ -67,7 +67,7 @@
         </mat-expansion-panel>
         <mat-divider></mat-divider>
 
-        <ng-container *ngFor="let group of templateTabLinks | keyvalue: tabOrder">
+        <ng-container *ngFor="let group of templateTabLinks | keyvalue:tabOrder; trackBy:trackByTabLink">
             <h3 mat-subheader>{{tabGroupNameOverrides[group.key] ?? group.key}}</h3>
             <mat-expansion-panel *ngFor="let tab of group.value" [expanded]="tabId == tab.resourceKey?.uiTemplateTabId"
             (afterExpand)="selectTab(tab.resourceKey?.uiTemplateTabId ?? 'null')" (closed)="deselectTab(tab.resourceKey?.uiTemplateTabId ?? null)" 

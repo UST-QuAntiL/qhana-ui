@@ -23,7 +23,7 @@ export class ExperimentWorkspaceDetailComponent implements OnInit {
 
     readonly separatorKeysCodes = [ENTER, COMMA] as const;
 
-    tabGroupNameOverrides = {...TAB_GROUP_NAME_OVERRIDES};
+    tabGroupNameOverrides = { ...TAB_GROUP_NAME_OVERRIDES };
 
     templateId: string | null = null;
     tabId: string | null = null;
@@ -342,4 +342,6 @@ export class ExperimentWorkspaceDetailComponent implements OnInit {
         const bSortKey = TAB_GROUP_SORT_KEYS[b.key] ?? 0;
         return aSortKey - bSortKey;
     }
+
+    trackByTabLink = (index: number, item: KeyValue<string, ApiLink[]>) => item.value.map(link => link.href).join(',');
 }
