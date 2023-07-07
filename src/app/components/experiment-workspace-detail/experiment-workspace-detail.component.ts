@@ -23,6 +23,8 @@ export class ExperimentWorkspaceDetailComponent implements OnInit {
 
     readonly separatorKeysCodes = [ENTER, COMMA] as const;
 
+    tabGroupNameOverrides = {...TAB_GROUP_NAME_OVERRIDES};
+
     templateId: string | null = null;
     tabId: string | null = null;
 
@@ -333,10 +335,6 @@ export class ExperimentWorkspaceDetailComponent implements OnInit {
         }
 
         this.cancelEditTemplate();
-    }
-
-    getTabName(group: string): string {
-        return TAB_GROUP_NAME_OVERRIDES[group] ?? group;
     }
 
     tabOrder = (a: KeyValue<string, ApiLink[]>, b: KeyValue<string, ApiLink[]>): number => {

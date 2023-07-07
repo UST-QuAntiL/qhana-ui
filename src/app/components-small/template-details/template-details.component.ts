@@ -29,6 +29,8 @@ export class TemplateDetailsComponent implements OnInit {
     @Input() templateLink: ApiLink | null = null;
     @Input() tabLink: ApiLink | null = null;
 
+    tabGroupNameOverrides = {...TAB_GROUP_NAME_OVERRIDES};
+
     private initialValues = {
         name: "",
         description: "",
@@ -88,9 +90,5 @@ export class TemplateDetailsComponent implements OnInit {
                 this.templateForm.controls.name.setErrors(null);
             }
         }
-    }
-
-    getLocations(): { [group: string]: string } {
-        return TAB_GROUP_NAME_OVERRIDES;
     }
 }

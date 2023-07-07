@@ -3,7 +3,7 @@
     <mat-form-field class="form-field">
         <mat-label>Location</mat-label>
         <mat-select formControlName="location">
-            <mat-option *ngFor="let location of getLocations() | keyvalue" [value]="location.key">
+            <mat-option *ngFor="let location of tabGroupNameOverrides | keyvalue" [value]="location.key">
                 {{location.value}}
             </mat-option>
         </mat-select>
