@@ -3,7 +3,7 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { ApiLink, ApiResponse } from 'src/app/services/api-data-types';
 import { PluginRegistryBaseService } from 'src/app/services/registry.service';
 import { TemplateApiObject, TemplateTabApiObject } from 'src/app/services/templates.service';
-import { TAB_GROUP_NAME_OVERRIDES } from "src/app/components/tab-group-list/tab-group-list.component";
+import { TAB_GROUP_NAME_OVERRIDES } from 'src/app/services/templates.service';
 
 export function isInSetValidator(validValues: any[]): Validators {
     return (control: FormControl): { [key: string]: any } | null => {

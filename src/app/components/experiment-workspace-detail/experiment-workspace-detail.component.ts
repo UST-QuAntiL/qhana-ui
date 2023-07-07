@@ -11,7 +11,7 @@ import { TemplateApiObject } from 'src/app/services/templates.service';
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { MatChipInputEvent } from '@angular/material/chips';
 import { Subscription } from 'rxjs';
-import { TAB_GROUP_NAME_OVERRIDES, TAB_GROUP_SORT_KEYS } from 'src/app/components/tab-group-list/tab-group-list.component';
+import { TAB_GROUP_NAME_OVERRIDES, TAB_GROUP_SORT_KEYS } from 'src/app/services/templates.service';
 import { KeyValue } from '@angular/common';
 
 @Component({

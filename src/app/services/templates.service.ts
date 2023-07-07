@@ -41,6 +41,19 @@ export interface TemplateTabApiObject extends ApiObject {  // TODO check fields
     plugins: ApiLink;
 }
 
+export const TAB_GROUP_SORT_KEYS: { [group: string]: number } = {
+    "DEFAULT": 10000,
+    "workspace": 10,
+    "experiment-navigation": 20,
+    "navigation": 30,
+}
+
+export const TAB_GROUP_NAME_OVERRIDES: { [group: string]: string } = {
+    "workspace": "Workspace Tabs (Sidebar)",
+    "experiment-navigation": "Experiment Navigation Tabs",
+    "navigation": "Navigation Tabs",
+}
+
 
 @Injectable({
     providedIn: 'root'

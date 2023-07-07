@@ -18,20 +18,7 @@ import { Subscription } from 'rxjs';
 import { ApiLink } from 'src/app/services/api-data-types';
 import { PluginRegistryBaseService } from 'src/app/services/registry.service';
 import { TemplatesService } from 'src/app/services/templates.service';
-
-
-export const TAB_GROUP_SORT_KEYS: { [group: string]: number } = {
-    "DEFAULT": 10000,
-    "workspace": 10,
-    "experiment-navigation": 20,
-    "navigation": 30,
-}
-
-export const TAB_GROUP_NAME_OVERRIDES: { [group: string]: string } = {
-    "workspace": "Workspace Tabs (Sidebar)",
-    "experiment-navigation": "Experiment Navigation Tabs",
-    "navigation": "Navigation Tabs",
-}
+import { TAB_GROUP_NAME_OVERRIDES, TAB_GROUP_SORT_KEYS } from 'src/app/services/templates.service';
 
 @Component({
     selector: 'qhana-tab-group-list',
