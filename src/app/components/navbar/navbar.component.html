@@ -23,14 +23,14 @@
         </a>
         <a class="navigation-link" mat-button
             [routerLink]="['/experiments', (experimentId|async), 'extra', tab.resourceKey?.uiTemplateTabId]" [queryParams]="{template: templateId}"
-            routerLinkActive="active" *ngFor="let tab of extraTabs">
+            routerLinkActive="active" *ngFor="let tab of experimentExtraTabs">
             {{tab.name}}
         </a>
     </ng-container>
     <ng-container *ngIf="(currentExperiment|async) == null">
         <a class="navigation-link" mat-button
             [routerLink]="['extra', tab.resourceKey?.uiTemplateTabId]" [queryParams]="{template: templateId}"
-            routerLinkActive="active" *ngFor="let tab of extraTabs">
+            routerLinkActive="active" *ngFor="let tab of generalExtraTabs">
             {{tab.name}}
         </a>
     </ng-container>

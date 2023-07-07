@@ -45,8 +45,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
     experimentExtraTabsGroupLink: ApiLink | null = null;
     experimentExtraTabs: ApiLink[] = [];
 
-    extraTabs: ApiLink[] = [];
-
     templateId: string | null = null;
     template: TemplateApiObject | null = null;
 
@@ -94,7 +92,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
     private async onTemplateChanges(template: TemplateApiObject | null) {
         if (template == null) {
-            this.extraTabs = [];
             return;
         }
         const experimentNavGroup = template.groups.find(group => group.resourceKey?.["?group"] === "experiment-navigation") ?? null;
@@ -118,7 +115,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
         if (groupLink == null) {
             this.experimentExtraTabs = [];
             this.experimentExtraTabsGroupLink = null;
-            this.updateExtraTabs();
             return;
         }
 
@@ -129,7 +125,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
         groupResponse?.data?.items?.forEach(tab => extraTabs.push(tab));
 
         this.experimentExtraTabs = extraTabs;
-        this.updateExtraTabs();
     }
 
     private async updateGeneralExtraTabGroup() {
@@ -137,7 +132,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
         if (groupLink == null) {
             this.generalExtraTabs = [];
             this.generalExtraTabsGroupLink = null;
-            this.updateExtraTabs();
             return;
         }
 
@@ -148,17 +142,5 @@ export class NavbarComponent implements OnInit, OnDestroy {
         groupResponse?.data?.items?.forEach(tab => extraTabs.push(tab));
 
         this.generalExtraTabs = extraTabs;
-        this.updateExtraTabs();
-    }
-
-    private updateExtraTabs() {
-        this.experimentId.subscribe(experimentId => {
-            if (experimentId != null) {
-                // only show experiment navigation tabs if an experiment is active
-                this.extraTabs = this.experimentExtraTabs;
-            } else {
-                this.extraTabs = this.generalExtraTabs;
-            }
-        });
     }
 }
