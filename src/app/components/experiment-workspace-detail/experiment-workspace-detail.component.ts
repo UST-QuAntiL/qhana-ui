@@ -343,5 +343,5 @@ export class ExperimentWorkspaceDetailComponent implements OnInit {
         return aSortKey - bSortKey;
     }
 
-    trackByTabLink = (index: number, item: KeyValue<string, ApiLink[]>) => item.value.map(link => link.href).join(',');
+    trackByTabLink = (index: number, item: KeyValue<string, ApiLink[]>) => item.key;
 }
