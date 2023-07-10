@@ -1,6 +1,5 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
-import { ApiLink } from 'src/app/services/api-data-types';
+import { ApiLink, ApiResponse } from 'src/app/services/api-data-types';
 import { PluginApiObject } from 'src/app/services/qhana-api-data-types';
 import { PluginRegistryBaseService } from 'src/app/services/registry.service';
 
@@ -39,15 +38,29 @@ export class PluginListItemComponent implements OnChanges {
             this.updateIsInSearch()
             return;
         }
+
+        // load available data from cache immediately
+        const cachePromise = await this.registry.getFromCacheByApiLink<PluginApiObject>(this.link);
+        const cacheResponse = await Promise.race([cachePromise, null]);
+        this.updatePluginDataFromApiResponse(cacheResponse);
+        this.updateIsInSearch();
+
+
+        // load fresh data from the API
         const pluginResponse = await this.registry.getByApiLink<PluginApiObject>(this.link);
 
-        this.plugin = pluginResponse?.data ?? null;
-        if (this.plugin != null) {
-            this.searchableString = `${this.plugin.identifier.toLowerCase()} ${this.plugin.title.toLowerCase()}${this.plugin.version} ${this.plugin.pluginType} ${this.plugin.tags.join(" ").toLowerCase()}`;
+        this.updatePluginDataFromApiResponse(pluginResponse);
+        this.updateIsInSearch();
+    }
+
+    private updatePluginDataFromApiResponse(pluginResponse: ApiResponse<PluginApiObject> | null) {
+        const plugin = pluginResponse?.data ?? null;
+        this.plugin = plugin;
+        if (plugin != null) {
+            this.searchableString = `${plugin.identifier.toLowerCase()} ${plugin.title.toLowerCase()}${plugin.version} ${plugin.pluginType} ${plugin.tags.join(" ").toLowerCase()}`;
         } else {
             this.searchableString = "";
         }
-        this.updateIsInSearch();
     }
 
     updateIsInSearch() {
