@@ -464,6 +464,23 @@ export class PluginRegistryBaseService {
         return await this.getByApiLink<T>(link, searchParams, ignoreCache);
     }
 
+    public async getFromCacheByApiLink<T>(link: ApiLink, searchParams: URLSearchParams | null = null, ignoreCache: false | "ignore-embedded" = false): Promise<ApiResponse<T> | null> {
+        const url = new URL(link.href)
+        searchParams?.forEach((value, key) => url.searchParams.append(key, value));
+        const request = new Request(url.toString(), { headers: { Accept: "application/json" } });
+        const response = await this._fetchCached(request, ignoreCache);
+        if (response != null) {
+            const responseData = await response.json();
+            if (request.url === responseData.data.self.href) {
+                // prevent stale/incorrect cache results
+                return responseData as ApiResponse<T>;
+            } else {
+                console.log("Wrong cached result!", request, responseData.data.self.href);
+            }
+        }
+        return null;
+    }
+
     public async getByApiLink<T>(link: ApiLink, searchParams: URLSearchParams | null = null, ignoreCache: boolean | "ignore-embedded" = false): Promise<ApiResponse<T> | null> {
         const url = new URL(link.href)
         searchParams?.forEach((value, key) => url.searchParams.append(key, value));
