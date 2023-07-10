@@ -91,7 +91,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
     }
 
     private onTemplateChanges(template: TemplateApiObject | null) {
-        console.log(template)
         if (template == null) {
             this.experimentExtraTabsGroupLink = null;
             this.generalExtraTabsGroupLink = null;
