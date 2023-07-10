@@ -90,8 +90,13 @@ export class NavbarComponent implements OnInit, OnDestroy {
         return this.downloadBadgeCounter?.subscribe();
     }
 
-    private async onTemplateChanges(template: TemplateApiObject | null) {
+    private onTemplateChanges(template: TemplateApiObject | null) {
+        console.log(template)
         if (template == null) {
+            this.experimentExtraTabsGroupLink = null;
+            this.generalExtraTabsGroupLink = null;
+            this.experimentExtraTabs = [];
+            this.generalExtraTabs = [];
             return;
         }
         const experimentNavGroup = template.groups.find(group => group.resourceKey?.["?group"] === "experiment-navigation") ?? null;
