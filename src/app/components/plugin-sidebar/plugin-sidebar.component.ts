@@ -19,6 +19,9 @@ export interface PluginGroup {
 }
 
 
+const ALL_PLUGINS_TEMPLATE_ID = "all-plugins";
+
+
 @Component({
     selector: 'qhana-plugin-sidebar',
     templateUrl: './plugin-sidebar.component.html',
@@ -57,6 +60,13 @@ export class PluginSidebarComponent implements OnInit, OnDestroy {
     private deletedTabSubscription: Subscription | null = null;
     private changedTemplateSubscription: Subscription | null = null;
 
+    get effectiveTemplateId(): string | null {
+        if (this.useDefaultTemplate) {
+            return ALL_PLUGINS_TEMPLATE_ID;
+        }
+        return this.templateId;
+    }
+
     @ViewChild('searchInput', { static: true }) searchInput: ElementRef<HTMLInputElement> | null = null;
 
     constructor(private route: ActivatedRoute, private router: Router, private templates: TemplatesService, private registry: PluginRegistryBaseService, private dialog: MatDialog) { }
@@ -64,8 +74,8 @@ export class PluginSidebarComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         this.routeParamSubscription = this.route.queryParamMap.subscribe(params => {
             let templateId = params.get('template');
-            this.useDefaultTemplate = templateId !== "all-plugins";
-            if (templateId === "all-plugins") {
+            this.useDefaultTemplate = templateId !== ALL_PLUGINS_TEMPLATE_ID;
+            if (templateId === ALL_PLUGINS_TEMPLATE_ID) {
                 templateId = null;
             }
             this.templateId = templateId;
@@ -316,9 +326,9 @@ export class PluginSidebarComponent implements OnInit, OnDestroy {
         }
 
         if (this.activeArea === 'detail' && newArea !== 'detail') {
-            this.navigate(this.templateId, this.pluginId, null);
+            this.navigate(this.effectiveTemplateId, this.pluginId, null);
         } else if (this.activeArea !== 'detail' && newArea === 'detail') {
-            this.navigate(this.templateId, null, this.tabId ?? 'new');
+            this.navigate(this.effectiveTemplateId, null, this.tabId ?? 'new');
         }
 
         this.sidebarOpen = true;
@@ -355,7 +365,7 @@ export class PluginSidebarComponent implements OnInit, OnDestroy {
         }
     }
 
-    selectTemplate(templateLink: ApiLink | null, specialTemplateId: "all-plugins" | null = null) {
+    selectTemplate(templateLink: ApiLink | null, specialTemplateId: (typeof ALL_PLUGINS_TEMPLATE_ID) | null = null) {
         this.useDefaultTemplate = specialTemplateId == null;
 
         this.switchActiveTemplateLink(templateLink);
@@ -373,7 +383,7 @@ export class PluginSidebarComponent implements OnInit, OnDestroy {
                 // double click deselects plugin
                 pluginId = null;
             }
-            this.navigate(this.templateId, pluginId, null);
+            this.navigate(this.effectiveTemplateId, pluginId, null);
         }
         this.activeArea = "plugins";
         this.sidebarOpen = pluginId == null; // always close sidebar after successfully selecting plugin
@@ -393,7 +403,7 @@ export class PluginSidebarComponent implements OnInit, OnDestroy {
                 console.warn("The template id in the given link does not match the selected template id!", tabLink);
             }
         }
-        this.navigate(templateId, null, tabId);
+        this.navigate(this.effectiveTemplateId, null, tabId);
     }
 
     async createTemplate() {
