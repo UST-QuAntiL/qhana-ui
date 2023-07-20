@@ -1,18 +1,16 @@
+import { COMMA, ENTER } from '@angular/cdk/keycodes';
+import { KeyValue } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MatChipInputEvent } from '@angular/material/chips';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { DeleteDialog } from 'src/app/dialogs/delete-dialog/delete-dialog.dialog';
 import { ApiLink, CollectionApiObject, PageApiObject } from 'src/app/services/api-data-types';
 import { PluginRegistryBaseService } from 'src/app/services/registry.service';
-import { TemplateTabApiObject, TemplatesService } from 'src/app/services/templates.service';
-import { TemplateApiObject } from 'src/app/services/templates.service';
-import { COMMA, ENTER } from '@angular/cdk/keycodes';
-import { MatChipInputEvent } from '@angular/material/chips';
-import { Subscription } from 'rxjs';
-import { TAB_GROUP_NAME_OVERRIDES, TAB_GROUP_SORT_KEYS } from 'src/app/services/templates.service';
-import { KeyValue } from '@angular/common';
+import { TAB_GROUP_NAME_OVERRIDES, TAB_GROUP_SORT_KEYS, TemplateApiObject, TemplateTabApiObject, TemplatesService } from 'src/app/services/templates.service';
 
 @Component({
     selector: 'qhana-experiment-workspace-detail',
@@ -25,6 +23,8 @@ export class ExperimentWorkspaceDetailComponent implements OnInit {
 
     tabGroupNameOverrides = { ...TAB_GROUP_NAME_OVERRIDES };
 
+    routeTemplateId: string | null = null;
+    defaultTemplateId: string | null = null;
     templateId: string | null = null;
     tabId: string | null = null;
 
@@ -56,17 +56,22 @@ export class ExperimentWorkspaceDetailComponent implements OnInit {
     private newTabSubscription: Subscription | null = null;
     private changedTabSubscription: Subscription | null = null;
     private routeParamSubscription: Subscription | null = null;
+    private defaultTemplateIdSubscription: Subscription | null = null;
 
     constructor(private route: ActivatedRoute, private router: Router, private registry: PluginRegistryBaseService, private fb: FormBuilder, private dialog: MatDialog, private templates: TemplatesService) { }
 
     ngOnInit() {
         this.routeParamSubscription = this.route.queryParamMap.subscribe(async params => {
-            const templateId = params.get('template');
-            const tabId = params.get('tab');
-
-            if (templateId && templateId !== this.templateId) {
-                this.updateTemplateId(templateId);
+            let templateId = params.get('template');
+            if (templateId === "all-plugins") {
+                // treat builtin template as default template for the workspace details
+                templateId = null;
             }
+            this.routeTemplateId = templateId;
+
+            this.updateTemplateId(templateId ?? this.defaultTemplateId);
+
+            const tabId = params.get('tab');
             if (tabId !== this.tabId) {
                 this.tabId = tabId;
                 for (const tabLinks of Object.values(this.templateTabLinks)) {
@@ -89,6 +94,7 @@ export class ExperimentWorkspaceDetailComponent implements OnInit {
         this.deletedTabSubscription?.unsubscribe();
         this.changedTabSubscription?.unsubscribe();
         this.routeParamSubscription?.unsubscribe();
+        this.defaultTemplateIdSubscription?.unsubscribe();
     }
 
     private sortTabs(group: string) {
@@ -100,6 +106,12 @@ export class ExperimentWorkspaceDetailComponent implements OnInit {
     }
 
     private registerObjectSubscriptions() {
+        this.defaultTemplateIdSubscription = this.templates.defaultTemplateId.subscribe(defaultTemplateId => {
+            this.defaultTemplateId = defaultTemplateId;
+
+            this.updateTemplateId(this.routeTemplateId ?? this.defaultTemplateId);
+        });
+
         // automatically deselect deleted template
         this.deletedTemplateSubscription = this.registry.deletedApiObjectSubject
             .pipe(filter(deletedObject => deletedObject.deleted.resourceType === "ui-template"))
@@ -190,7 +202,13 @@ export class ExperimentWorkspaceDetailComponent implements OnInit {
             });
     }
 
-    private async updateTemplateId(templateId: string) {
+    private async updateTemplateId(templateId: string | null) {
+        if (templateId == null) {
+            return; // no template selected
+        }
+        if (templateId === this.templateId) {
+            return; // template id did not change
+        }
         this.templateId = templateId;
         const query = new URLSearchParams();
         query.set("template-id", templateId);
@@ -242,7 +260,6 @@ export class ExperimentWorkspaceDetailComponent implements OnInit {
             relativeTo: this.route,
             preserveFragment: true,
             queryParams: {
-                template: this.templateId,
                 plugin: null,
                 tab: this.tabId,
             },
