@@ -48,6 +48,8 @@ export class PluginSidebarComponent implements OnInit, OnDestroy {
 
     pluginGroups: PluginGroup[] = this.defaultPluginGroups;
 
+    defaultTemplateId: string | null = null;
+
     // route params
     useExternalDefaultTemplate: boolean = true; // if true, use default templates from registry
     templateId: string | null = null;
@@ -59,8 +61,10 @@ export class PluginSidebarComponent implements OnInit, OnDestroy {
     private changedTabSubscription: Subscription | null = null;
     private deletedTabSubscription: Subscription | null = null;
     private changedTemplateSubscription: Subscription | null = null;
+    private defaultTemplateIdSubscription: Subscription | null = null;
+    private defaultTemplateSubscription: Subscription | null = null;
 
-    get effectiveTemplateId(): string | null {
+    get routeTemplateId(): string | null {
         if (!this.useExternalDefaultTemplate) {
             // use the builtin template if the external template id is null
             // and external default templates should not be used
@@ -121,7 +125,11 @@ export class PluginSidebarComponent implements OnInit, OnDestroy {
             });
         });
 
-        this.templates.defaultTemplate.subscribe(template => {
+        this.defaultTemplateIdSubscription = this.templates.defaultTemplateId.subscribe(defaultTemplateId => {
+            this.defaultTemplateId = defaultTemplateId;
+        });
+
+        this.defaultTemplateSubscription = this.templates.defaultTemplate.subscribe(template => {
             this.defaultTemplate = template;
             if (this.templateId == null && this.useExternalDefaultTemplate) {
                 this.switchActiveTemplateLink(template?.self ?? null);
@@ -137,6 +145,8 @@ export class PluginSidebarComponent implements OnInit, OnDestroy {
         this.changedTabSubscription?.unsubscribe();
         this.deletedTabSubscription?.unsubscribe();
         this.changedTemplateSubscription?.unsubscribe();
+        this.defaultTemplateIdSubscription?.unsubscribe();
+        this.defaultTemplateSubscription?.unsubscribe();
     }
 
     private async handleNewTemplateTab(newTabLink: ApiLink) {
@@ -336,9 +346,9 @@ export class PluginSidebarComponent implements OnInit, OnDestroy {
         }
 
         if (this.activeArea === 'detail' && newArea !== 'detail') {
-            this.navigate(this.effectiveTemplateId, this.pluginId, null);
+            this.navigate(this.routeTemplateId, this.pluginId, null);
         } else if (this.activeArea !== 'detail' && newArea === 'detail') {
-            this.navigate(this.effectiveTemplateId, null, this.tabId ?? 'new');
+            this.navigate(this.routeTemplateId, null, this.tabId ?? 'new');
         }
 
         this.sidebarOpen = true;
@@ -393,7 +403,7 @@ export class PluginSidebarComponent implements OnInit, OnDestroy {
                 // double click deselects plugin
                 pluginId = null;
             }
-            this.navigate(this.effectiveTemplateId, pluginId, null);
+            this.navigate(this.routeTemplateId, pluginId, null);
         }
         this.activeArea = "plugins";
         this.sidebarOpen = pluginId == null; // always close sidebar after successfully selecting plugin
@@ -408,12 +418,12 @@ export class PluginSidebarComponent implements OnInit, OnDestroy {
             if (tabLink.resourceKey?.uiTemplateTabId !== this.tabId) {
                 tabId = tabLink.resourceKey?.uiTemplateTabId ?? null;
             }
-            if (this.templateId !== templateId) {
+            if ((this.templateId ?? this.defaultTemplateId) !== templateId) {
                 this.templateId = templateId;
                 console.warn("The template id in the given link does not match the selected template id!", tabLink);
             }
         }
-        this.navigate(this.effectiveTemplateId, null, tabId);
+        this.navigate(this.routeTemplateId, null, tabId);
     }
 
     async createTemplate() {

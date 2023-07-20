@@ -55,7 +55,7 @@
         </div>
         <div class="template-tab-sidebar" [hidden]="activeArea != 'detail'">
             <mat-divider></mat-divider>
-            <qhana-tab-group-list [templateId]="templateId" [selectedTab]="tabId"
+            <qhana-tab-group-list [templateId]="templateId ?? defaultTemplateId" [selectedTab]="tabId"
                 (clickedOnTab)="selectTab($event)"></qhana-tab-group-list>
         </div>
         <details class="plugin-group" [open]="group.open" *ngFor="let group of pluginGroups"
