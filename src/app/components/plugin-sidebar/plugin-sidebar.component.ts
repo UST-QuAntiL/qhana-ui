@@ -66,7 +66,8 @@ export class PluginSidebarComponent implements OnInit, OnDestroy {
             // and external default templates should not be used
             return this.templateId ?? ALL_PLUGINS_TEMPLATE_ID;
         }
-        return this.templateId;
+        const defaultTemplateId = this.defaultTemplate?.self?.resourceKey?.uiTemplateId ?? null
+        return this.templateId ?? defaultTemplateId;
     }
 
     @ViewChild('searchInput', { static: true }) searchInput: ElementRef<HTMLInputElement> | null = null;

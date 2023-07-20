@@ -27,6 +27,7 @@ export class ExperimentWorkspaceDetailComponent implements OnInit {
 
     templateId: string | null = null;
     tabId: string | null = null;
+    defaultTemplateId: string | null = null;
 
     templateObject: TemplateApiObject | null = null;
     tabObject: TemplateTabApiObject | null = null;
@@ -57,11 +58,13 @@ export class ExperimentWorkspaceDetailComponent implements OnInit {
     private changedTabSubscription: Subscription | null = null;
     private routeParamSubscription: Subscription | null = null;
 
+    private defaultTemplateIdSubscription: Subscription | null = null;
+
     constructor(private route: ActivatedRoute, private router: Router, private registry: PluginRegistryBaseService, private fb: FormBuilder, private dialog: MatDialog, private templates: TemplatesService) { }
 
     ngOnInit() {
         this.routeParamSubscription = this.route.queryParamMap.subscribe(async params => {
-            const templateId = params.get('template');
+            const templateId = params.get('template') ?? this.defaultTemplateId;
             const tabId = params.get('tab');
 
             if (templateId && templateId !== this.templateId) {
@@ -89,6 +92,7 @@ export class ExperimentWorkspaceDetailComponent implements OnInit {
         this.deletedTabSubscription?.unsubscribe();
         this.changedTabSubscription?.unsubscribe();
         this.routeParamSubscription?.unsubscribe();
+        this.defaultTemplateIdSubscription?.unsubscribe();
     }
 
     private sortTabs(group: string) {
@@ -188,6 +192,13 @@ export class ExperimentWorkspaceDetailComponent implements OnInit {
                     this.sortTabs(group);
                 }
             });
+
+        this.defaultTemplateIdSubscription = this.templates.defaultTemplateId.subscribe(defaultTemplateId => {
+            this.defaultTemplateId = defaultTemplateId;
+            if (this.templateId == null && this.defaultTemplateId != null) {
+                this.updateTemplateId(this.defaultTemplateId);
+            }
+        });
     }
 
     private async updateTemplateId(templateId: string) {
