@@ -49,7 +49,7 @@ export class PluginSidebarComponent implements OnInit, OnDestroy {
     pluginGroups: PluginGroup[] = this.defaultPluginGroups;
 
     // route params
-    useDefaultTemplate: boolean = true;
+    useExternalDefaultTemplate: boolean = true; // if true, use default templates from registry
     templateId: string | null = null;
     pluginId: string | null = null;
     tabId: string | null = null;
@@ -61,8 +61,10 @@ export class PluginSidebarComponent implements OnInit, OnDestroy {
     private changedTemplateSubscription: Subscription | null = null;
 
     get effectiveTemplateId(): string | null {
-        if (this.useDefaultTemplate) {
-            return ALL_PLUGINS_TEMPLATE_ID;
+        if (!this.useExternalDefaultTemplate) {
+            // use the builtin template if the external template id is null
+            // and external default templates should not be used
+            return this.templateId ?? ALL_PLUGINS_TEMPLATE_ID;
         }
         return this.templateId;
     }
@@ -74,11 +76,13 @@ export class PluginSidebarComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         this.routeParamSubscription = this.route.queryParamMap.subscribe(params => {
             let templateId = params.get('template');
-            this.useDefaultTemplate = templateId !== ALL_PLUGINS_TEMPLATE_ID;
             if (templateId === ALL_PLUGINS_TEMPLATE_ID) {
+                this.useExternalDefaultTemplate = false;
                 templateId = null;
+            } else {
+                this.useExternalDefaultTemplate = true;
+                this.templateId = templateId;
             }
-            this.templateId = templateId;
             this.pluginId = params.get('plugin');
             this.tabId = params.get('tab');
             if (this.templateId != null) {
@@ -119,7 +123,7 @@ export class PluginSidebarComponent implements OnInit, OnDestroy {
 
         this.templates.defaultTemplate.subscribe(template => {
             this.defaultTemplate = template;
-            if (this.templateId == null && this.useDefaultTemplate) {
+            if (this.templateId == null && this.useExternalDefaultTemplate) {
                 this.switchActiveTemplateLink(template?.self ?? null);
             }
         });
@@ -237,7 +241,7 @@ export class PluginSidebarComponent implements OnInit, OnDestroy {
 
     private switchActiveTemplateLink(activeTemplate: ApiLink | null) {
         if (activeTemplate == null) {
-            if (this.useDefaultTemplate && this.defaultTemplate != null) {
+            if (this.useExternalDefaultTemplate && this.defaultTemplate != null) {
                 activeTemplate = this.defaultTemplate.self;
             } else {
                 this.selectedTemplate = null;
@@ -300,7 +304,13 @@ export class PluginSidebarComponent implements OnInit, OnDestroy {
     }
 
     private navigate(template: string | null = null, plugin: string | null = null, tab: string | null = null) {
-        this.templateId = template;
+        if (template === ALL_PLUGINS_TEMPLATE_ID) {
+            this.useExternalDefaultTemplate = false;
+            this.templateId = null;
+        } else {
+            this.useExternalDefaultTemplate = true;
+            this.templateId = template;
+        }
         this.pluginId = plugin;
         this.tabId = tab;
         this.router.navigate([], {
@@ -366,7 +376,7 @@ export class PluginSidebarComponent implements OnInit, OnDestroy {
     }
 
     selectTemplate(templateLink: ApiLink | null, specialTemplateId: (typeof ALL_PLUGINS_TEMPLATE_ID) | null = null) {
-        this.useDefaultTemplate = specialTemplateId == null;
+        this.useExternalDefaultTemplate = specialTemplateId == null;
 
         this.switchActiveTemplateLink(templateLink);
         if (templateLink == null) {
