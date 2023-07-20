@@ -48,9 +48,12 @@ export class NavbarComponent implements OnInit, OnDestroy {
     templateId: string | null = null;
     template: TemplateApiObject | null = null;
 
-    private defaultTemplateIdSubscription: Subscription | null = null;
-    private defaultTemplateSubscription: Subscription | null = null;
+    routeTemplateId: string | null = null;
+
+    private currentTemplateIdSubscription: Subscription | null = null;
+    private currentTemplateSubscription: Subscription | null = null;
     private templateTabUpdatesSubscription: Subscription | null = null;
+    private routeParamsSubscription: Subscription | null = null;
 
     constructor(private route: ActivatedRoute, private experiment: CurrentExperimentService, private templates: TemplatesService, private registry: PluginRegistryBaseService, private backend: QhanaBackendService, private downloadService: DownloadsService) {
         this.currentExperiment = this.experiment.experimentName;
@@ -64,14 +67,17 @@ export class NavbarComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
-        this.defaultTemplateIdSubscription?.unsubscribe();
-        this.defaultTemplateSubscription?.unsubscribe();
+        this.currentTemplateIdSubscription?.unsubscribe();
+        this.currentTemplateSubscription?.unsubscribe();
         this.templateTabUpdatesSubscription?.unsubscribe();
+        this.routeParamsSubscription?.unsubscribe();
     }
 
     private registerSubscriptions() {
-        this.defaultTemplateIdSubscription = this.templates.currentTemplateId.subscribe(templateId => this.templateId = templateId);
-        this.defaultTemplateSubscription = this.templates.currentTemplate.subscribe(template => {
+        this.routeParamsSubscription = this.route.queryParamMap.subscribe(params => this.routeTemplateId = params.get('template'));
+
+        this.currentTemplateIdSubscription = this.templates.currentTemplateId.subscribe(templateId => this.templateId = templateId);
+        this.currentTemplateSubscription = this.templates.currentTemplate.subscribe(template => {
             this.onTemplateChanges(template);
         });
         this.templateTabUpdatesSubscription = this.templates.currentTemplateTabsUpdates.subscribe(() => {

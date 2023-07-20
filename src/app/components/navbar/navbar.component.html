@@ -5,32 +5,32 @@
     </a>
 
     <ng-container *ngIf="(currentExperiment|async) != null">
-        <a class="navigation-link" mat-button [routerLink]="['/experiments', (experimentId|async), 'info']" [queryParams]="{template: templateId}"
-            routerLinkActive="active">
+        <a class="navigation-link" mat-button [routerLink]="['/experiments', (experimentId|async), 'info']"
+            [queryParams]="{template: routeTemplateId}" routerLinkActive="active">
             Info
         </a>
-        <a class="navigation-link" mat-button [routerLink]="['/experiments', (experimentId|async), 'workspace']" [queryParams]="{template: templateId}"
-            routerLinkActive="active">
+        <a class="navigation-link" mat-button [routerLink]="['/experiments', (experimentId|async), 'workspace']"
+            [queryParams]="{template: routeTemplateId}" routerLinkActive="active">
             Workspace
         </a>
-        <a class="navigation-link" mat-button [routerLink]="['/experiments', (experimentId|async), 'data']" [queryParams]="{template: templateId}"
-            routerLinkActive="active">
+        <a class="navigation-link" mat-button [routerLink]="['/experiments', (experimentId|async), 'data']"
+            [queryParams]="{template: routeTemplateId}" routerLinkActive="active">
             Data
         </a>
-        <a class="navigation-link" mat-button [routerLink]="['/experiments', (experimentId|async), 'timeline']" [queryParams]="{template: templateId}"
-            routerLinkActive="active">
+        <a class="navigation-link" mat-button [routerLink]="['/experiments', (experimentId|async), 'timeline']"
+            [queryParams]="{template: routeTemplateId}" routerLinkActive="active">
             Timeline
         </a>
         <a class="navigation-link" mat-button
-            [routerLink]="['/experiments', (experimentId|async), 'extra', tab.resourceKey?.uiTemplateTabId]" [queryParams]="{template: templateId}"
-            routerLinkActive="active" *ngFor="let tab of experimentExtraTabs">
+            [routerLink]="['/experiments', (experimentId|async), 'extra', tab.resourceKey?.uiTemplateTabId]"
+            [queryParams]="{template: routeTemplateId}" routerLinkActive="active"
+            *ngFor="let tab of experimentExtraTabs">
             {{tab.name}}
         </a>
     </ng-container>
     <ng-container *ngIf="(currentExperiment|async) == null">
-        <a class="navigation-link" mat-button
-            [routerLink]="['extra', tab.resourceKey?.uiTemplateTabId]" [queryParams]="{template: templateId}"
-            routerLinkActive="active" *ngFor="let tab of generalExtraTabs">
+        <a class="navigation-link" mat-button [routerLink]="['extra', tab.resourceKey?.uiTemplateTabId]"
+            [queryParams]="{template: routeTemplateId}" routerLinkActive="active" *ngFor="let tab of generalExtraTabs">
             {{tab.name}}
         </a>
     </ng-container>
