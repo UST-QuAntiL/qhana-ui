@@ -81,16 +81,19 @@
                     <dd>{{timelineStep.processorLocation}}</dd>
                 </div>
             </dl>
-            <details class="collapsible-item" [open]="timelineStep.status === 'PENDING'">
-                <summary class="summary-item">Result Log</summary>
-                {{timelineStep.resultLog}}
-            </details>
-            <details class="collapsible-item">
-                <summary class="summary-item">Parameters</summary>
-                <qhana-data-preview [data]="timelineStep"></qhana-data-preview>
-            </details>
         </mat-card-content>
     </mat-card>
+
+    <mat-expansion-panel class="result-log" [expanded]="timelineStep.status === 'PENDING'"
+        *ngIf="stepTabId === 'overview'">
+        <mat-expansion-panel-header>
+            <mat-panel-title>
+                Result Log
+            </mat-panel-title>
+        </mat-expansion-panel-header>
+        <pre>{{timelineStep.resultLog}}</pre>
+    </mat-expansion-panel>
+
     <div class="notes-title" *ngIf="stepTabId === 'overview' && timelineStep.status !== 'PENDING'">
         <h2>Notes</h2>
         <div class="notes-status" *ngIf="notesStatus === 'changed'">
@@ -112,10 +115,12 @@
             </mat-spinner>
         </mat-card-content>
     </mat-card>
-    <mat-card class="recommendation-card card" *ngIf="stepTabId === 'overview' && timelineStep.status !== 'PENDING' && pluginRecommendations.length != 0">
+    <mat-card class="recommendation-card card"
+        *ngIf="stepTabId === 'overview' && timelineStep.status !== 'PENDING' && pluginRecommendations.length != 0">
         <mat-card-title class="t-headline">Plugin Recommendations</mat-card-title>
         <mat-card-content>
-            <a *ngFor="let plugin of pluginRecommendations" [routerLink]="['/experiments', experimentId, 'workspace']" [queryParams]="{'plugin': plugin.resourceKey?.pluginId}">
+            <a *ngFor="let plugin of pluginRecommendations" [routerLink]="['/experiments', experimentId, 'workspace']"
+                [queryParams]="{'plugin': plugin.resourceKey?.pluginId}">
                 <qhana-plugin-list-item [link]="plugin"></qhana-plugin-list-item>
             </a>
         </mat-card-content>
@@ -126,7 +131,9 @@
         <qhana-preview-list [dataList]="timelineStep.outputData"></qhana-preview-list>
     </ng-container>
     <ng-container *ngIf="stepTabId === 'inputs' && timelineStep.inputData != null && timelineStep.inputData.length > 0">
-        <h2>Input</h2>
+        <h2>Parameters</h2>
+        <qhana-data-preview [data]="timelineStep"></qhana-data-preview>
+        <h2>Data Input</h2>
         <qhana-preview-list [dataList]="timelineStep.inputData"></qhana-preview-list>
     </ng-container>
 
