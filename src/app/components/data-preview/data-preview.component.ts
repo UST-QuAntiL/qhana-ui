@@ -1,6 +1,7 @@
 import { Component, Input, OnChanges } from '@angular/core';
 import { ApiLink, CollectionApiObject } from 'src/app/services/api-data-types';
 import { EnvService } from 'src/app/services/env.service';
+import { PluginApiObject } from 'src/app/services/qhana-api-data-types';
 import { ExperimentDataApiObject, QhanaBackendService, TimelineStepApiObject, TimelineSubStepApiObject } from 'src/app/services/qhana-backend.service';
 import { PluginRegistryBaseService } from 'src/app/services/registry.service';
 
@@ -20,6 +21,7 @@ interface InternalPreviewOption extends PreviewOption {
 interface PluginPreviewOption extends PreviewOption {
     type: "plugin";
     plugin: ApiLink;
+    inputsAvailable: boolean;
 }
 
 function isDataApiObject(input: ExperimentDataApiObject | TimelineStepApiObject | TimelineSubStepApiObject): input is ExperimentDataApiObject {
@@ -180,6 +182,9 @@ export class DataPreviewComponent implements OnChanges {
                 contentType: this.data.parametersContentType ?? "",
             };
         }
+        if (previewData?.url === this.previewData?.url && previewData?.dataType === this.previewData?.dataType && previewData?.contentType === this.previewData?.contentType) {
+            return; // prevent updates when nothing has changed
+        }
         this.previewData = previewData;
         this.updateData();
     }
@@ -223,7 +228,8 @@ export class DataPreviewComponent implements OnChanges {
             }
 
             this.registry.getByRel<CollectionApiObject>(["plugin", "collection"], query)
-                .then((response) => this.updatePluginPreviewOptions(response?.data?.items ?? []));
+                .then((response) => this.convertPluginLinksToPreviewOptions(response?.data?.items ?? []))
+                .then((pluginOptions) => this.updatePluginPreviewOptions(pluginOptions));
         } else {
             this.builtinPreviewOptions = [];
             this.pluginPreviewOptions = [];
@@ -232,20 +238,29 @@ export class DataPreviewComponent implements OnChanges {
         }
     }
 
-    private updatePluginPreviewOptions(pluginLinks: ApiLink[]) {
-
-        const pluginPreviewOptions: PluginPreviewOption[] = pluginLinks.map(pluginLink => {
-            return {
+    private convertPluginLinksToPreviewOptions = async (pluginLinks: ApiLink[]) => {
+        const promises = pluginLinks.map(async pluginLink => {
+            const plugin = await this.registry.getFromCacheByApiLink<PluginApiObject>(pluginLink);
+            const dataInputs = plugin?.data?.entryPoint?.dataInput ?? [];
+            const requiredInputs = dataInputs.filter(input => input.required);
+            const previewOption: PluginPreviewOption = {
                 type: 'plugin',
                 name: pluginLink.name ?? "Unknown",
-                plugin: pluginLink
-            }
+                plugin: pluginLink,
+                inputsAvailable: requiredInputs.length === 1,
+            };
+            return previewOption;
         });
+        return await Promise.all(promises);
+    }
 
+    private updatePluginPreviewOptions(pluginPreviewOptions: PluginPreviewOption[]) {
         this.pluginPreviewOptions = pluginPreviewOptions;
 
+        const matchingPreviews = pluginPreviewOptions.filter(preview => preview.inputsAvailable);
+
         if (this.chosenPreview == null || (this.chosenPreview.type == 'internal' && this.chosenPreview.specificity === 0)) {
-            this.chosenPreview = pluginPreviewOptions[0] ?? this.chosenPreview;
+            this.chosenPreview = matchingPreviews[0] ?? this.chosenPreview;
         }
     }
 
