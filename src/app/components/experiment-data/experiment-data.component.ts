@@ -82,7 +82,7 @@ export class ExperimentDataComponent implements OnInit, OnDestroy {
         this.error = null;
         const currentRequest = { page: page, itemCount: itemCount };
         this.currentPage = currentRequest;
-        this.experimentData = this.backend.getExperimentDataPage(this.experimentId, this.allVersions, this.searchValue, page, itemCount, this.sort).pipe(
+        this.experimentData = this.backend.getExperimentDataPage(this.experimentId, this.allVersions, this.searchValue, null, page, itemCount, this.sort).pipe(
             map(value => {
                 if (this.currentPage !== currentRequest) {
                     throw Error("Cancelled by other request.");

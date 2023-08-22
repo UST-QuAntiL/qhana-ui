@@ -404,10 +404,13 @@ export class QhanaBackendService {
             rootUrl => this.http.get<ExperimentImportPollObject>(`${rootUrl}/experiments/import/${importId}`, { responseType: "json" }));
     }
 
-    public getExperimentDataPage(experimentId: number | string, allVersions: boolean = true, search: string | null = null, page: number = 0, itemCount: number = 10, sort: number = 1): Observable<ApiObjectList<ExperimentDataApiObject>> {
+    public getExperimentDataPage(experimentId: number | string, allVersions: boolean = true, search: string | null = null, dataType: string | null = null, page: number = 0, itemCount: number = 10, sort: number = 1): Observable<ApiObjectList<ExperimentDataApiObject>> {
         let queryParams = new HttpParams().append("all-versions", allVersions);
         if (search) {
             queryParams = queryParams.append("search", search);
+        }
+        if (dataType) {
+            queryParams = queryParams.append("data-type", dataType);
         }
         queryParams = queryParams.append("page", page).append("item-count", itemCount).append("sort", sort);
         return this.callWithRootUrl<ApiObjectList<ExperimentDataApiObject>>(

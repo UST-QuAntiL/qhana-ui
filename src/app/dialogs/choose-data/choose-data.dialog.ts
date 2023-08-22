@@ -50,7 +50,7 @@ export class ChooseDataDialog implements OnInit {
             return;
         }
         this.currentPageSubscription?.unsubscribe(); // cancel ongoing request
-        this.currentPageSubscription = this.backend.getExperimentDataPage(this.experimentId, this.allVersions, this.searchValue, this.currentPage, this.pageSize, this.sort).subscribe((dataPage) => {
+        this.currentPageSubscription = this.backend.getExperimentDataPage(this.experimentId, this.allVersions, this.searchValue, this.data.acceptedDataType, this.currentPage, this.pageSize, this.sort).subscribe((dataPage) => {
             this.prepareDataPage(dataPage)
         });
     }

@@ -360,7 +360,7 @@ export class PluginUiframeComponent implements OnChanges, OnDestroy {
         if (this.experimentId == null) {
             return null;
         }
-        return this.backend.getExperimentDataPage(this.experimentId, true, null, num, this.itemsPerPage);
+        return this.backend.getExperimentDataPage(this.experimentId, true, null, null, num, this.itemsPerPage);
     }
 
     private handleMicroFrontendEvent(event: MessageEvent) {
