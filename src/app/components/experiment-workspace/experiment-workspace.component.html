@@ -42,7 +42,9 @@
                         </mat-card-content>
                     </mat-card>
                     <mat-card class="card no-padding">
-                        <qhana-plugin-uiframe [url]="frontendUrl" (formDataSubmit)="onPluginUiFormSubmit($event)">
+                        <qhana-plugin-uiframe [url]="frontendUrl" [plugin]="activePlugin.self"
+                            [context]="{experimentId: experimentId??undefined}"
+                            (formDataSubmit)="onPluginUiFormSubmit($event)">
                         </qhana-plugin-uiframe>
                     </mat-card>
                 </div>

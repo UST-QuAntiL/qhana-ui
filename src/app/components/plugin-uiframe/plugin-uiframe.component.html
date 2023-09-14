@@ -1,4 +1,18 @@
 <div class="microfrontend-container" [ngClass]="fullscreen ? 'fullscreen' : ''" [hidden]="frontendUrl === blank">
+    <div class="floating-buttons" [ngClass]="buttonsLeft ? 'left' : ''">
+        <button mat-icon-button (click)="buttonsLeft = !buttonsLeft">
+            <mat-icon *ngIf="buttonsLeft" inline="false" aria-hidden="true">chevron_right</mat-icon>
+            <mat-icon *ngIf="!buttonsLeft" inline="false" aria-hidden="true">chevron_left</mat-icon>
+        </button>
+        <mat-divider [vertical]="true"></mat-divider>
+        <button mat-icon-button (click)="autofillLatest()" [disabled]="autofillData == null">
+            <mat-icon inline="true" aria-hidden="true">rocket_launch</mat-icon>
+        </button>
+        <button mat-icon-button (click)="fullscreen=!fullscreen">
+            <mat-icon *ngIf="fullscreen" inline="false" aria-hidden="true">fullscreen_exit</mat-icon>
+            <mat-icon *ngIf="!fullscreen" inline="false" aria-hidden="true">fullscreen</mat-icon>
+        </button>
+    </div>
     <iframe seamless class="frontend-frame" [src]="frontendUrl" frameborder="0" scroll="no" [height]="frontendHeight"
         sandbox="allow-forms allow-scripts allow-same-origin" allow="fullscreen" #uiframe></iframe>
     <div class="ui-loading-blend" *ngIf="loading">

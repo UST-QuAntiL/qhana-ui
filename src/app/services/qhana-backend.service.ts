@@ -474,6 +474,12 @@ export class QhanaBackendService {
         );
     }
 
+    public getTimelineStepParameters(url: string): Observable<string> {
+        return this.callWithRootUrl<string>(
+            rootUrl => this.http.get(url, { responseType: "text" })
+        );
+    }
+
     public getTimelineStepNotes(experimentId: number | string, step: number | string): Observable<TimelineStepNotesApiObject> {
         return this.callWithRootUrl<TimelineStepNotesApiObject>(
             rootUrl => this.http.get<TimelineStepNotesApiObject>(`${rootUrl}/experiments/${experimentId}/timeline/${step}/notes`)

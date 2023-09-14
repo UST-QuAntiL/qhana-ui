@@ -26,12 +26,41 @@
     background-color: var(--background)
     color: var(--warn-text)
 
-.fullscreen
+.floating-buttons
+    display: none
     position: absolute
-    top: 0
-    left: 0
-    right: 0
-    min-height: 97%
+    height: 2.5rem
+    top: calc(-2.5rem - 3px)
+    right: 0.3rem
+    color: var(--text-card)
+    background-color: var(--background-card)
+    border: solid
+    border-width: 2px
+    border-radius: 2px
+    border-color: var(--border-color)
+    z-index: 2
+
+.floating-buttons.left
+    right: unset
+    left: 0.3rem
+
+.microfrontend-container:focus-within, .microfrontend-container:focus, .microfrontend-container:hover
+    .floating-buttons
+        display: flex
+
+.fullscreen
+    .floating-buttons
+        display: flex
+        top: 2px
+
+.fullscreen
+    position: fixed
+    top: 0px
+    left: 0px
+    right: 0px
+    bottom: 0px
+    background-color: var(--background)
+    z-index: 1
 
 .fsbutton
     position: absolute

@@ -3,10 +3,10 @@ import { MatDialog } from '@angular/material/dialog';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, of } from 'rxjs';
-import { concatAll, filter, map, mergeAll, toArray } from 'rxjs/operators';
+import { catchError, concatAll, filter, map, mergeAll, mergeMap, toArray } from 'rxjs/operators';
 import { ChooseDataDialog } from 'src/app/dialogs/choose-data/choose-data.dialog';
 import { ChoosePluginDialog } from 'src/app/dialogs/choose-plugin/choose-plugin.dialog';
-import { CollectionApiObject } from 'src/app/services/api-data-types';
+import { ApiLink, CollectionApiObject } from 'src/app/services/api-data-types';
 import { PluginApiObject } from 'src/app/services/qhana-api-data-types';
 import { ApiObjectList, ExperimentDataApiObject, QhanaBackendService } from 'src/app/services/qhana-backend.service';
 import { PluginRegistryBaseService } from 'src/app/services/registry.service';
@@ -18,6 +18,12 @@ export interface FormSubmitData {
     dataInputs: string[];
     submitUrl: string;
     resultUrl: string;
+}
+
+export interface PluginUiContext {
+    experimentId?: string | number;
+    stepId?: string | number;
+    data?: Array<{ downloadUrl: string, dataType: string, contentType: string }>;
 }
 
 function isFormSubmitData(data: any): data is FormSubmitData {
@@ -161,6 +167,9 @@ export class PluginUiframeComponent implements OnChanges, OnDestroy {
     @Input() url: string | null = null;
     @Output() formDataSubmit: EventEmitter<FormSubmitData> = new EventEmitter();
 
+    @Input() plugin: ApiLink | null = null;
+    @Input() context: PluginUiContext | null = null;
+
     blank: SafeResourceUrl;
 
     pluginOrigin: string | null = null;
@@ -171,10 +180,15 @@ export class PluginUiframeComponent implements OnChanges, OnDestroy {
     hasFullscreenMode: boolean = false;
     fullscreen: boolean = false;
 
+    buttonsLeft: boolean = false;
+
     loading: boolean = true;
     error: { code: number, status: string } | null = null;
 
+    autofillData: { value: string, encoding: string } | null = null;
+
     private dialogActive = false;
+
 
     listenerFunction = (event: MessageEvent) => this.handleMicroFrontendEvent(event);
 
@@ -202,11 +216,65 @@ export class PluginUiframeComponent implements OnChanges, OnDestroy {
             this.frontendHeight = 100;
             return;
         }
-        this.loading = true;
-        this.pluginOrigin = (new URL(url)).origin;
-        this.frontendHeight = 100;
-        this.frontendUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url);
-        this.hasFullscreenMode = false;
+        if (changes.url != null) {
+            this.loading = true;
+            this.pluginOrigin = (new URL(url)).origin;
+            this.frontendHeight = 100;
+            this.frontendUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+            this.hasFullscreenMode = false;
+        }
+        if (changes.plugin != null || changes.context != null) {
+            this.processContext();
+        }
+    }
+
+    async autofillLatest() {
+        if (this.autofillData != null) {
+            this.sendAutofillData(this.autofillData.value, this.autofillData.encoding);
+        }
+    }
+
+    private async processContext() {
+        if (this.plugin == null) {
+            this.autofillData = null;
+            return;
+        }
+        const plugin = (await this.registry.getByApiLink<PluginApiObject>(this.plugin))?.data ?? null;
+        if (plugin == null) {
+            this.autofillData = null;
+            return;
+        }
+        if (this.context?.experimentId != null) {
+            this.backend.getTimelineStepsPage(this.context.experimentId, { sort: -1, pluginName: plugin.identifier, version: plugin.version, itemCount: 1 }).pipe(
+                map(steps => {
+                    if (steps.items.length == 1) {
+                        const step = steps.items[0];
+                        return {
+                            parametersUrl: step.parameters,
+                            encoding: step.parametersContentType,
+                        };
+                    }
+                    return null;
+                }),
+                mergeMap(params => {
+                    if (params == null) {
+                        return of(null);
+                    }
+                    return this.backend.getTimelineStepParameters(params.parametersUrl).pipe(map(value => {
+                        return { value: value, encoding: params.encoding };
+                    }))
+                }),
+                catchError((err) => {
+                    console.log(err)
+                    return of(null);
+                }),
+            ).subscribe(result => {
+                this.autofillData = result;
+            });
+            return;
+        }
+        this.autofillData = null;
+        return;
     }
 
     private selectPlugin(request: PluginUrlRequest) {
@@ -297,6 +365,14 @@ export class PluginUiframeComponent implements OnChanges, OnDestroy {
                 });
             });
         }
+    }
+
+    private sendAutofillData(value: string, encoding: string) {
+        this.sendMessage({
+            type: "autofill-response",
+            value: value,
+            encoding: encoding,
+        });
     }
 
     private sendMessage(message: any) {
