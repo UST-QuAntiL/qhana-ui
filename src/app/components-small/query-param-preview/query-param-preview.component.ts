@@ -28,11 +28,11 @@ export class QueryParamPreviewComponent implements OnChanges {
                     let lastParam: string = "";
                     params.forEach((value, key) => {
                         if (key === lastParam) {
-                            mdString += `|   | ${value.replace("|", "\\|")} |\n`;
+                            mdString += `|   | ${value.replace(/\|/g, "\\|").replace(/\n/g, "&#10;")} |\n`;
                             return;
                         }
                         lastParam = key;
-                        mdString += `| ${key} | ${value.replace("|", "\\|")} |\n`;
+                        mdString += `| ${key} | ${value.replace(/\|/g, "\\|").replace(/\n/g, "&#10;")} |\n`;
                     });
                     this.content = mdString;
                 });
