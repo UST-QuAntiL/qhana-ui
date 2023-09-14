@@ -74,7 +74,17 @@
                 </div>
                 <div>
                     <dt>Processor</dt>
-                    <dd>{{timelineStep.processorName}} (version {{timelineStep.processorVersion}})</dd>
+                    <dd>
+                        <span *ngIf="stepProcessor == null || (stepProcessor|async) == null; else processorLink">
+                            {{timelineStep.processorName}} (version {{timelineStep.processorVersion}})
+                        </span>
+                        <ng-template #processorLink>
+                            <a [routerLink]="['/experiments', experimentId, 'workspace']"
+                                [queryParams]="{'plugin': stepProcessor|async}">
+                                {{timelineStep.processorName}} (version {{timelineStep.processorVersion}})
+                            </a>
+                        </ng-template>
+                    </dd>
                 </div>
                 <div>
                     <dt>Processor Location</dt>

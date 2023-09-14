@@ -1,8 +1,8 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { BehaviorSubject, from, Observable, of, Subject, Subscription, timer } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, Subscription, from, of, timer } from 'rxjs';
 import { catchError, concatMap, debounceTime, filter, mergeAll, mergeMap, take, throttleTime } from 'rxjs/operators';
-import { ApiLink, CollectionApiObject } from 'src/app/services/api-data-types';
+import { ApiLink, CollectionApiObject, PageApiObject } from 'src/app/services/api-data-types';
 import { CurrentExperimentService } from 'src/app/services/current-experiment.service';
 import { QhanaBackendService, TimelineStepApiObject, TimelineSubStepApiObject } from 'src/app/services/qhana-backend.service';
 import { PluginRegistryBaseService } from 'src/app/services/registry.service';
@@ -47,6 +47,7 @@ export class TimelineStepComponent implements OnInit, OnDestroy {
 
     timelineStep: TimelineStepApiObject | null = null;
     resultQuality: "UNKNOWN" | "NEUTRAL" | "GOOD" | "BAD" | "ERROR" | "UNUSABLE" = "UNKNOWN";
+    stepProcessor: Promise<string | null> | null = null;
     stepProgress: Progress | null = null;
     substeps: TimelineSubStepApiObject[] | null = null;
     stepNotes: string | null = null;
@@ -166,6 +167,7 @@ export class TimelineStepComponent implements OnInit, OnDestroy {
             }
             this.timelineStep = stepApiObject;
             this.resultQuality = stepApiObject.resultQuality;
+            this.stepProcessor = this.getStepProcessor(stepApiObject);
             this.stepProgress = this.getStepProgress(stepApiObject);
             this.substeps = stepApiObject.substeps ?? null;
             if (stepApiObject.end != null) {
@@ -179,6 +181,20 @@ export class TimelineStepComponent implements OnInit, OnDestroy {
             this.watching = "error";
         });
         this.stepSubscription = stepSubscription;
+    }
+
+    private async getStepProcessor(step: TimelineStepApiObject) {
+        const search = new URLSearchParams();
+        search.set("item-count", "1");
+        search.set("name", step.processorName);
+        search.set("version", step.processorVersion);
+        let page = await this.registry.getByRel<PageApiObject>("plugin", search);
+        if (page?.data.items) {
+            return page.data.items[0].resourceKey?.pluginId ?? null;
+        }
+        search.delete("version");
+        page = await this.registry.getByRel<PageApiObject>("plugin", search);
+        return page?.data.items[0].resourceKey?.pluginId ?? null;
     }
 
     private getStepProgress(step: TimelineStepApiObject): Progress | null {
