@@ -31,12 +31,15 @@
                     </h2>
                 </summary>
                 <mat-divider></mat-divider>
-                <button mat-button class="w-100 all-plugins-button" (click)="selectTemplate(null)"
-                    *ngIf="defaultTemplate">
+                <button mat-button
+                    class="w-100 builtin-template-button {{(templateId==null && useExternalDefaultTemplate) ? 'active' : ''}}"
+                    (click)="selectTemplate(null)" *ngIf="defaultTemplate">
                     use default template
                 </button>
                 <mat-divider *ngIf="defaultTemplate"></mat-divider>
-                <button mat-button class="w-100 all-plugins-button" (click)="selectTemplate(null, 'all-plugins')">
+                <button mat-button
+                    class="w-100 builtin-template-button {{(templateId==null && !useExternalDefaultTemplate) ? 'active' : ''}}"
+                    (click)="selectTemplate(null, 'all-plugins')">
                     show all plugins
                 </button>
                 <mat-divider></mat-divider>
@@ -44,7 +47,9 @@
                     [highlighted]="highlightedTemplates" [highlightByKey]="'uiTemplateId'"
                     (clickItem)="selectTemplate($event)"></qhana-growing-list>
                 <mat-divider></mat-divider>
-                <button mat-ripple class="sidebar-button w-100" (click)="createTemplate()">Create Template</button>
+                <button class="new-template-button" mat-stroked-button (click)="createTemplate()">
+                    Create Template
+                </button>
             </details>
             <mat-form-field class="full-width" color="primary"
                 [hidden]="activeArea == 'detail' || activeArea == 'templates'">

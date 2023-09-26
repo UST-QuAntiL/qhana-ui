@@ -37,10 +37,23 @@
     padding-inline: 1rem
     cursor: pointer
 
-.all-plugins-button
+.builtin-template-button
     min-height: 3rem
     display: inline-flex
     align-items: center
+    font-size: initial
+
+.builtin-template-button:hover, .builtin-template-button:focus, .builtin-template-button:active, .builtin-template-button.active
+    background-color: var(--primary-lighter)
+
+@media (prefers-color-scheme: dark)
+    .builtin-template-button:hover, .builtin-template-button:focus, .builtin-template-button:active, .builtin-template-button.active
+        background-color: var(--primary)
+
+.new-template-button
+    width: calc(100% - 1rem)
+    margin-inline: 0.5rem
+    margin-block-start: 1rem
 
 .plugin-group
     margin-block-end: 1rem
