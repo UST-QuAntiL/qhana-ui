@@ -1,11 +1,12 @@
-<div *ngIf="plugin!=null || link != null">
+<div ngClass="(plugin?.tags?.length ?? 0) === 0 ? 'single-line' : ''" *ngIf="plugin!=null || link != null">
     <span>
         <span *ngIf="plugin==null">{{link?.name}}</span>
         <span *ngIf="plugin!=null">{{plugin.title}} ({{plugin.version}})</span>
-        <qhana-plugin-last-used class="plugin-status" [plugin]="plugin" [color]="'accent'" [spinner]="16" *ngIf="plugin!=null">
+        <qhana-plugin-last-used class="plugin-status" [plugin]="plugin" [color]="'accent'" [spinner]="16"
+            *ngIf="plugin!=null">
         </qhana-plugin-last-used>
     </span>
-    <mat-chip-list class="tags">
+    <mat-chip-list class="tags" [hidden]="(plugin?.tags?.length ?? 0) === 0">
         <mat-chip class="tag" *ngFor="let tag of plugin?.tags ?? []">{{tag}}</mat-chip>
     </mat-chip-list>
 </div>
