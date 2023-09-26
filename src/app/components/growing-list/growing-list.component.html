@@ -1,9 +1,10 @@
 <ul class="list">
-    <ng-container [ngSwitch]="link.resourceType" *ngFor="let link of items; trackBy: trackBy">
+    <ng-container [ngSwitch]="link.resourceType" *ngFor="let link of items; index as index trackBy: trackBy">
 
         <li class="list-item {{isHighlighted(link) ? 'highlighted' : ''}}" *ngSwitchCase="'plugin'"
-            (click)="onItemClick(link)" [hidden]="!pluginItem.isInSearch">
-            <qhana-plugin-list-item class="default-content" [link]="link" [search]="normalizedSearch" #pluginItem>
+            (click)="onItemClick(link)" [hidden]="!(pluginItem.isInSearch|async)">
+            <qhana-plugin-list-item class="default-content" [link]="link" [search]="normalizedSearch"
+                (isInSearch)="itemsInSearch[index] = $event; onItemsInSearchChanged()" #pluginItem>
             </qhana-plugin-list-item>
         </li>
 

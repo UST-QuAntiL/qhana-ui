@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { ApiLink, ApiResponse } from 'src/app/services/api-data-types';
 import { PluginApiObject } from 'src/app/services/qhana-api-data-types';
 import { PluginRegistryBaseService } from 'src/app/services/registry.service';
@@ -13,7 +13,7 @@ export class PluginListItemComponent implements OnChanges {
     @Input() link: ApiLink | null = null;
     @Input() search: string | null = null;
 
-    isInSearch: boolean = false;
+    @Output() isInSearch: EventEmitter<boolean> = new EventEmitter(true);
 
     plugin: PluginApiObject | null = null;
 
@@ -87,7 +87,7 @@ export class PluginListItemComponent implements OnChanges {
      */
     deferredIsInSearchUpdate(value: boolean) {
         Promise.resolve().then(() => {
-            this.isInSearch = value;
+            this.isInSearch.emit(value);
         });
     }
 
