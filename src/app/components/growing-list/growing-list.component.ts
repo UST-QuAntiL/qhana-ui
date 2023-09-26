@@ -204,6 +204,9 @@ export class GrowingListComponent implements OnInit, OnDestroy {
     }
 
     loadMore() {
+        if (this.loadMoreClicked) {
+            return; // do not allow multiple parallel loadMore commands in queue
+        }
         this.loadMoreClicked = true;
         this.updateQueue.next(() => this.loadMoreQueued());
     }
