@@ -79,8 +79,8 @@
                 <mat-divider></mat-divider>
             </summary>
             <qhana-growing-list [apiLink]="group.link" [query]="group?.query ?? null" [search]="searchInput.value"
-                [highlighted]="highlightedPlugins" [highlightByKey]="'pluginId'" (clickItem)="selectPlugin($event)"
-                #pluginList></qhana-growing-list>
+                [autoloadOnSearch]="true" [highlighted]="highlightedPlugins" [highlightByKey]="'pluginId'"
+                (clickItem)="selectPlugin($event)" #pluginList></qhana-growing-list>
             <mat-divider></mat-divider>
         </details>
     </div>

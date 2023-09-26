@@ -28,6 +28,7 @@ export class GrowingListComponent implements OnInit, OnDestroy {
     @Input() set search(value: string | null) {
         this.normalizedSearch = value?.toLowerCase()?.trim() ?? null;
     }
+    @Input() autoloadOnSearch: boolean | number = false;
 
     normalizedSearch: string | null = null;
 
@@ -362,6 +363,13 @@ export class GrowingListComponent implements OnInit, OnDestroy {
             this.visibleItems.emit(itemsInSearch);
             this.visibleCollectionSize.emit(itemsInSearchCount);
         });
+        if (this.autoloadOnSearch !== false) {
+            const minItems = this.autoloadOnSearch === true ? 0 : this.autoloadOnSearch;
+            const underMinItems = itemsInSearchCount <= minItems;
+            if (underMinItems && this.loadMoreApiLink != null) {
+                this.loadMore();
+            }
+        }
     }
 
     onItemClick(link: ApiLink) {
