@@ -78,6 +78,7 @@ import { TabGroupListComponent } from './components/tab-group-list/tab-group-lis
 import { TimelineStepNavComponent } from './components/timeline-step-nav/timeline-step-nav.component';
 import { TimelineStepComponent } from './components/timeline-step/timeline-step.component';
 import { TimelineSubstepsComponent } from './components/timeline-substeps/timeline-substeps.component';
+import { UiTemplatesPageComponent } from './components/ui-templates-page/ui-templates-page.component';
 import { ChangeUiTemplateDialog } from './dialogs/change-ui-template/change-ui-template.dialog';
 import { ChooseDataDialog } from './dialogs/choose-data/choose-data.dialog';
 import { ChoosePluginDialog } from './dialogs/choose-plugin/choose-plugin.dialog';
@@ -132,6 +133,7 @@ import { MarkdownHelpDialog } from './dialogs/markdown-help/markdown-help.dialog
         PluginFilterEditorComponent,
         TabGroupListComponent,
         ChooseTemplateDialog,
+        UiTemplatesPageComponent,
     ],
     imports: [
         BrowserModule,

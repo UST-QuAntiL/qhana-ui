@@ -1,0 +1,19 @@
+<div class="templates-content">
+    <div class="sidebar color-scheme-card">
+        <h2 class="sidebar-header">Templates:</h2>
+        <button class="new-template-button" mat-stroked-button (click)="createTemplate()">
+            Create Template
+        </button>
+        <mat-divider></mat-divider>
+        <qhana-growing-list [rels]="['ui-template', 'collection']" [newItemRels]="['ui-template']"
+            [highlighted]="highlightedTemplates" [highlightByKey]="'uiTemplateId'"
+            (clickItem)="selectTemplate($event)"></qhana-growing-list>
+        <mat-divider></mat-divider>
+    </div>
+    <div class="content-container">
+        <div class="main-content">
+            <!--qhana-experiment-workspace-detail></qhana-experiment-workspace-detail-->
+            <div class="scroll-spacer"></div>
+        </div>
+    </div>
+</div>
