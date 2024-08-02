@@ -20,7 +20,7 @@
             <mat-icon>extension</mat-icon>
         </button>
     </div>
-    <div class="sidebar-expander color-scheme-card" [attr.data-open]="sidebarOpen ? 'yes' : 'no'">
+    <div class="sidebar-expander color-scheme-card scrollable" [attr.data-open]="sidebarOpen ? 'yes' : 'no'">
         <div class="expander-head">
             <details [open]="activeArea === 'templates'">
                 <summary class="no-decoration" (click)="toggleTemplateHeader($event)">
