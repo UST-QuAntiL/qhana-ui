@@ -98,8 +98,10 @@ export class TabGroupListComponent implements OnChanges, OnInit, OnDestroy {
         const tabGroups = await this.templates.getTemplateTabGroups(templateId, ignoreCache);
         tabGroups.sort((groupA, groupB) => {
             const defaultSort = TAB_GROUP_SORT_KEYS["DEFAULT"];
-            const a = TAB_GROUP_SORT_KEYS[groupA.resourceKey?.["?group"] ?? "DEFAULT"] ?? defaultSort;
-            const b = TAB_GROUP_SORT_KEYS[groupB.resourceKey?.["?group"] ?? "DEFAULT"] ?? defaultSort;
+            const groupStrA = groupA.resourceKey?.["?group"]?.split(".", 1)?.[0];
+            const groupStrB = groupB.resourceKey?.["?group"]?.split(".", 1)?.[0];
+            const a = TAB_GROUP_SORT_KEYS[groupStrA ?? "DEFAULT"] ?? defaultSort;
+            const b = TAB_GROUP_SORT_KEYS[groupStrB ?? "DEFAULT"] ?? defaultSort;
             if (a !== b) {
                 return a - b;
             }

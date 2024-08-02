@@ -33,7 +33,7 @@ export class ExperimentWorkspaceDetailComponent implements OnInit {
 
     templateLink: ApiLink | null = null;
     tabLink: ApiLink | null = null;
-    templateTabLinks: { [group: string]: ApiLink[] } = {};
+    templateTabLinks: Array<{ group: string, name: string, tabs: ApiLink[] }> = [];
 
     templateTabObjects: { [id: string]: TemplateTabApiObject } = {};
 
@@ -74,14 +74,13 @@ export class ExperimentWorkspaceDetailComponent implements OnInit {
             const tabId = params.get('tab');
             if (tabId !== this.tabId) {
                 this.tabId = tabId;
-                for (const tabLinks of Object.values(this.templateTabLinks)) {
-                    const tabLink = tabLinks.find(link => link.resourceKey?.uiTemplateTabId === tabId);
+                this.templateTabLinks.forEach(group => {
+                    const tabLink = group.tabs.find(link => link.resourceKey?.uiTemplateTabId === tabId);
                     if (tabLink != null) {
                         this.tabLink = tabLink;
                         this.updateTabId();
-                        break;
                     }
-                }
+                });
             }
         });
         this.registerObjectSubscriptions();
@@ -97,8 +96,8 @@ export class ExperimentWorkspaceDetailComponent implements OnInit {
         this.defaultTemplateIdSubscription?.unsubscribe();
     }
 
-    private sortTabs(group: string) {
-        this.templateTabLinks[group].sort((a, b) => {
+    private sortTabs(tabs: ApiLink[]) {
+        return tabs.sort((a, b) => {
             const aSort = this.templateTabObjects[a.resourceKey?.uiTemplateTabId ?? ""]?.sortKey ?? 0;
             const bSort = this.templateTabObjects[b.resourceKey?.uiTemplateTabId ?? ""]?.sortKey ?? 0;
             return aSort - bSort;
@@ -132,9 +131,12 @@ export class ExperimentWorkspaceDetailComponent implements OnInit {
                 }
                 if (deletedObject.deleted.resourceKey?.uiTemplateTabId && Object.hasOwn(this.templateTabObjects, deletedObject.deleted.resourceKey?.uiTemplateTabId)) {
                     delete this.templateTabObjects[deletedObject.deleted.resourceKey?.uiTemplateTabId];
-                    for (const group in this.templateTabLinks) {
-                        this.templateTabLinks[group] = this.templateTabLinks[group].filter(link => link.href !== deletedObject.deleted.href);
-                    }
+                    this.templateTabLinks = this.templateTabLinks.map(group => {
+                        return {
+                            ...group,
+                            tabs: group.tabs.filter(link => link.href !== deletedObject.deleted.href),
+                        };
+                    });
                 }
             });
 
@@ -155,11 +157,16 @@ export class ExperimentWorkspaceDetailComponent implements OnInit {
                         return;
                     }
                     this.templateTabObjects[tabId] = tab?.data;
-                    if (this.templateTabLinks[group] == null) {
-                        this.templateTabLinks[group] = [];
+                    let tabGroup = this.templateTabLinks.find(g => g.group === group);
+                    if (tabGroup == null) {
+                        tabGroup = {
+                            group: group,
+                            name: group,
+                            tabs: [],
+                        };
                     }
-                    this.templateTabLinks[group].push(newObject.new);
-                    this.sortTabs(group);
+                    tabGroup.tabs.push(newObject.new);
+                    tabGroup.tabs = this.sortTabs(tabGroup.tabs);
                 }
             });
 
@@ -189,15 +196,20 @@ export class ExperimentWorkspaceDetailComponent implements OnInit {
                     console.warn("changed tab has no group", changedObject.changed);
                     return;
                 }
-                if (!Object.hasOwn(this.templateTabLinks, group)) {
-                    this.templateTabLinks[group] = [];
+                let tabGroup = this.templateTabLinks.find(g => g.group === group);
+                if (tabGroup == null) {
+                    tabGroup = {
+                        group: group,
+                        name: group,
+                        tabs: [],
+                    };
                 }
-                if (!this.templateTabLinks[group].includes(changedObject.changed)) {
+                if (!tabGroup.tabs.includes(changedObject.changed)) {
                     for (const group in this.templateTabLinks) {
-                        this.templateTabLinks[group] = this.templateTabLinks[group].filter(link => link.href !== changedObject.changed.href);
+                        tabGroup.tabs = tabGroup.tabs.filter(link => link.href !== changedObject.changed.href);
                     }
-                    this.templateTabLinks[group].push(changedObject.changed);
-                    this.sortTabs(group);
+                    tabGroup.tabs.push(changedObject.changed);
+                    this.sortTabs(tabGroup.tabs);
                 }
             });
     }
@@ -240,7 +252,11 @@ export class ExperimentWorkspaceDetailComponent implements OnInit {
                     this.templateTabObjects[tabLink.resourceKey.uiTemplateTabId] = tab?.data;
                 }
             });
-            this.templateTabLinks[group] = tabLinks;
+            this.templateTabLinks.push({
+                group: group,
+                name: groupLink.name ?? group,
+                tabs: tabLinks,
+            });
         }
     }
 
@@ -355,10 +371,12 @@ export class ExperimentWorkspaceDetailComponent implements OnInit {
     }
 
     tabOrder = (a: KeyValue<string, ApiLink[]>, b: KeyValue<string, ApiLink[]>): number => {
-        const aSortKey = TAB_GROUP_SORT_KEYS[a.key] ?? 0;
-        const bSortKey = TAB_GROUP_SORT_KEYS[b.key] ?? 0;
+        const aGroupBase = a.key.split(".", 1)[0];
+        const bGroupBase = b.key.split(".", 1)[0];
+        const aSortKey = TAB_GROUP_SORT_KEYS[aGroupBase] ?? 0;
+        const bSortKey = TAB_GROUP_SORT_KEYS[bGroupBase] ?? 0;
         return aSortKey - bSortKey;
     }
 
-    trackByTabLink = (index: number, item: KeyValue<string, ApiLink[]>) => item.key;
+    trackByTabLink = (index: number, group: { group: string }) => group.group;
 }
