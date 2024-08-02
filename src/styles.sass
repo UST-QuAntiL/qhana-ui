@@ -21,6 +21,8 @@ $my-dark-theme: mat.define-dark-theme((color: (primary: $my-primary,accent: $my-
     --background: #{mat.get-color-from-palette(mat.$light-theme-background-palette, 'background')}
     --background-card: #ddd
     --border-color: #aaa
+    --scroll-background: #{mat.get-color-from-palette(mat.$light-theme-background-palette, 'card')}
+    --scroll-color: #888
     --text: #{mat.get-color-from-palette(mat.$light-theme-foreground-palette, 'text')}
     --text-inv: #{mat.get-color-from-palette(mat.$dark-theme-foreground-palette, 'text')}
     --text-washed: #{mat.get-color-from-palette(mat.$light-theme-foreground-palette, 'secondary-text')}
@@ -54,6 +56,8 @@ $my-dark-theme: mat.define-dark-theme((color: (primary: $my-primary,accent: $my-
     --background: #{mat.get-color-from-palette(mat.$light-theme-background-palette, 'card')}
     --background-card: #bbb
     --border-color: #ddd
+    --scroll-background: #bbb
+    --scroll-color: #{mat.get-color-from-palette(mat.$light-theme-background-palette, 'card')}
 
 .mat-mdc-dialog, .color-scheme-dialog
     --background: #{mat.get-color-from-palette(mat.$light-theme-background-palette, 'dialog')}
@@ -70,6 +74,8 @@ $my-dark-theme: mat.define-dark-theme((color: (primary: $my-primary,accent: $my-
         --background: #{mat.get-color-from-palette(mat.$dark-theme-background-palette, 'background')}
         --background-card: #777
         --border-color: #555
+        --scroll-background: #555
+        --scroll-color: #888
         --text: #{mat.get-color-from-palette(mat.$dark-theme-foreground-palette, 'text')}
         --text-inv: #{mat.get-color-from-palette(mat.$light-theme-foreground-palette, 'text')}
         --text-washed: #{mat.get-color-from-palette(mat.$dark-theme-foreground-palette, 'secondary-text')}
@@ -103,6 +109,8 @@ $my-dark-theme: mat.define-dark-theme((color: (primary: $my-primary,accent: $my-
         --background: #{mat.get-color-from-palette(mat.$dark-theme-background-palette, 'card')}
         --background-card: #{mat.get-color-from-palette(mat.$dark-theme-background-palette, 'background')}
         --border-color: #888
+        --scroll-background: #{mat.get-color-from-palette(mat.$dark-theme-background-palette, 'background')}
+        --scroll-color: #888
         --text-primary: #{mat.get-color-from-palette($my-primary, 'card-contrast')}
         --text-primary-lighter: var(--text-inv, black)
         --text-primary-darker: var(--text-primary)
@@ -111,6 +119,8 @@ $my-dark-theme: mat.define-dark-theme((color: (primary: $my-primary,accent: $my-
 
     .mat-mdc-dialog, .color-scheme-dialog
         --background: #{mat.get-color-from-palette(mat.$dark-theme-background-palette, 'dialog')}
+        --scroll-background: #{mat.get-color-from-palette(mat.$dark-theme-background-palette, 'background')}
+        --scroll-color: #{mat.get-color-from-palette(mat.$dark-theme-background-palette, 'dialog')}
         --text-primary: #{mat.get-color-from-palette($my-primary, 'dialog-contrast')}
         --text-primary-lighter: var(--text-inv, black)
         --text-primary-darker: var(--text-primary)
@@ -235,6 +245,9 @@ a:hover, a:visited
 ////////////////////////////////////////////////////////////////////////////////
 // top level classes applying to all components ////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+
+.scrollable
+    scrollbar-color: var(--scroll-color) var(--scroll-background)
 
 .big-content
     // max width for readability
