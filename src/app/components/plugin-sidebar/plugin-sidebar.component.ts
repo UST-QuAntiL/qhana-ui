@@ -188,6 +188,7 @@ export class PluginSidebarComponent implements OnInit, OnDestroy {
                 name: tabResponse.data.name,
                 key: tabResponse.data.self.href,
                 open: false,
+                icon: tabResponse.data.icon,
                 description: tabResponse.data.description,
                 link: tabResponse.data.plugins,
             });
@@ -224,11 +225,13 @@ export class PluginSidebarComponent implements OnInit, OnDestroy {
                         key: tabResponse.data.self.href,
                         open: false,
                         description: tabResponse.data.description,
+                        icon: tabResponse.data.icon,
                         link: tabResponse.data.plugins,
                     });
                 } else {
                     this.pluginGroups[tabIndex].name = tabResponse.data.name;
                     this.pluginGroups[tabIndex].description = tabResponse.data.description;
+                    this.pluginGroups[tabIndex].icon = tabResponse.data.icon;
                 }
                 if (tabResponse.data.location !== 'workspace') {
                     this.pluginGroups.splice(tabIndex, 1);
@@ -319,6 +322,7 @@ export class PluginSidebarComponent implements OnInit, OnDestroy {
                 key: tab.data.self.href,
                 open: true,
                 description: tab.data.description,
+                icon: tab.data.icon,
                 link: tab.data.plugins,
             });
         });
