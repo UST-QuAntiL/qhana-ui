@@ -1,10 +1,60 @@
 .big-nav-tabs
-    border-color: var(--border-color)
+    --mdc-tab-indicator-active-indicator-color: var(--primary-text)
+    --mat-tab-header-active-label-text-color: var(--primary-text)
+    --mat-tab-header-active-ripple-color: var(--primary-text)
+    --mat-tab-header-inactive-ripple-color: var(--primary-text)
+    --mat-tab-header-active-focus-label-text-color: var(--primary-text)
+    --mat-tab-header-active-hover-label-text-color: var(--primary-text)
+    --mat-tab-header-active-focus-indicator-color: var(--primary-text)
+    --mat-tab-header-active-hover-indicator-color: var(--primary-text)
+    border-block-end: 1px solid var(--border-color)
 
 .big-nav-tabs a
     color: var(--text)
 
+.link-label
+    display: inline-flex
+    align-items: center
+    gap: 0.3rem
+
+.main-content
+    display: flex
+    flex-direction: row
+    width: 100%
+
+.sidebar
+    position: sticky
+    top: 1rem
+    margin-block: 1rem
+    margin-inline: 1rem
+    min-width: 15rem
+    width: 25vw
+    max-width: 22rem
+    max-height: calc( 100vh - 2rem )
+
+.sidebar-header
+    padding-block: 1rem
+    height: 2rem
+
+.sidebar-content-wrapper
+    margin-inline: -16px
+    margin-block-end: -16px
+    height: calc(100% - 4rem)
+
+.sidebar-content
+    display: block
+    box-sizing: border-box
+    padding-inline: 16px
+    padding-block-end: 1rem
+    height: 100%
+    overflow-y: auto
+    scrollbar-width: thin
+
+.sidebar-content ::ng-deep > ul
+    margin-inline: -16px
+
 .plugin-frame
+    flex-grow: 1
     display: flex
     flex-direction: column
     min-height: 50vh

@@ -31,6 +31,8 @@ const routes: Routes = [
     { path: 'settings', component: SettingsPageComponent },
     { path: 'extra/:templateTabId', component: PluginTabComponent },
     { path: 'extra/:templateTabId/plugin/:pluginId', component: PluginTabComponent },
+    { path: 'extra/:path/:templateTabId', component: PluginTabComponent },
+    { path: 'extra/:path/:templateTabId/plugin/:pluginId', component: PluginTabComponent },
     { path: 'experiments', component: ExperimentsPageComponent },
     { path: 'experiments/:experimentId', redirectTo: "info" },
     { path: 'experiments/:experimentId/info', component: ExperimentComponent },
@@ -43,6 +45,8 @@ const routes: Routes = [
     { path: 'experiments/:experimentId/timeline/:step/:stepTabId', component: TimelineStepComponent },
     { path: 'experiments/:experimentId/extra/:templateTabId', component: PluginTabComponent },
     { path: 'experiments/:experimentId/extra/:templateTabId/plugin/:pluginId', component: PluginTabComponent },
+    { path: 'experiments/:experimentId/extra/:path/:templateTabId', component: PluginTabComponent },
+    { path: 'experiments/:experimentId/extra/:path/:templateTabId/plugin/:pluginId', component: PluginTabComponent },
 ];
 
 @NgModule({
