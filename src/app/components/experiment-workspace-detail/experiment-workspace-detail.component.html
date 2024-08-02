@@ -74,7 +74,12 @@
             [id]="'tab-' + tab.resourceKey?.uiTemplateTabId">
             <mat-expansion-panel-header>
                 <mat-panel-title>
-                    {{tab.name}}
+                    <span>
+                        {{tab.name}}
+                        <span *ngIf="templateTabObjects[tab.resourceKey?.uiTemplateTabId ?? '']?.groupKey">
+                            (Group: {{templateTabObjects[tab.resourceKey?.uiTemplateTabId ?? '']?.groupKey}})
+                        </span>
+                    </span>
                 </mat-panel-title>
                 <mat-panel-description>
                     {{templateTabObjects[tab.resourceKey?.uiTemplateTabId ?? '']?.description}}
