@@ -40,15 +40,21 @@ export class TemplateDetailsComponent implements OnInit {
     private initialValues = {
         name: "",
         description: "",
+        icon: null,
         sortKey: 0,
-        location: "workspace"
+        location: "workspace",
+        locationExtra: "",
+        groupKey: "",
     };
 
     templateForm: FormGroup = this.fb.group({
         name: [this.initialValues.name, [Validators.required, Validators.minLength(1)]],
         description: this.initialValues.description,
+        icon: [this.initialValues.locationExtra, [Validators.maxLength(64)]],
         sortKey: this.initialValues.sortKey,
-        location: [this.initialValues.location, [Validators.required, isInSetValidator(Object.keys(TAB_GROUP_NAME_OVERRIDES))]]
+        location: [this.initialValues.location, [Validators.required, isInSetValidator(Object.keys(TAB_GROUP_NAME_OVERRIDES))]],
+        locationExtra: [this.initialValues.locationExtra],
+        groupKey: [this.initialValues.locationExtra, [Validators.maxLength(32)]],
     });
 
     constructor(private registry: PluginRegistryBaseService, private fb: FormBuilder) { }
@@ -56,11 +62,16 @@ export class TemplateDetailsComponent implements OnInit {
     ngOnInit() {
         if (this.tabLink != null) {
             this.registry.getByApiLink<TemplateTabApiObject>(this.tabLink).then(response => {
+                const location = response?.data?.location ?? this.initialValues.location
+                const [baseLocation, locationExtra] = location.split(".", 2);
                 this.templateForm.setValue({
                     name: response?.data?.name ?? this.initialValues.name,
                     description: response?.data?.description ?? this.initialValues.description,
+                    icon: response?.data?.icon ?? this.initialValues.icon,
                     sortKey: response?.data?.sortKey ?? this.initialValues.sortKey,
-                    location: response?.data?.location ?? this.initialValues.location
+                    groupKey: response?.data?.groupKey ?? this.initialValues.groupKey,
+                    location: baseLocation,
+                    locationExtra: locationExtra ?? "",
                 });
             });
         }
@@ -84,12 +95,23 @@ export class TemplateDetailsComponent implements OnInit {
         }
         const link = response?.links?.find(link => link.rel.some(rel => rel === findString) && link.resourceType == "ui-template-tab") ?? null;
         if (link != null) {
+            let iconValue = this.templateForm.value.icon;
+            if (!iconValue) {
+                iconValue = null;
+            }
+            const location = [this.templateForm.value.location]
+            if (this.templateForm.value.location !== "workspace" && this.templateForm.value.locationExtra) {
+                location.push(this.templateForm.value.locationExtra);
+            }
+            const groupKey = this.templateForm.value.groupKey;
             this.registry.submitByApiLink<TemplateTabApiObject>(link, {
                 name: this.templateForm.value.name,
                 description: this.templateForm.value.description,
+                icon: iconValue,
                 sortKey: this.templateForm.value.sortKey,
-                filterString: this.filterString,
-                location: this.templateForm.value.location
+                groupKey: groupKey,
+                filterString: Boolean(groupKey) ? "" : this.filterString,
+                location: location.join("."),
             });
             if (this.templateLink != null) {
                 this.templateForm.reset(this.initialValues);

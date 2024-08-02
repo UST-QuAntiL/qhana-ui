@@ -9,6 +9,10 @@
             </mat-radio-button>
         </mat-radio-group>
     </div>
+    <mat-form-field class="form-field" [hidden]="!templateForm.value.location || templateForm.value.location === 'workspace'">
+        <mat-label>Tab Group:</mat-label>
+        <input matInput formControlName="locationExtra">
+    </mat-form-field>
     <mat-form-field class="form-field">
         <mat-label>Name:</mat-label>
         <input matInput formControlName="name">
@@ -22,8 +26,19 @@
         <mat-label>Sort Key:</mat-label>
         <input matInput type="number" formControlName="sortKey">
     </mat-form-field>
+    <div class="icon-field-wrapper">
+        <mat-form-field class="form-field">
+            <mat-label>Icon:</mat-label>
+            <input matInput formControlName="icon">
+        </mat-form-field>
+        <mat-icon class="icon-preview">{{templateForm.value.icon || "extension"}}</mat-icon>
+    </div>
+    <mat-form-field class="form-field">
+        <mat-label>Group Key:</mat-label>
+        <input matInput formControlName="groupKey">
+        <mat-hint>Establish this tab as its own tab group.</mat-hint>
+    </mat-form-field>
     <qhana-plugin-filter-editor [tabLink]="tabLink"
-        (filterEmitter)="filterString = $event"></qhana-plugin-filter-editor>
-    <br>
-    <button mat-raised-button type="submit" color="primary">{{templateLink ? 'Create' : 'Update'}} Tab</button>
+        (filterEmitter)="filterString = $event" [hidden]="templateForm.value.groupKey"></qhana-plugin-filter-editor>
+    <button mat-raised-button class="submit-button" type="submit" color="primary">{{templateLink ? 'Create' : 'Update'}} Tab</button>
 </form>
