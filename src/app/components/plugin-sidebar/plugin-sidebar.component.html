@@ -17,10 +17,10 @@
         <button mat-ripple class="sidebar-button {{(activeArea === 'plugins' && activeGroup == group) ? 'active' : ''}}"
             [matTooltip]="group.name" matTooltipPosition="after" [attr.aria-label]="group.name"
             (click)="switchActiveArea('plugins', group)" *ngFor="let group of pluginGroups">
-            <mat-icon>extension</mat-icon>
+            <mat-icon>{{group.icon ?? 'extension'}}</mat-icon>
         </button>
     </div>
-    <div class="sidebar-expander color-scheme-card scrollable" [attr.data-open]="sidebarOpen ? 'yes' : 'no'">
+    <div class="sidebar-expander color-scheme-card scrollable" [attr.data-open]="sidebarOpen ? 'yes' : 'no'" #sidebar>
         <div class="expander-head">
             <details [open]="activeArea === 'templates'">
                 <summary class="no-decoration" (click)="toggleTemplateHeader($event)">
@@ -63,13 +63,13 @@
             <qhana-tab-group-list [templateId]="templateId ?? defaultTemplateId" [selectedTab]="tabId"
                 (clickedOnTab)="selectTab($event)"></qhana-tab-group-list>
         </div>
-        <details class="plugin-group" [open]="group.open" *ngFor="let group of pluginGroups"
+        <details class="plugin-group" attr.data-group="{{group.key}}" [open]="group.open" *ngFor="let group of pluginGroups"
             [hidden]="activeArea == 'detail' || activeArea == 'templates'">
             <summary class="no-decoration" (click)="togglePluginGroup(group, $event)">
                 <mat-divider></mat-divider>
                 <h3 class="plugin-group-header">
                     <span class="plugin-group-header-text">
-                        <mat-icon>extension</mat-icon>
+                        <mat-icon>{{group.icon ?? 'extension'}}</mat-icon>
                         {{group.name}}
                         ({{pluginList.visibleCollectionSize|async}}/{{pluginList.collectionSize|async}})
                     </span>
