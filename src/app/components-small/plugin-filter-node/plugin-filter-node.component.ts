@@ -1,4 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { ChoosePluginDialog } from 'src/app/dialogs/choose-plugin/choose-plugin.dialog';
+import { PluginApiObject } from 'src/app/services/qhana-api-data-types';
 
 // Define filter types ('not' excluded)
 // The PluginFilterNodeComponent component is designed to encapsulate a filter object and the information wether the filter is inverted ('not').
@@ -25,7 +28,7 @@ export class PluginFilterNodeComponent implements OnInit {
     inverted: boolean = false;
     isEmpty: boolean = true;
 
-    constructor() { }
+    constructor(private dialog: MatDialog) { }
 
     ngOnInit(): void {
         this.setupFilter();
@@ -155,5 +158,23 @@ export class PluginFilterNodeComponent implements OnInit {
             this.filterObject = this.filterObject.not;
         }
         this.filterOut.emit(JSON.parse(JSON.stringify(this.filterObject)));
+    }
+
+    openPluginChooser() {
+        const dialogRef = this.dialog.open(ChoosePluginDialog, {});
+        dialogRef.afterClosed().subscribe((result: PluginApiObject | null) => {
+            if (result == null) {
+                return; // nothing was selected
+            }
+            if (this.type === "id") {
+                this.value = result.identifier;
+                this.updateFilterObject();
+            }
+            if (this.type === "name") {
+                this.value = result.title;
+                this.updateFilterObject();
+            }
+        });
+
     }
 }

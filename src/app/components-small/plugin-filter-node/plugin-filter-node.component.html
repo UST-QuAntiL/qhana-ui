@@ -80,6 +80,9 @@
                         Examples: "processing", "conversion", "dataloader", "visualization", "interaction"
                     </mat-hint>
                 </mat-form-field>
+                <button mat-raised-button class="config-filter-button" (click)="openPluginChooser()" *ngIf="type === 'name' || type === 'id'">
+                    choose
+                </button>
                 <button mat-raised-button class="config-filter-button" (click)="delete.emit()">
                     <mat-icon>delete</mat-icon>
                 </button>
