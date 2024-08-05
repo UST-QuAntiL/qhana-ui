@@ -411,7 +411,7 @@ export class PluginSidebarComponent implements OnInit, OnDestroy {
             let caller: (calback: () => void) => void = window.requestIdleCallback;
             if (caller == null) {
                 // fix for safari/older browsers
-                caller = Promise.resolve().then;
+                caller = (c) => Promise.resolve().then(c);
             }
             caller(() => {
                 groupElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
