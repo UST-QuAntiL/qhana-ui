@@ -13,6 +13,8 @@ import { ALL_PLUGINS_TEMPLATE_ID, TemplateApiObject, TemplateTabApiObject, Templ
 export interface PluginGroup {
     name: string;
     description?: string;
+    key: string;
+    icon?: string | null;
     open: boolean;
     link: ApiLink;
     query?: URLSearchParams;
@@ -72,6 +74,8 @@ export class PluginSidebarComponent implements OnInit, OnDestroy {
 
     @ViewChild('searchInput', { static: true }) searchInput: ElementRef<HTMLInputElement> | null = null;
 
+    @ViewChild('sidebar', { static: true }) sidebar: ElementRef<HTMLDivElement> | null = null;
+
     constructor(private route: ActivatedRoute, private router: Router, private templates: TemplatesService, private registry: PluginRegistryBaseService, private dialog: MatDialog) { }
 
     ngOnInit(): void {
@@ -120,23 +124,27 @@ export class PluginSidebarComponent implements OnInit, OnDestroy {
         });
 
         this.registry.resolveRecursiveRels([["plugin", "collection"]]).then((apiLink) => {
-            const pluginTypes = new Map<string, string>([
-                ["dataloader", "Dataloader Plugins"],
-                ["processing", "Processing Plugins"],
-                ["conversion", "Conversion Plugins"],
-                ["visualization", "Visualization Plugins"],
-                ["interaction", "Interaction Plugins"]
-            ]);
-            pluginTypes.forEach((name, pluginType) => {
+            const pluginTypes = [
+                ["dataloader", "Dataloader Plugins", "downloading"],
+                ["processing", "Processing Plugins", "calculate"],
+                ["conversion", "Conversion Plugins", "swap_horiz"],
+                ["visualization", "Visualization Plugins", "preview"],
+                ["interaction", "Interaction Plugins", "web_asset"]
+            ];
+            const defaultPlugins: PluginGroup[] = [];
+            pluginTypes.forEach(([pluginType, name, icon]) => {
                 const query = new URLSearchParams();
                 query.set("type", pluginType)
-                this.defaultPluginGroups.push({
+                defaultPlugins.push({
                     name: name,
+                    key: pluginType,
                     open: true,
                     link: apiLink,
+                    icon: icon ?? null,
                     query: query,
                 });
             });
+            this.defaultPluginGroups.push(...defaultPlugins);
         });
 
         this.defaultTemplateIdSubscription = this.templates.defaultTemplateId.subscribe(defaultTemplateId => {
@@ -178,7 +186,9 @@ export class PluginSidebarComponent implements OnInit, OnDestroy {
         if (tabResponse) {
             this.pluginGroups.push({
                 name: tabResponse.data.name,
+                key: tabResponse.data.self.href,
                 open: false,
+                icon: tabResponse.data.icon,
                 description: tabResponse.data.description,
                 link: tabResponse.data.plugins,
             });
@@ -212,13 +222,16 @@ export class PluginSidebarComponent implements OnInit, OnDestroy {
                 if (tabIndex < 0) {
                     this.pluginGroups.push({
                         name: tabResponse.data.name,
+                        key: tabResponse.data.self.href,
                         open: false,
                         description: tabResponse.data.description,
+                        icon: tabResponse.data.icon,
                         link: tabResponse.data.plugins,
                     });
                 } else {
                     this.pluginGroups[tabIndex].name = tabResponse.data.name;
                     this.pluginGroups[tabIndex].description = tabResponse.data.description;
+                    this.pluginGroups[tabIndex].icon = tabResponse.data.icon;
                 }
                 if (tabResponse.data.location !== 'workspace') {
                     this.pluginGroups.splice(tabIndex, 1);
@@ -306,8 +319,10 @@ export class PluginSidebarComponent implements OnInit, OnDestroy {
         sortedTabs.forEach(tab => {
             pluginGroups.push({
                 name: tab.data.name,
+                key: tab.data.self.href,
                 open: true,
                 description: tab.data.description,
+                icon: tab.data.icon,
                 link: tab.data.plugins,
             });
         });
@@ -381,11 +396,26 @@ export class PluginSidebarComponent implements OnInit, OnDestroy {
 
         if (group != null) {
             group.open = true;
+            this.scrollGroupIntoView(group);
         }
 
         if (newArea === "search") {
             // set focus on search field
             this.searchInput?.nativeElement?.focus();
+        }
+    }
+
+    scrollGroupIntoView(group: PluginGroup) {
+        const groupElement = this.sidebar?.nativeElement?.querySelector<HTMLDetailsElement>(`[data-group="${group.key}"]`);
+        if (groupElement) {
+            let caller: (calback: () => void) => void = window.requestIdleCallback;
+            if (caller == null) {
+                // fix for safari/older browsers
+                caller = (c) => Promise.resolve().then(c);
+            }
+            caller(() => {
+                groupElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
         }
     }
 

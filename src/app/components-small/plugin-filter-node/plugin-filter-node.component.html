@@ -65,7 +65,7 @@
                 </mat-form-field>
                 <mat-form-field class="form-field">
                     <mat-label>Filter String:</mat-label>
-                    <input matInput [value]="value" (focusout)="updateFilterString($event)" list="plugin-types">
+                    <input matInput [value]="value" (focusout)="updateFilterString($event)" [attr.list]="type === 'type' ? 'plugin-types' : null">
                     <datalist *ngIf="type === 'type'" id="plugin-types">
                         <option value="processing"></option>
                         <option value="visualization"></option>
@@ -80,7 +80,10 @@
                         Examples: "processing", "conversion", "dataloader", "visualization", "interaction"
                     </mat-hint>
                 </mat-form-field>
-                <button mat-raised-button type="button" (click)="delete.emit()">
+                <button mat-raised-button class="config-filter-button" (click)="openPluginChooser()" *ngIf="type === 'name' || type === 'id'">
+                    choose
+                </button>
+                <button mat-raised-button class="config-filter-button" (click)="delete.emit()">
                     <mat-icon>delete</mat-icon>
                 </button>
             </div>

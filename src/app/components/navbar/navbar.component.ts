@@ -21,7 +21,7 @@ import { CurrentExperimentService } from 'src/app/services/current-experiment.se
 import { DownloadsService } from 'src/app/services/downloads.service';
 import { ExportResult, QhanaBackendService } from 'src/app/services/qhana-backend.service';
 import { PluginRegistryBaseService } from 'src/app/services/registry.service';
-import { TemplateApiObject, TemplatesService } from 'src/app/services/templates.service';
+import { TemplateApiObject, TemplateTabApiObject, TemplatesService } from 'src/app/services/templates.service';
 
 @Component({
     selector: 'qhana-navbar',
@@ -44,6 +44,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
     experimentExtraTabsGroupLink: ApiLink | null = null;
     experimentExtraTabs: ApiLink[] = [];
+
+    tabLinkHrefToApiObject: Map<string, TemplateTabApiObject> = new Map();
 
     templateId: string | null = null;
     template: TemplateApiObject | null = null;
@@ -135,6 +137,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
         groupResponse?.data?.items?.forEach(tab => extraTabs.push(tab));
 
         this.experimentExtraTabs = extraTabs;
+        this.updateTabApiObjects(extraTabs);
     }
 
     private async updateGeneralExtraTabGroup() {
@@ -152,5 +155,21 @@ export class NavbarComponent implements OnInit, OnDestroy {
         groupResponse?.data?.items?.forEach(tab => extraTabs.push(tab));
 
         this.generalExtraTabs = extraTabs;
+        this.updateTabApiObjects(extraTabs);
+    }
+
+    private async updateTabApiObjects(tabLinks: ApiLink[]) {
+        const hrefToTab = new Map<string, TemplateTabApiObject>();
+
+        const promises = tabLinks.map(tabLink => {
+            return this.registry.getByApiLink<TemplateTabApiObject>(tabLink, null, false).then(response => {
+                if (response) {
+                    hrefToTab.set(response.data.self.href, response.data);
+                }
+            });
+        });
+        await Promise.allSettled(promises);
+
+        this.tabLinkHrefToApiObject = hrefToTab;
     }
 }

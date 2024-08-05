@@ -155,8 +155,10 @@ export class GrowingListComponent implements OnInit, OnDestroy {
         }
         this.loadMoreApiLink = null;
         this.lastCollectionSize = null;
-        this.collectionSize.emit(0);
-        this.visibleCollectionSize.emit(0);
+        Promise.resolve().then(() => {
+            this.collectionSize.emit(0);
+            this.visibleCollectionSize.emit(0);
+        });
         const query = this.query;
         this.updateQueue.next(() => this.replaceApiLinkQueued(newApiLink, query));
     }

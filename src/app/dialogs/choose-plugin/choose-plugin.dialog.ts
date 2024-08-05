@@ -22,17 +22,17 @@ export class ChoosePluginDialog {
 
     queryParams: URLSearchParams | null = null;
 
-    constructor(public dialogRef: MatDialogRef<ChoosePluginDialog>, @Inject(MAT_DIALOG_DATA) public data: PluginRestrictions, private registry: PluginRegistryBaseService) {
+    constructor(public dialogRef: MatDialogRef<ChoosePluginDialog>, @Inject(MAT_DIALOG_DATA) public data: PluginRestrictions | null, private registry: PluginRegistryBaseService) {
         const query = new URLSearchParams();
-        if (data.pluginTags) {
+        if (data?.pluginTags) {
             const tag_list = data.pluginTags.join(",");
             console.log(tag_list, data.pluginTags)
             query.set("tags", tag_list);
         }
-        if (data.pluginName) {
+        if (data?.pluginName) {
             query.set("name", data.pluginName);
         }
-        if (data.pluginVersion) {
+        if (data?.pluginVersion) {
             query.set("version", data.pluginVersion)
         }
         this.queryParams = query;
