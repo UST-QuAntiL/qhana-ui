@@ -12,6 +12,7 @@
     <mat-form-field class="form-field" [hidden]="!templateForm.value.location || templateForm.value.location === 'workspace'">
         <mat-label>Tab Group:</mat-label>
         <input matInput formControlName="locationExtra">
+        <mat-hint>The group key of the tab this tab should be grouped under. (Use '.' to separate group keys for nested groups.)</mat-hint>
     </mat-form-field>
     <mat-form-field class="form-field">
         <mat-label>Name:</mat-label>
@@ -35,10 +36,11 @@
     </div>
     <mat-form-field class="form-field">
         <mat-label>Group Key:</mat-label>
-        <input matInput formControlName="groupKey">
-        <mat-hint>Establish this tab as its own tab group.</mat-hint>
+        <input matInput pattern="[^\.]*" formControlName="groupKey">
+        <mat-hint>Establish this tab as its own tab group. (Cannot contain '.')</mat-hint>
     </mat-form-field>
     <qhana-plugin-filter-editor [tabLink]="tabLink"
         (filterEmitter)="filterString = $event" [hidden]="templateForm.value.groupKey"></qhana-plugin-filter-editor>
-    <button mat-raised-button class="submit-button" type="submit" color="primary">{{templateLink ? 'Create' : 'Update'}} Tab</button>
+    <p class="form-error" *ngIf="templateForm?.errors?.groupKeyForbidden">Group key cannot be used in experiment workspace tabs!</p>
+    <button mat-raised-button class="submit-button" type="submit" color="primary" [disabled]="templateForm.errors">{{templateLink ? 'Create' : 'Update'}} Tab</button>
 </form>

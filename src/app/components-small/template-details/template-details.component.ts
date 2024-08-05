@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { ApiLink, ApiResponse } from 'src/app/services/api-data-types';
 import { PluginRegistryBaseService } from 'src/app/services/registry.service';
 import { TAB_GROUP_NAME_OVERRIDES, TemplateApiObject, TemplateTabApiObject } from 'src/app/services/templates.service';
@@ -60,6 +60,18 @@ export class TemplateDetailsComponent implements OnInit {
     constructor(private registry: PluginRegistryBaseService, private fb: FormBuilder) { }
 
     ngOnInit() {
+        this.templateForm.addValidators((control): ValidationErrors | null => {
+            const loc = control.get("location")?.getRawValue() ?? "";
+            if (loc === "workspace") {
+                const groupKey = control.get("groupKey")?.getRawValue() ?? "";
+                if (groupKey) {
+                    return {
+                        groupKeyForbidden: true,
+                    };
+                }
+            }
+            return null;
+        });
         if (this.tabLink != null) {
             this.registry.getByApiLink<TemplateTabApiObject>(this.tabLink).then(response => {
                 const location = response?.data?.location ?? this.initialValues.location
