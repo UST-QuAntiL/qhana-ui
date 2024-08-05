@@ -408,7 +408,12 @@ export class PluginSidebarComponent implements OnInit, OnDestroy {
     scrollGroupIntoView(group: PluginGroup) {
         const groupElement = this.sidebar?.nativeElement?.querySelector<HTMLDetailsElement>(`[data-group="${group.key}"]`);
         if (groupElement) {
-            window.requestIdleCallback(() => {
+            let caller: (calback: () => void) => void = window.requestIdleCallback;
+            if (caller == null) {
+                // fix for safari/older browsers
+                caller = Promise.resolve().then;
+            }
+            caller(() => {
                 groupElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
             });
         }
