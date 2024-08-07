@@ -87,6 +87,7 @@ import { CreateExperimentDialog } from './dialogs/create-experiment/create-exper
 import { DeleteDialog } from './dialogs/delete-dialog/delete-dialog.dialog';
 import { ExportExperimentDialog } from './dialogs/export-experiment/export-experiment.dialog';
 import { MarkdownHelpDialog } from './dialogs/markdown-help/markdown-help.dialog';
+import { UiTemplateComponent } from "./components-small/ui-template/ui-template.component";
 
 @NgModule({
     declarations: [
@@ -134,6 +135,7 @@ import { MarkdownHelpDialog } from './dialogs/markdown-help/markdown-help.dialog
         TabGroupListComponent,
         ChooseTemplateDialog,
         UiTemplatesPageComponent,
+        UiTemplateComponent,
     ],
     imports: [
         BrowserModule,

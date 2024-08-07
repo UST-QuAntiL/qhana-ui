@@ -1,0 +1,42 @@
+<mat-card appearance="outlined" class="card" *ngIf="templateData != null">
+    <mat-card-title class="t-headline header">
+        <div [hidden]="isEditing">
+            UI Template: {{templateData.name}}
+        </div>
+        <mat-form-field class="name-field" [hidden]="!isEditing">
+            <mat-label>UI Template Name:</mat-label>
+            <input matInput [(ngModel)]="currentName">
+        </mat-form-field>
+        <div class="header-buttons">
+            <button mat-stroked-button (click)="updateTemplate()" *ngIf="isDirty"><mat-icon>save</mat-icon>save</button>
+            <button mat-icon-button (click)="toggleEdit()" *ngIf="templateUpdateLink != null"><mat-icon>{{isEditing ? 'edit_off' : 'edit'}}</mat-icon></button>
+            <button mat-icon-button (click)="deleteTemplate()" color="warn" *ngIf="templateDeleteLink != null"><mat-icon>delete</mat-icon></button>
+        </div>
+    </mat-card-title>
+    <mat-card-content class="content">
+        <mat-chip-set class="tags" [hidden]="isEditing">
+            <mat-chip *ngFor="let tag of templateData.tags">{{tag}}</mat-chip>
+        </mat-chip-set>
+        <mat-form-field class="tags-field" *ngIf="isEditing">
+            <mat-label>Tags</mat-label>
+            <mat-chip-grid #chipGrid>
+              @for (tag of currentTags; track tag) {
+                <mat-chip-row
+                  (removed)="removeTag(tag)"
+                >
+                  {{tag}}
+                  <button matChipRemove [attr.aria-label]="'remove ' + tag">
+                    <mat-icon>cancel</mat-icon>
+                  </button>
+                </mat-chip-row>
+              }
+              <input
+                placeholder="New Tag"
+                [matChipInputFor]="chipGrid"
+                (matChipInputTokenEnd)="addTag($event)"
+              />
+            </mat-chip-grid>
+          </mat-form-field>
+        <qhana-markdown [editable]="isEditing" [markdown]="templateData.description" (markdownChanges)="currentDescription = $event"></qhana-markdown>
+    </mat-card-content>
+</mat-card>

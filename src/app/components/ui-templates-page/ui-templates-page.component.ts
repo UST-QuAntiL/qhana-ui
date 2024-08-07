@@ -18,7 +18,10 @@ export class UiTemplatesPageComponent implements OnInit, OnDestroy {
     highlightedTemplates: Set<string> = new Set();
 
     templateId: string | null = null;
+
     private routeParamSubscription: Subscription | null = null;
+    private templateCreatedSubscription: Subscription | null = null;
+    private templateDeletedSubscription: Subscription | null = null;
 
 
     constructor(private route: ActivatedRoute, private router: Router, private registry: PluginRegistryBaseService, private templates: TemplatesService, private dialog: MatDialog) { }
@@ -32,18 +35,37 @@ export class UiTemplatesPageComponent implements OnInit, OnDestroy {
             } else {
                 this.highlightedTemplates.clear();
             }
-            console.log(this.highlightedTemplates, templateId)
+            this.templateId = templateId;
             this.loadActiveTemplateFromId(templateId);
         });
 
+        this.templateCreatedSubscription = this.registry.newApiObjectSubject.subscribe(created => {
+            if (created.new.resourceType === "ui-template") {
+                // new template created
+                if (this.templateId == null) {
+                    this.selectTemplate(created.new);
+                }
+            }
+        });
+
+        this.templateDeletedSubscription = this.registry.deletedApiObjectSubject.subscribe(deleted => {
+            if (this.templateId == null) {
+                return;
+            }
+            if (deleted.deleted.resourceType === "ui-template" && deleted.deleted.resourceKey?.uiTemplateId === this.templateId) {
+                // current template was deleted, navigate to overview
+                this.selectTemplate(null);
+            }
+        });
     }
 
     ngOnDestroy(): void {
         this.routeParamSubscription?.unsubscribe();
+        this.templateDeletedSubscription?.unsubscribe();
+        this.templateCreatedSubscription?.unsubscribe();
     }
 
     selectTemplate(templateLink: ApiLink | null) {
-        console.log(templateLink)
         if (templateLink == null) {
             this.router.navigate(["/templates"]);
             return;
@@ -72,6 +94,7 @@ export class UiTemplatesPageComponent implements OnInit, OnDestroy {
             this.selectedTemplate = templatePage.data.items[0];
         } else {
             console.warn(`Template API returned an ambiguous response for template id ${newTemplateId}`, templatePage);
+            this.selectTemplate(null);
         }
     }
 
