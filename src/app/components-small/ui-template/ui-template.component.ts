@@ -1,6 +1,5 @@
 import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ApiLink, ChangedApiObject } from 'src/app/services/api-data-types';
+import { ApiLink } from 'src/app/services/api-data-types';
 import { TemplateApiObject } from 'src/app/services/templates.service';
 import { PluginRegistryBaseService } from 'src/app/services/registry.service';
 import { MatChipInputEvent } from '@angular/material/chips';
@@ -61,11 +60,11 @@ export class UiTemplateComponent implements OnChanges, OnInit, OnDestroy {
             this.templateData = null;
             return;
         }
-        const templateResponse = await this.registry.getByApiLink<TemplateApiObject>(this.templateLink);
+        const templateResponse = await this.registry.getByApiLink<TemplateApiObject>(this.templateLink, null, true);
         this.templateData = templateResponse?.data ?? null;
 
-        this.templateUpdateLink = templateResponse?.links?.find(link => link.rel.some(rel => rel === "update") && link.resourceType == "ui-template") ?? null;
-        this.templateDeleteLink = templateResponse?.links?.find(link => link.rel.some(rel => rel === "delete") && link.resourceType == "ui-template") ?? null;
+        this.templateUpdateLink = templateResponse?.links?.find?.(link => link.rel.some(rel => rel === "update") && link.resourceType == "ui-template") ?? null;
+        this.templateDeleteLink = templateResponse?.links?.find?.(link => link.rel.some(rel => rel === "delete") && link.resourceType == "ui-template") ?? null;
     }
 
     get isDirty() {
