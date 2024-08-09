@@ -89,6 +89,8 @@ import { ExportExperimentDialog } from './dialogs/export-experiment/export-exper
 import { MarkdownHelpDialog } from './dialogs/markdown-help/markdown-help.dialog';
 import { UiTemplateComponent } from "./components-small/ui-template/ui-template.component";
 import { UiTemplateTabListComponent } from './components-small/ui-template-tab-list/ui-template-tab-list.component';
+import { UiTemplateTabComponent } from './components-small/ui-template-tab/ui-template-tab.component';
+import { PluginFilterViewComponent } from './components-small/plugin-filter-view/plugin-filter-view.component';
 
 @NgModule({
     declarations: [
@@ -138,6 +140,8 @@ import { UiTemplateTabListComponent } from './components-small/ui-template-tab-l
         UiTemplatesPageComponent,
         UiTemplateComponent,
         UiTemplateTabListComponent,
+        UiTemplateTabComponent,
+        PluginFilterViewComponent,
     ],
     imports: [
         BrowserModule,

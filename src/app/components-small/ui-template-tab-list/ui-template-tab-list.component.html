@@ -11,7 +11,7 @@
                     </mat-panel-title>
                     <mat-panel-description *ngIf="hrefToTab.get(tab.href)?.groupKey">(Group: {{navigationGroup.groupKey}}.{{hrefToTab.get(tab.href)?.groupKey}})</mat-panel-description>
                 </mat-expansion-panel-header>
-                <p>TODO: CONTENT</p>
+                <qhana-ui-template-tab [tabLink]="tab"></qhana-ui-template-tab>
             </mat-expansion-panel>
         }
     </mat-accordion>
@@ -33,7 +33,7 @@
                         </mat-panel-title>
                         <mat-panel-description *ngIf="hrefToTab.get(tab.href)?.groupKey">(Group: {{group.groupKey}}.{{hrefToTab.get(tab.href)?.groupKey}})</mat-panel-description>
                     </mat-expansion-panel-header>
-                    <p>TODO: CONTENT</p>
+                    <qhana-ui-template-tab [tabLink]="tab"></qhana-ui-template-tab>
                 </mat-expansion-panel>
             }
         </mat-accordion>
@@ -54,7 +54,7 @@
                         {{tab.name}}
                     </mat-panel-title>
                 </mat-expansion-panel-header>
-                <p>TODO: CONTENT</p>
+                <qhana-ui-template-tab [tabLink]="tab"></qhana-ui-template-tab>
             </mat-expansion-panel>
         }
     </mat-accordion>
@@ -72,7 +72,7 @@
                     </mat-panel-title>
                     <mat-panel-description *ngIf="hrefToTab.get(tab.href)?.groupKey">(Group: {{experimentNavigationGroup.groupKey}}.{{hrefToTab.get(tab.href)?.groupKey}})</mat-panel-description>
                 </mat-expansion-panel-header>
-                <p>TODO: CONTENT</p>
+                <qhana-ui-template-tab [tabLink]="tab"></qhana-ui-template-tab>
             </mat-expansion-panel>
         }
     </mat-accordion>
@@ -94,7 +94,7 @@
                         </mat-panel-title>
                         <mat-panel-description *ngIf="hrefToTab.get(tab.href)?.groupKey">(Group: {{group.groupKey}}.{{hrefToTab.get(tab.href)?.groupKey}})</mat-panel-description>
                     </mat-expansion-panel-header>
-                    <p>TODO: CONTENT</p>
+                    <qhana-ui-template-tab [tabLink]="tab"></qhana-ui-template-tab>
                 </mat-expansion-panel>
             }
         </mat-accordion>
@@ -119,7 +119,7 @@
                         </mat-panel-title>
                         <mat-panel-description *ngIf="hrefToTab.get(tab.href)?.groupKey">(Group: {{group.groupKey}}.{{hrefToTab.get(tab.href)?.groupKey}})</mat-panel-description>
                     </mat-expansion-panel-header>
-                    <p>TODO: CONTENT</p>
+                    <qhana-ui-template-tab [tabLink]="tab"></qhana-ui-template-tab>
                 </mat-expansion-panel>
             }
         </mat-accordion>

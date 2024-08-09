@@ -1,0 +1,13 @@
+<div class="tab-header">
+    <div class="header-buttons">
+        <button mat-icon-button *ngIf="templateUpdateLink != null"><mat-icon>{{isEditing ? 'edit_off' : 'edit'}}</mat-icon></button>
+        <button mat-icon-button color="warn" *ngIf="templateDeleteLink != null"><mat-icon>delete</mat-icon></button>
+    </div>
+</div>
+<p>Description:  {{tabData?.description ? '' : '–'}}</p>
+<qhana-markdown [markdown]="tabData?.description ?? ''" [editable]="false" [hidden]="!tabData?.description"></qhana-markdown>
+@if(!isEditing && !(tabData?.groupKey ?? false) && tabFilterData) {
+    <p>Plugin filter:</p>
+    <qhana-plugin-filter-view [filter]="tabFilterData"></qhana-plugin-filter-view>
+}
+
