@@ -6,6 +6,7 @@ import { MatChipInputEvent } from '@angular/material/chips';
 import { Subscription } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { DeleteDialog } from 'src/app/dialogs/delete-dialog/delete-dialog.dialog';
+import { EnvService } from 'src/app/services/env.service';
 
 @Component({
     selector: 'qhana-ui-template',
@@ -27,10 +28,13 @@ export class UiTemplateComponent implements OnChanges, OnInit, OnDestroy {
     currentTags: string[] | null = null;
     currentDescription: string | null = null;
 
+    currentEnvDefaultTemplate: string | null = null;
+
     private tagsDirty: boolean = false;
     private updateSubscription: Subscription | null = null;
+    private defaultTemplateSubscription: Subscription | null = null;
 
-    constructor(private registry: PluginRegistryBaseService, private dialog: MatDialog) { }
+    constructor(private registry: PluginRegistryBaseService, private env: EnvService, private dialog: MatDialog) { }
 
     ngOnInit(): void {
         this.updateSubscription = this.registry.apiObjectSubject.subscribe((apiObject) => {
@@ -45,10 +49,12 @@ export class UiTemplateComponent implements OnChanges, OnInit, OnDestroy {
                 }
             }
         });
+        this.defaultTemplateSubscription = this.env.uiTemplateId.subscribe(templateID => this.currentEnvDefaultTemplate = templateID);
     }
 
     ngOnDestroy(): void {
         this.updateSubscription?.unsubscribe();
+        this.defaultTemplateSubscription?.unsubscribe();
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -137,6 +143,20 @@ export class UiTemplateComponent implements OnChanges, OnInit, OnDestroy {
         const doDelete = await dialogRef.afterClosed().toPromise();
         if (doDelete) {
             this.registry.submitByApiLink(this.templateDeleteLink);
+        }
+    }
+
+    async toggleEnvDefault() {
+        const templateId = this.templateLink?.resourceKey?.uiTemplateId;
+        if (templateId == null) {
+            return;
+        }
+
+        if (this.currentEnvDefaultTemplate === templateId) {
+            // unset default
+            this.env.setDefaultUiTemplateEnvVar(null);
+        } else {
+            this.env.setDefaultUiTemplateEnvVar(templateId);
         }
     }
 

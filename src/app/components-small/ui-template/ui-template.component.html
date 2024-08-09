@@ -9,6 +9,9 @@
         </mat-form-field>
         <div class="header-buttons">
             <button mat-stroked-button (click)="updateTemplate()" *ngIf="isDirty"><mat-icon>save</mat-icon>save</button>
+            <button mat-icon-button (click)="toggleEnvDefault()">
+                <mat-icon>{{(templateLink && currentEnvDefaultTemplate === templateLink.resourceKey?.uiTemplateId) ? 'star' : 'star_outline'}}</mat-icon>
+            </button>
             <button mat-icon-button (click)="toggleEdit()" *ngIf="templateUpdateLink != null"><mat-icon>{{isEditing ? 'edit_off' : 'edit'}}</mat-icon></button>
             <button mat-icon-button (click)="deleteTemplate()" color="warn" *ngIf="templateDeleteLink != null"><mat-icon>delete</mat-icon></button>
         </div>
