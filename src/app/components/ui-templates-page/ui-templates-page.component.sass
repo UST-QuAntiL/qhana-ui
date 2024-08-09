@@ -1,0 +1,62 @@
+.templates-content
+    display: grid
+    grid-template-areas: "sidebar main spacer"
+    grid-template-columns: minmax(min-content, calc( (100vw - 60rem)/2 )) minmax(20rem, 1fr) minmax(0.5rem, calc( (100vw - 60rem)/2 ))
+    grid-template-rows: 1fr
+
+.sidebar
+    position: sticky
+    top: 0px
+    grid-area: sidebar
+    margin-inline-end: 0.5rem
+    min-height: 100vh
+    display: flex
+    flex-direction: column
+    min-width: 15rem
+    width: 25vw
+    max-width: 20rem
+    padding-block-end: 4rem
+    background: var(--background)
+    border-inline-end: 1px solid var(--border-color)
+
+@media (prefers-color-scheme: dark)
+    .sidebar
+        border-right: none
+
+.new-template-button
+    margin-block: 1rem
+    margin-inline: 1rem
+
+.sidebar-header
+    display: flex
+    gap: 0.3rem
+    align-content: center
+    justify-content: space-between
+    padding-inline: 1rem
+
+.w-100
+    width: 100%
+
+.full-width
+    width: calc(100% - 2rem)
+    margin-inline: 1rem
+
+.content-container
+    grid-area: main
+
+.content-container .main-content
+    max-width: 60rem
+    margin-inline: auto
+    padding-block-start: 2rem
+
+.title
+    display: flex
+    justify-content: space-between
+    align-items: center
+
+.spacer
+    flex-grow: 1
+
+.template-tabs
+    display: block
+    margin-block-start: 2rem

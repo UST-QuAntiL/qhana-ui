@@ -358,14 +358,14 @@ export class MarkdownComponent implements OnChanges {
             // });
         }
         if (changes.editable != null) {
-            this.editor?.action(forceUpdate);
+            this.editor?.action(forceUpdate());
         }
     }
 
     resetEditMode() {
         if (this.editable) {
             this.showAsPreview = false;
-            this.editor?.action(forceUpdate);
+            this.editor?.action(forceUpdate());
         }
     }
 
