@@ -52,7 +52,7 @@ $my-dark-theme: mat.define-dark-theme((color: (primary: $my-primary,accent: $my-
     // line is for milkdown
     --line: 150,150,150
 
-.mat-mdc-card, .color-scheme-card
+.mat-mdc-card, .mat-expansion-panel, .color-scheme-card
     --background: #{mat.get-color-from-palette(mat.$light-theme-background-palette, 'card')}
     --background-card: #bbb
     --border-color: #ddd
@@ -105,7 +105,23 @@ $my-dark-theme: mat.define-dark-theme((color: (primary: $my-primary,accent: $my-
         // line is for milkdown
         --line: 170,170,170
 
-    .mat-mdc-card, .color-scheme-card
+        // material theme token overrides for better dark mode text contrast
+        --mat-option-selected-state-label-text-color: var(--primary-text)
+        --mdc-filled-text-field-caret-color: var(--primary-text)
+        --mdc-filled-text-field-focus-active-indicator-color: var(--primary-text)
+        --mdc-filled-text-field-focus-label-text-color: rgba(179, 136, 255, 0.87)
+        --mdc-outlined-text-field-caret-color: var(--primary-text)
+        --mdc-outlined-text-field-focus-outline-color: var(--primary-text)
+        --mdc-outlined-text-field-focus-label-text-color: rgba(179, 136, 255, 0.87)
+        --mat-form-field-focus-select-arrow-color: rgba(179, 136, 255, 0.87)
+        --mat-select-focused-arrow-color: rgba(179, 136, 255, 0.87)
+        --mdc-circular-progress-active-indicator-color: var(--primary-text)
+        --mat-badge-background-color: var(--primary-text)
+        --mat-stepper-header-selected-state-icon-background-color: var(--primary-text)
+        --mat-stepper-header-done-state-icon-background-color: var(--primary-text)
+        --mat-stepper-header-edit-state-icon-background-color: var(--primary-text)
+
+    .mat-mdc-card, .mat-expansion-panel, .color-scheme-card
         --background: #{mat.get-color-from-palette(mat.$dark-theme-background-palette, 'card')}
         --background-card: #{mat.get-color-from-palette(mat.$dark-theme-background-palette, 'background')}
         --border-color: #888
@@ -130,6 +146,9 @@ $my-dark-theme: mat.define-dark-theme((color: (primary: $my-primary,accent: $my-
     .card.mat-mdc-card
         box-shadow: none
         border: 2px solid var(--border-color)
+
+    :root .mat-primary .mat-pseudo-checkbox-checked.mat-pseudo-checkbox-minimal::after, :root .mat-primary .mat-pseudo-checkbox-indeterminate.mat-pseudo-checkbox-minimal::after
+        color: var(--primary-text)
 
     :root // color contrast fixes:
 
