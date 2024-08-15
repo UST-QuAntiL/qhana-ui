@@ -5,7 +5,7 @@
             <div>AND</div>
             <div class="line"></div>
         </div>
-        <div>
+        <div class="child-filters">
             @for (f of filter.and; track $index) {
                 <qhana-plugin-filter-view [filter]="f"></qhana-plugin-filter-view>
             }
@@ -19,7 +19,7 @@
             <div>OR</div>
             <div class="line"></div>
         </div>
-        <div>
+        <div class="child-filters">
             @for (f of filter.or; track $index) {
                 <qhana-plugin-filter-view [filter]="f"></qhana-plugin-filter-view>
             }
