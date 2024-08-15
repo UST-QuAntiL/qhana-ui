@@ -1,0 +1,90 @@
+@if (filterValue == null) {
+    <p>Flter Plugins by:</p>
+    <mat-button-toggle-group class="toggle-group" aria-label="Filter Type">
+        <mat-button-toggle (click)="setType('id')">Identifier</mat-button-toggle>
+        <mat-button-toggle (click)="setType('name')">Name</mat-button-toggle>
+        <mat-button-toggle (click)="setType('version')">Version</mat-button-toggle>
+        <mat-button-toggle (click)="setType('type')">Type</mat-button-toggle>
+        <mat-button-toggle (click)="setType('tag')">Tag</mat-button-toggle>
+    </mat-button-toggle-group>
+    @if(depth < 4) {
+        <p>Or combine multiple filters with:</p>
+        <mat-button-toggle-group class="toggle-group" aria-label="Filter combinator">
+            <mat-button-toggle (click)="setType('and')">AND (match all filters)</mat-button-toggle>
+            <mat-button-toggle (click)="setType('or')">OR (match any filter)</mat-button-toggle>
+        </mat-button-toggle-group>
+    }
+} @else {
+    <div class="filter-head">
+        <mat-slide-toggle [checked]="isNegated" (toggleChange)="isNegated = !isNegated; updateFilterObject()">Exclude plugins matching this filter</mat-slide-toggle>
+        <button mat-icon-button (click)="resetCurrentFilter(); updateFilterObject()"><mat-icon>clear</mat-icon></button>
+    </div>
+}
+@if (isNestedFilter) {
+    <mat-button-toggle-group class="toggle-group" [value]="nestedFilterCombinator" (valueChange)="changeFilterCombinator($event)" aria-label="Filter combinator" >
+        <mat-button-toggle [value]="'and'">AND (match all filters)</mat-button-toggle>
+        <mat-button-toggle [value]="'or'">OR (match any filter)</mat-button-toggle>
+    </mat-button-toggle-group>
+
+    <div class="nested-filter-container">
+        <div class="filter-combinator">
+            <div class="line"></div>
+            <div>{{nestedFilterCombinator.toUpperCase()}}</div>
+            <div class="line"></div>
+        </div>
+        <div class="child-filter-list">
+            @if (filterValue?.length === 0) {
+                <p class="warning">Must have at least one plugin filter!</p>
+            }
+            @for (f of filterValue; track $index) {
+                <div class="child-filter-container">
+                    <mat-card class="child-filter">
+                        <mat-card-content>
+                            <qhana-plugin-filter-form [depth]="depth + 1" [filterIn]="f" (filterOut)="childFiltersOutput[$index] = $event; updateFilterObject()" (valid)="childFiltersValid[$index] = $event"></qhana-plugin-filter-form>
+                        </mat-card-content>
+                    </mat-card>
+                    <button mat-flat-button class="child-filter-remove-button" (click)="deleteChild($index)"><div><mat-icon>delete</mat-icon></div></button>
+                </div>
+            }
+            <button mat-raised-button class="add-child-filter-button" (click)="addChildFilter()"><mat-icon>plus</mat-icon>Add new filter</button>
+        </div>
+    </div>
+}
+@if (!isNestedFilter && filterType != null) {
+    <div class="simple-filter">
+        <mat-form-field class="filter-type-select">
+            <mat-label>Filter By:</mat-label>
+            <mat-select [value]="filterType" (valueChange)="changeSimpleFilterType($event)">
+                <mat-option value="id">Identifier</mat-option>
+                <mat-option value="name">Name</mat-option>
+                <mat-option value="tag">Tag</mat-option>
+                <mat-option value="version">Version</mat-option>
+                <mat-option value="type">Type</mat-option>
+            </mat-select>
+        </mat-form-field>
+        <mat-form-field class="filter-value">
+            <mat-label>Match against:</mat-label>
+            <input matInput [ngModel]="filterValue" (ngModelChange)="filterValue = $event; updateFilterObject()" [attr.list]="filterType === 'type' ? 'plugin-types' : null">
+            <datalist *ngIf="filterType === 'type'" id="plugin-types">
+                <option value="processing"></option>
+                <option value="visualization"></option>
+                <option value="conversion"></option>
+                <option value="dataloader"></option>
+                <option value="interaction"></option>
+            </datalist>
+            <mat-hint *ngIf="filterType === 'version'">
+                Examples: ">= 0.1.0", "== 1.0.2", "< 2.0.0", ">= 1.0.0, < 2.0.0" , "!= 1.0.14"
+            </mat-hint>
+            <mat-hint *ngIf="filterType === 'type'">
+                Examples: "processing", "conversion", "dataloader", "visualization", "interaction"
+            </mat-hint>
+        </mat-form-field>
+        <button mat-raised-button class="filter-button" (click)="openPluginChooser()" *ngIf="filterType === 'name' || filterType === 'id'">
+            choose
+        </button>
+    </div>
+}
+@if (depth > 0 && (filterValue == null || filterValue === "")) {
+    <p class="warning">Filter may not be empty!</p>
+}
+

@@ -91,6 +91,8 @@ import { UiTemplateComponent } from "./components-small/ui-template/ui-template.
 import { UiTemplateTabListComponent } from './components-small/ui-template-tab-list/ui-template-tab-list.component';
 import { UiTemplateTabComponent } from './components-small/ui-template-tab/ui-template-tab.component';
 import { PluginFilterViewComponent } from './components-small/plugin-filter-view/plugin-filter-view.component';
+import { UiTemplateTabFormComponent } from './components-small/ui-template-tab-form/ui-template-tab-form.component';
+import { PluginFilterFormComponent } from './components-small/plugin-filter-form/plugin-filter-form.component';
 
 @NgModule({
     declarations: [
@@ -141,7 +143,9 @@ import { PluginFilterViewComponent } from './components-small/plugin-filter-view
         UiTemplateComponent,
         UiTemplateTabListComponent,
         UiTemplateTabComponent,
+        UiTemplateTabFormComponent,
         PluginFilterViewComponent,
+        PluginFilterFormComponent,
     ],
     imports: [
         BrowserModule,

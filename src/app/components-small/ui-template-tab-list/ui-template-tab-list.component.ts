@@ -22,6 +22,8 @@ export class UiTemplateTabListComponent implements OnInit, OnChanges, OnDestroy 
 
     @Input() templateLink: ApiLink | null = null;
 
+    isLoading: boolean = true;
+
     navigationGroup: NavTabGroup | null = null;
     workspaceGroup: NavTabGroup | null = null;
     experimentNavigationGroup: NavTabGroup | null = null;
@@ -30,6 +32,12 @@ export class UiTemplateTabListComponent implements OnInit, OnChanges, OnDestroy 
     unknownGroups: NavTabGroup[] = [];
 
     private allGroups: NavTabGroup[] = [];
+
+    // new tab
+    createTabLink: ApiLink | null = null;
+    newTabData: any = null;
+    isValid: boolean = false;
+
 
     hrefToTab: Map<string, TemplateTabApiObject> = new Map();
 
@@ -76,6 +84,7 @@ export class UiTemplateTabListComponent implements OnInit, OnChanges, OnDestroy 
     }
 
     ngOnChanges(changes: SimpleChanges): void {
+        this.isLoading = true;
         this.loadTemplateGroups();
     }
 
@@ -88,9 +97,10 @@ export class UiTemplateTabListComponent implements OnInit, OnChanges, OnDestroy 
             this.navigationGroups = [];
             this.experimentNavigationGroups = [];
             this.unknownGroups = [];
+            this.isLoading = false;
             return;
         }
-        const templateResponse = await this.registry.getByApiLink<TemplateApiObject>(this.templateLink, null, false);
+        const templateResponse = await this.registry.getByApiLink<TemplateApiObject>(this.templateLink, null, true);
         if (templateResponse == null) {
             this.hrefToTab = new Map();
             this.workspaceGroup = null;
@@ -99,8 +109,11 @@ export class UiTemplateTabListComponent implements OnInit, OnChanges, OnDestroy 
             this.navigationGroups = [];
             this.experimentNavigationGroups = [];
             this.unknownGroups = [];
+            this.isLoading = false;
             return;
         }
+
+        this.createTabLink = templateResponse?.links?.find?.(link => link.rel.some(rel => rel === "create") && link.resourceType == "ui-template-tab") ?? null;
 
         const hrefToTab = new Map<string, TemplateTabApiObject>();
 
@@ -118,7 +131,7 @@ export class UiTemplateTabListComponent implements OnInit, OnChanges, OnDestroy 
         const groupIcons = new Map<string, string>();
 
         const groupPromises = templateResponse.data.groups.map(async (group) => {
-            const groupResponse = await this.registry.getByApiLink<CollectionApiObject>(group);
+            const groupResponse = await this.registry.getByApiLink<CollectionApiObject>(group, null, true);
 
             // fetch tab data
             groupResponse?.data?.items?.forEach?.(tabLink => {
@@ -177,6 +190,7 @@ export class UiTemplateTabListComponent implements OnInit, OnChanges, OnDestroy 
         this.experimentNavigationGroups = expNavGroups;
         this.unknownGroups = unknownGroups;
         this.allGroups = allGroups;
+        this.isLoading = false;
     }
 
     private async updateTemplateTab(tabLink: ApiLink) {
@@ -288,7 +302,7 @@ export class UiTemplateTabListComponent implements OnInit, OnChanges, OnDestroy 
                 return;
             }
             if (group.tabs.some(t => t.href === tabLink.href)) {
-                group.tabs = group.tabs.filter(t => t.href !== t.href);
+                group.tabs = group.tabs.filter(t => t.href !== tabLink.href);
             }
             if (group.tabs.length === 0) {
                 hasEmptyGroups = true;
@@ -303,7 +317,7 @@ export class UiTemplateTabListComponent implements OnInit, OnChanges, OnDestroy 
         let hasEmptyGroups = false;
         this.allGroups.forEach(group => {
             if (group.tabs.some(t => t.href === tabLink.href)) {
-                group.tabs = group.tabs.filter(t => t.href !== t.href);
+                group.tabs = group.tabs.filter(t => t.href !== tabLink.href);
             }
             if (group.tabs.length === 0) {
                 hasEmptyGroups = true;
@@ -329,6 +343,17 @@ export class UiTemplateTabListComponent implements OnInit, OnChanges, OnDestroy 
         if (this.experimentNavigationGroup?.tabs?.length === 0) {
             this.experimentNavigationGroup = null;
         }
+    }
+
+    async createNewTab() {
+        if (this.createTabLink == null) {
+            return;
+        }
+        if (!this.isValid || !this.newTabData) {
+            return;
+        }
+
+        this.registry.submitByApiLink(this.createTabLink, this.newTabData);
     }
 
 }

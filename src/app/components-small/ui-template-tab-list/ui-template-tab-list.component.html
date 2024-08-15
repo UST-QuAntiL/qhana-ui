@@ -1,4 +1,12 @@
-<div *ngIf="navigationGroups.length > 0 || navigationGroup != null">
+<mat-expansion-panel *ngIf="createTabLink != null">
+    <mat-expansion-panel-header>
+        <mat-panel-title class="tab-title">Create New Tab</mat-panel-title>
+    </mat-expansion-panel-header>
+    <qhana-ui-template-tab-form  (isValid)="isValid = $event" (data)="newTabData = $event" (formSubmit)="createNewTab()" #newTabForm></qhana-ui-template-tab-form>
+    <button class="new-tab-button" mat-flat-button color="primary" [disabled]="!isValid" (click)="newTabForm.submitForm()"><mat-icon>save</mat-icon>save</button>
+</mat-expansion-panel>
+
+<div *ngIf="!isLoading && (navigationGroups.length > 0 || navigationGroup != null)">
     <h3>Navigation Tab Groups</h3>
     <mat-accordion *ngIf="navigationGroup != null">
         @for (tab of navigationGroup.tabs; track tab.href) {
@@ -11,7 +19,7 @@
                     </mat-panel-title>
                     <mat-panel-description *ngIf="hrefToTab.get(tab.href)?.groupKey">(Group: {{navigationGroup.groupKey}}.{{hrefToTab.get(tab.href)?.groupKey}})</mat-panel-description>
                 </mat-expansion-panel-header>
-                <qhana-ui-template-tab [tabLink]="tab"></qhana-ui-template-tab>
+                <qhana-ui-template-tab [tabLink]="tab" [useCache]="true"></qhana-ui-template-tab>
             </mat-expansion-panel>
         }
     </mat-accordion>
@@ -33,17 +41,13 @@
                         </mat-panel-title>
                         <mat-panel-description *ngIf="hrefToTab.get(tab.href)?.groupKey">(Group: {{group.groupKey}}.{{hrefToTab.get(tab.href)?.groupKey}})</mat-panel-description>
                     </mat-expansion-panel-header>
-                    <qhana-ui-template-tab [tabLink]="tab"></qhana-ui-template-tab>
+                    <qhana-ui-template-tab [tabLink]="tab" [useCache]="true"></qhana-ui-template-tab>
                 </mat-expansion-panel>
             }
         </mat-accordion>
     }
-    <ul>
-        <li *ngIf="navigationGroup != null">{{navigationGroup.name}}</li>
-        <li *ngFor="let group of navigationGroups">{{group.name}} - {{group.groupKey}}</li>
-    </ul>
 </div>
-<div *ngIf="workspaceGroup != null">
+<div *ngIf="!isLoading && workspaceGroup != null">
     <h3>Experiment Workspace Tabs</h3>
     <mat-accordion>
         @for (tab of workspaceGroup.tabs; track tab.href) {
@@ -54,12 +58,12 @@
                         {{tab.name}}
                     </mat-panel-title>
                 </mat-expansion-panel-header>
-                <qhana-ui-template-tab [tabLink]="tab"></qhana-ui-template-tab>
+                <qhana-ui-template-tab [tabLink]="tab" [useCache]="true"></qhana-ui-template-tab>
             </mat-expansion-panel>
         }
     </mat-accordion>
 </div>
-<div *ngIf="experimentNavigationGroups.length > 0 || experimentNavigationGroup != null">
+<div *ngIf="!isLoading && (experimentNavigationGroups.length > 0 || experimentNavigationGroup != null)">
     <h3>Experiment Navigation Tab Groups</h3>
     <mat-accordion *ngIf="experimentNavigationGroup != null">
         @for (tab of experimentNavigationGroup.tabs; track tab.href) {
@@ -72,7 +76,7 @@
                     </mat-panel-title>
                     <mat-panel-description *ngIf="hrefToTab.get(tab.href)?.groupKey">(Group: {{experimentNavigationGroup.groupKey}}.{{hrefToTab.get(tab.href)?.groupKey}})</mat-panel-description>
                 </mat-expansion-panel-header>
-                <qhana-ui-template-tab [tabLink]="tab"></qhana-ui-template-tab>
+                <qhana-ui-template-tab [tabLink]="tab" [useCache]="true"></qhana-ui-template-tab>
             </mat-expansion-panel>
         }
     </mat-accordion>
@@ -94,13 +98,13 @@
                         </mat-panel-title>
                         <mat-panel-description *ngIf="hrefToTab.get(tab.href)?.groupKey">(Group: {{group.groupKey}}.{{hrefToTab.get(tab.href)?.groupKey}})</mat-panel-description>
                     </mat-expansion-panel-header>
-                    <qhana-ui-template-tab [tabLink]="tab"></qhana-ui-template-tab>
+                    <qhana-ui-template-tab [tabLink]="tab" [useCache]="true"></qhana-ui-template-tab>
                 </mat-expansion-panel>
             }
         </mat-accordion>
     }
 </div>
-<div *ngIf="unknownGroups.length > 0">
+<div *ngIf="!isLoading && unknownGroups.length > 0">
     <h3>Unknown Tab Groups</h3>
     @for (group of unknownGroups; track group.groupKey) {
         <h4>
@@ -119,7 +123,7 @@
                         </mat-panel-title>
                         <mat-panel-description *ngIf="hrefToTab.get(tab.href)?.groupKey">(Group: {{group.groupKey}}.{{hrefToTab.get(tab.href)?.groupKey}})</mat-panel-description>
                     </mat-expansion-panel-header>
-                    <qhana-ui-template-tab [tabLink]="tab"></qhana-ui-template-tab>
+                    <qhana-ui-template-tab [tabLink]="tab" [useCache]="true"></qhana-ui-template-tab>
                 </mat-expansion-panel>
             }
         </mat-accordion>
