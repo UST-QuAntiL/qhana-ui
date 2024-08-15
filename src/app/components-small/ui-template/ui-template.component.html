@@ -1,3 +1,10 @@
+<mat-card appearance="outlined" class="card" *ngIf="templateData == null">
+    <mat-card-title class="t-headline header">
+        Loading...
+    </mat-card-title>
+    <mat-card-content class="content"></mat-card-content>
+</mat-card>
+
 <mat-card appearance="outlined" class="card" *ngIf="templateData != null">
     <mat-card-title class="t-headline header">
         <div [hidden]="isEditing">
@@ -40,6 +47,6 @@
               />
             </mat-chip-grid>
           </mat-form-field>
-        <qhana-markdown [editable]="isEditing" [markdown]="templateData.description" (markdownChanges)="currentDescription = $event"></qhana-markdown>
+        <qhana-markdown class="{{isEditing ? 'qhana-form-input' : ''}}" style="display: block;" [editable]="isEditing" [markdown]="templateData.description" (markdownChanges)="currentDescription = $event"></qhana-markdown>
     </mat-card-content>
 </mat-card>
