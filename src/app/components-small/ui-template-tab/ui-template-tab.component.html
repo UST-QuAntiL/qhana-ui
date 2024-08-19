@@ -1,0 +1,19 @@
+<div class="tab-header">
+    <div class="header-buttons">
+        <button mat-stroked-button (click)="tabFormChild.submitForm()" *ngIf="tabFormChild != null && isDirty"><mat-icon>save</mat-icon>save</button>
+        <button mat-icon-button (click)="isEditing = !isEditing" *ngIf="tabUpdateLink != null"><mat-icon>{{isEditing ? 'edit_off' : 'edit'}}</mat-icon></button>
+        <button mat-icon-button color="warn" (click)="deleteTab()" *ngIf="tabDeleteLink != null"><mat-icon>delete</mat-icon></button>
+    </div>
+</div>
+@if (!isEditing) {
+    <p>Description: {{tabData?.description ? '' : '–'}}</p>
+    <qhana-markdown [markdown]="tabData?.description ?? ''" [editable]="false" [hidden]="!tabData?.description"></qhana-markdown>
+}
+@if (!isEditing && !(tabData?.groupKey ?? false) && tabFilterData) {
+    <p>Plugin filter:</p>
+    <qhana-plugin-filter-view [filter]="tabFilterData"></qhana-plugin-filter-view>
+}
+@if (isEditing) {
+    <qhana-ui-template-tab-form [tabData]="tabData" (isValid)="isValid = $event" (isDirty)="isDirty = $event" (data)="newData = $event" (formSubmit)="updateTab()" [hidden]="!isEditing" #tabForm></qhana-ui-template-tab-form>
+    <button mat-flat-button color="primary" (click)="tabFormChild.submitForm()" *ngIf="tabFormChild != null && isDirty"><mat-icon>save</mat-icon>save</button>
+}

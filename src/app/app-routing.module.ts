@@ -25,6 +25,7 @@ import { ExperimentsPageComponent } from './components/experiments-page/experime
 import { PluginTabComponent } from './components/plugin-tab/plugin-tab.component';
 import { SettingsPageComponent } from './components/settings-page/settings-page.component';
 import { TimelineStepComponent } from './components/timeline-step/timeline-step.component';
+import { UiTemplatesPageComponent } from './components/ui-templates-page/ui-templates-page.component';
 
 const NUMBER_REGEX = /^[0-9]+$/;
 
@@ -48,8 +49,6 @@ const extraTabsMatcher: UrlMatcher = (segments: UrlSegment[], group, route): Url
             return null;
         }
     }
-
-    console.log(consumed, params)
 
     // match: ./extra[/:path]/:templateTabId
     if (segments[index]?.path !== "extra") {
@@ -79,8 +78,6 @@ const extraTabsMatcher: UrlMatcher = (segments: UrlSegment[], group, route): Url
     }
     params.templateTabId = tabId;
 
-    console.log(consumed, params)
-
     // found full match?
     if (index === segments.length) {
         return {
@@ -90,7 +87,7 @@ const extraTabsMatcher: UrlMatcher = (segments: UrlSegment[], group, route): Url
     }
 
     // match: ./plugin/:pluginId
-    if (segments[index]?.path !== "plugins") {
+    if (segments[index]?.path !== "plugins" && segments[index]?.path !== "plugin") {
         return null;
     }
     consumed.push(segments[index]);
@@ -100,8 +97,6 @@ const extraTabsMatcher: UrlMatcher = (segments: UrlSegment[], group, route): Url
         consumed.push(segments[index]);
         index += 1;
     }
-
-    console.log(consumed, params)
 
     // found full match?
     if (index === segments.length && pluginId != null) {
@@ -118,6 +113,8 @@ const extraTabsMatcher: UrlMatcher = (segments: UrlSegment[], group, route): Url
 const routes: Routes = [
     { path: '', component: ExperimentsPageComponent },
     { path: 'settings', component: SettingsPageComponent },
+    { path: 'templates', component: UiTemplatesPageComponent },
+    { path: 'templates/:templateId', component: UiTemplatesPageComponent },
     { path: 'experiments', component: ExperimentsPageComponent },
     { path: 'experiments/:experimentId', redirectTo: "info" },
     { path: 'experiments/:experimentId/info', component: ExperimentComponent },

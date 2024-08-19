@@ -1,0 +1,53 @@
+@if (filterType === "and") {
+    <div class="filter-container">
+        <div class="filter-type">
+            <div class="line"></div>
+            <div>AND</div>
+            <div class="line"></div>
+        </div>
+        <div class="child-filters">
+            @for (f of filter.and; track $index) {
+                <qhana-plugin-filter-view [filter]="f"></qhana-plugin-filter-view>
+            }
+        </div>
+    </div>
+}
+@if (filterType === "or") {
+    <div class="filter-container">
+        <div class="filter-type">
+            <div class="line"></div>
+            <div>OR</div>
+            <div class="line"></div>
+        </div>
+        <div class="child-filters">
+            @for (f of filter.or; track $index) {
+                <qhana-plugin-filter-view [filter]="f"></qhana-plugin-filter-view>
+            }
+        </div>
+    </div>
+}
+@if (filterType === "not") {
+    <div class="single-filter-container">
+        <p>NOT</p>
+        <div class="line"></div>
+        <qhana-plugin-filter-view [filter]="filter.not"></qhana-plugin-filter-view>
+    </div>
+}
+@if (filterType === "id") {
+    <p>Plugin ID: {{filter.id}}</p>
+}
+@if (filterType === "name") {
+    <p>Plugin name: {{filter.name}}</p>
+}
+@if (filterType === "version") {
+    <p>Plugin version: {{filter.version}}</p>
+}
+@if (filterType === "tag") {
+    <p>Plugin tag: {{filter.tag}}</p>
+}
+@if (filterType === "type") {
+    <p>Plugin type: {{filter.type}}</p>
+}
+@if (filterType === "empty") {
+    <p>No filter set.</p>
+}

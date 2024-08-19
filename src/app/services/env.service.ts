@@ -16,7 +16,7 @@
 
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
-import { ApiObject, isApiObject, isDeletedApiObject } from './api-data-types';
+import { ApiLink, ApiObject, CollectionApiObject, isApiObject, isDeletedApiObject } from './api-data-types';
 import { PluginRegistryBaseService } from './registry.service';
 
 
@@ -53,6 +53,9 @@ export class EnvService {
     private urlMapSubject: BehaviorSubject<Map<RegExp, string> | null> = new BehaviorSubject<Map<RegExp, string> | null>(null);
     private uiTemplateSubject: BehaviorSubject<string | null> = new BehaviorSubject<string | null>(null);
 
+    private createEnvVarLink: ApiLink | null = null;
+    private currentUiTemplateEnvVar: ApiLink | null = null;
+
     public get urlMap(): Observable<Map<RegExp, string> | null> {
         return this.urlMapSubject.asObservable();
     }
@@ -65,7 +68,9 @@ export class EnvService {
         this.subscribe();
         // just kick off get, updates are handled by subscription setup above
         this.registryService.getByRel([["env", "collection"]], new URLSearchParams([["name", "UI_URL_MAP"]]), true);
-        this.registryService.getByRel([["env", "collection"]], new URLSearchParams([["name", "DEFAULT_UI_TEMPLATE"]]), true);
+        this.registryService.getByRel([["env", "collection"]], new URLSearchParams([["name", "DEFAULT_UI_TEMPLATE"]]), true).then(response => {
+            this.createEnvVarLink = response?.links?.find?.(link => link.resourceType === "env" && link.rel.some(r => r === "create")) ?? null;
+        });
     }
 
     private unsubscribe() {
@@ -74,6 +79,11 @@ export class EnvService {
 
     private subscribe() {
         this.registrySubscription = this.registryService.apiObjectSubject.subscribe((apiObject => {
+            if (isDeletedApiObject(apiObject) && apiObject.deleted.resourceType === "env") {
+                if (apiObject.deleted.name === "DEFAULT_UI_TEMPLATE") {
+                    this.uiTemplateSubject.next(null);
+                }
+            }
             if (apiObject.self.resourceType !== "env") {
                 return;  // only look at env api objects
             }
@@ -82,12 +92,8 @@ export class EnvService {
                     this.updateUrlMap(apiObject.value);
                 }
                 if (apiObject.name === "DEFAULT_UI_TEMPLATE") {
-                    this.uiTemplateSubject.next(apiObject.value);
-                }
-            }
-            if (isDeletedApiObject(apiObject)) {
-                if (apiObject.deleted.name === "DEFAULT_UI_TEMPLATE") {
-                    this.uiTemplateSubject.next(null);
+                    this.currentUiTemplateEnvVar = apiObject.self;
+                    this.uiTemplateSubject.next(apiObject.value ? apiObject.value : null);
                 }
             }
         }));
@@ -121,5 +127,49 @@ export class EnvService {
             urlIn = urlIn.replace(matcher, replacment);
         });
         return urlIn;
+    }
+
+    public async setDefaultUiTemplateEnvVar(templateId: string | null) {
+        if (this.currentUiTemplateEnvVar == null) {
+            // no env var available, create it
+            if (!templateId) {
+                return;  // nothing to create
+            }
+            if (this.createEnvVarLink == null) {
+                console.warn("No create link found for env vars!");
+                return;
+            }
+            this.registryService.submitByApiLink(this.createEnvVarLink, {
+                name: "DEFAULT_UI_TEMPLATE",
+                value: templateId,
+            });
+            return;
+        }
+        if (this.currentUiTemplateEnvVar == null) {
+            return;
+        }
+        const response = await this.registryService.getByApiLink<EnvApiObject>(this.currentUiTemplateEnvVar);
+        if (response == null) {
+            console.warn("Env var DEFAULT_UI_TEMPLATE not found!");
+            return;
+        }
+        if (!templateId) {
+            const deleteLink = response.links.find(link => link.resourceType === "env" && link.rel.some(r => r === "delete"));
+            if (deleteLink == null) {
+                console.warn("No delete link found for env var DEFAULT_UI_TEMPLATE!");
+                return;
+            }
+            this.registryService.submitByApiLink(deleteLink);
+            return;
+        }
+        const updateLink = response.links.find(link => link.resourceType === "env" && link.rel.some(r => r === "update"));
+        if (updateLink == null) {
+            console.warn("No update link found for env var DEFAULT_UI_TEMPLATE!");
+            return;
+        }
+        this.registryService.submitByApiLink(updateLink, {
+            name: "DEFAULT_UI_TEMPLATE",
+            value: templateId,
+        });
     }
 }

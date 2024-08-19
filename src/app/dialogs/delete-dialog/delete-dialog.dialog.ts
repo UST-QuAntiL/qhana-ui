@@ -6,6 +6,8 @@ const RESOURCE_TYPE_TO_TEXT: { [props: string]: string } = {
     'resource': 'resource',
     'seed': 'seed url',
     'service': 'service entry',
+    'ui-template': 'UI template',
+    'ui-template-tab': 'UI template tab',
 }
 
 @Component({

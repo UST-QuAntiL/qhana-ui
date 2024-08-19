@@ -4,6 +4,17 @@
         <span>{{title}}</span>
     </a>
 
+    <ng-container *ngIf="(currentExperiment|async) == null">
+        <a class="navigation-link" mat-button [routerLink]="['/']"
+            routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+            Experiments
+        </a>
+        <a class="navigation-link" mat-button [routerLink]="['/templates']"
+            queryParamsHandling="merge" routerLinkActive="active">
+            UI Templates
+        </a>
+    </ng-container>
+
     <ng-container *ngIf="(currentExperiment|async) != null">
         <a class="navigation-link" mat-button [routerLink]="['/experiments', (experimentId|async), 'info']"
             routerLinkActive="active">

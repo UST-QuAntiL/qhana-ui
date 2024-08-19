@@ -1,0 +1,67 @@
+.toggle-group
+    height: 3em
+
+.filter-head
+    display: flex
+    align-items: center
+    justify-content: space-between
+    width: 100%
+    margin-block-end: 0.5rem
+
+.simple-filter
+    display: flex
+    align-items: start
+    gap: 0.5rem
+    width: 100%
+
+.filter-type-selec
+    width: 8rem
+
+.filter-value
+    width: unset
+    flex-grow: 1
+
+.filter-button
+    height: 3.5rem
+
+.nested-filter-container
+    display: flex
+    gap: 1rem
+    align-items: stretch
+    margin-block: 1rem
+
+.filter-combinator
+    display: flex
+    flex-direction: column
+    align-items: center
+    min-width: 2.1rem
+
+    .line
+        flex-grow: 1
+        width: 0px
+        border-inline-start: 1px solid var(--text-washed)
+
+.child-filter-list
+    display: flex
+    flex-direction: column
+    gap: 0.8rem
+    flex-grow: 1
+
+.child-filter-container
+    display: flex
+    align-items: stretch
+    gap: 0.5rem
+
+.child-filter
+    flex-grow: 1
+
+.child-filter-remove-button
+    height: unset
+    min-width: 2rem
+    padding: 0px
+    display: flex
+    flex-direction: column
+    align-items: center
+
+.warning
+    color: var(--accent-text)

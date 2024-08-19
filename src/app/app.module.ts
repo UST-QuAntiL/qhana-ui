@@ -78,6 +78,7 @@ import { TabGroupListComponent } from './components/tab-group-list/tab-group-lis
 import { TimelineStepNavComponent } from './components/timeline-step-nav/timeline-step-nav.component';
 import { TimelineStepComponent } from './components/timeline-step/timeline-step.component';
 import { TimelineSubstepsComponent } from './components/timeline-substeps/timeline-substeps.component';
+import { UiTemplatesPageComponent } from './components/ui-templates-page/ui-templates-page.component';
 import { ChangeUiTemplateDialog } from './dialogs/change-ui-template/change-ui-template.dialog';
 import { ChooseDataDialog } from './dialogs/choose-data/choose-data.dialog';
 import { ChoosePluginDialog } from './dialogs/choose-plugin/choose-plugin.dialog';
@@ -86,6 +87,12 @@ import { CreateExperimentDialog } from './dialogs/create-experiment/create-exper
 import { DeleteDialog } from './dialogs/delete-dialog/delete-dialog.dialog';
 import { ExportExperimentDialog } from './dialogs/export-experiment/export-experiment.dialog';
 import { MarkdownHelpDialog } from './dialogs/markdown-help/markdown-help.dialog';
+import { UiTemplateComponent } from "./components-small/ui-template/ui-template.component";
+import { UiTemplateTabListComponent } from './components-small/ui-template-tab-list/ui-template-tab-list.component';
+import { UiTemplateTabComponent } from './components-small/ui-template-tab/ui-template-tab.component';
+import { PluginFilterViewComponent } from './components-small/plugin-filter-view/plugin-filter-view.component';
+import { UiTemplateTabFormComponent } from './components-small/ui-template-tab-form/ui-template-tab-form.component';
+import { PluginFilterFormComponent } from './components-small/plugin-filter-form/plugin-filter-form.component';
 
 @NgModule({
     declarations: [
@@ -132,6 +139,13 @@ import { MarkdownHelpDialog } from './dialogs/markdown-help/markdown-help.dialog
         PluginFilterEditorComponent,
         TabGroupListComponent,
         ChooseTemplateDialog,
+        UiTemplatesPageComponent,
+        UiTemplateComponent,
+        UiTemplateTabListComponent,
+        UiTemplateTabComponent,
+        UiTemplateTabFormComponent,
+        PluginFilterViewComponent,
+        PluginFilterFormComponent,
     ],
     imports: [
         BrowserModule,
