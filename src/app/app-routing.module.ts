@@ -91,7 +91,7 @@ const extraTabsMatcher: UrlMatcher = (segments: UrlSegment[], group, route): Url
     }
 
     // match: ./plugin/:pluginId
-    if (segments[index]?.path !== "plugins") {
+    if (segments[index]?.path !== "plugins" && segments[index]?.path !== "plugin") {
         return null;
     }
     consumed.push(segments[index]);
