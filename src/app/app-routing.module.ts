@@ -50,8 +50,6 @@ const extraTabsMatcher: UrlMatcher = (segments: UrlSegment[], group, route): Url
         }
     }
 
-    console.log(consumed, params)
-
     // match: ./extra[/:path]/:templateTabId
     if (segments[index]?.path !== "extra") {
         return null;
@@ -80,8 +78,6 @@ const extraTabsMatcher: UrlMatcher = (segments: UrlSegment[], group, route): Url
     }
     params.templateTabId = tabId;
 
-    console.log(consumed, params)
-
     // found full match?
     if (index === segments.length) {
         return {
@@ -101,8 +97,6 @@ const extraTabsMatcher: UrlMatcher = (segments: UrlSegment[], group, route): Url
         consumed.push(segments[index]);
         index += 1;
     }
-
-    console.log(consumed, params)
 
     // found full match?
     if (index === segments.length && pluginId != null) {
