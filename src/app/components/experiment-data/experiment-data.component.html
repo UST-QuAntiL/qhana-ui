@@ -35,7 +35,7 @@
         </mat-card>
         <mat-card appearance="outlined" class="page-item card" *ngFor="let data of experimentData | async">
             <mat-card-title>
-                <a class="t-headline title-link" queryParamsHandling="merge"
+                <a class="t-headline title-link break-words" queryParamsHandling="merge"
                     [routerLink]="['/experiments', experimentId, 'data', data.name, {version: data.version.toString()}]">{{data.name}}</a>
             </mat-card-title>
             <mat-card-content>

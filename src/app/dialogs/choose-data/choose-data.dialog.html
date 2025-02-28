@@ -29,17 +29,15 @@
         </div>
         <mat-selection-list [multiple]="false" color="primary" #selection>
             <mat-list-option *ngFor="let data of dataList" [disabled]="!matching.has(data['@self'])" [value]="data">
-                <p>
-                    <span class="bold">
+                <span class="bold break-words" matListItemTitle>
                         {{data.name}}
-                    </span>
-                    <span>
-                        (v{{data.version}})
-                    </span>
+                </span>
+                <span matListItemLine>
+                    (v{{data.version}})
                     <span class="italic ml2">
                         {{data.type}} – {{data.contentType}}
                     </span>
-                </p>
+                </span>
             </mat-list-option>
         </mat-selection-list>
     </div>
