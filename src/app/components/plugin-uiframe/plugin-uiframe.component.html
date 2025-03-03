@@ -14,7 +14,7 @@
         </button>
     </div>
     <iframe seamless class="frontend-frame" [src]="frontendUrl" frameborder="0" scroll="no" [height]="frontendHeight"
-        sandbox="allow-forms allow-scripts allow-same-origin" allow="fullscreen" #uiframe></iframe>
+        sandbox="allow-forms allow-downloads allow-scripts allow-same-origin" allow="fullscreen" #uiframe></iframe>
     <div class="ui-loading-blend" *ngIf="loading">
         <mat-spinner class="notes-content-spinner" mode="indeterminate" strokeWidth="5" color="primary">
         </mat-spinner>
