@@ -22,6 +22,7 @@ interface PluginPreviewOption extends PreviewOption {
     type: "plugin";
     plugin: ApiLink;
     inputsAvailable: boolean;
+    specificity: number;
 }
 
 function isDataApiObject(input: ExperimentDataApiObject | TimelineStepApiObject | TimelineSubStepApiObject): input is ExperimentDataApiObject {
@@ -243,11 +244,26 @@ export class DataPreviewComponent implements OnChanges {
             const plugin = await this.registry.getFromCacheByApiLink<PluginApiObject>(pluginLink);
             const dataInputs = plugin?.data?.entryPoint?.dataInput ?? [];
             const requiredInputs = dataInputs.filter(input => input.required);
+            const inputsAvailable = requiredInputs.length === 1;
+            let specificity = 50;
+            if (plugin?.data?.tags?.some(t => t === "default")) {
+                specificity = 100;
+            }
+            if (plugin?.data?.tags?.some(t => t === "non-default")) {
+                specificity = 0;
+            }
+            if (dataInputs.length > 1) {
+                specificity = 10;
+            }
+            if (!inputsAvailable) {
+                specificity = 0;
+            }
             const previewOption: PluginPreviewOption = {
                 type: 'plugin',
                 name: pluginLink.name ?? "Unknown",
                 plugin: pluginLink,
-                inputsAvailable: requiredInputs.length === 1,
+                inputsAvailable: inputsAvailable,
+                specificity: specificity,
             };
             return previewOption;
         });
@@ -259,7 +275,11 @@ export class DataPreviewComponent implements OnChanges {
 
         const matchingPreviews = pluginPreviewOptions.filter(preview => preview.inputsAvailable);
 
-        if (this.chosenPreview == null || (this.chosenPreview.type == 'internal' && this.chosenPreview.specificity === 0)) {
+        matchingPreviews.sort((a, b) => b.specificity - a.specificity);
+
+        const newSpecificity = matchingPreviews[0]?.specificity ?? 0;
+
+        if (this.chosenPreview == null || (this.chosenPreview.type == 'internal' && this.chosenPreview.specificity < newSpecificity)) {
             this.chosenPreview = matchingPreviews[0] ?? this.chosenPreview;
         }
     }
