@@ -147,7 +147,7 @@ export class PluginPreviewComponent implements OnChanges {
         }
 
         // mimetype like contains both parts
-        const splitType = mimetypeLike.split("/", 1);
+        const splitType = mimetypeLike.split("/", 2);
         const splitStart = splitType[0];
         let splitEnd = splitType[1];
         if (splitEnd == null || splitEnd === "") {
