@@ -81,6 +81,7 @@ import { TimelineSubstepsComponent } from './components/timeline-substeps/timeli
 import { UiTemplatesPageComponent } from './components/ui-templates-page/ui-templates-page.component';
 import { ChangeUiTemplateDialog } from './dialogs/change-ui-template/change-ui-template.dialog';
 import { ChooseDataDialog } from './dialogs/choose-data/choose-data.dialog';
+import { ChooseRelatedDataDialog } from './dialogs/choose-related-data/choose-related-data.dialog';
 import { ChoosePluginDialog } from './dialogs/choose-plugin/choose-plugin.dialog';
 import { ChooseTemplateDialog } from './dialogs/choose-template/choose-template.dialog';
 import { CreateExperimentDialog } from './dialogs/create-experiment/create-experiment.dialog';
@@ -113,6 +114,7 @@ import { PluginFilterFormComponent } from './components-small/plugin-filter-form
         MarkdownComponent,
         PluginUiframeComponent,
         ChooseDataDialog,
+        ChooseRelatedDataDialog,
         ChoosePluginDialog,
         TimelineSubstepsComponent,
         SubstepsDetailsComponent,
