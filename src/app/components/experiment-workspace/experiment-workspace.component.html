@@ -46,9 +46,14 @@
                     <mat-card appearance="outlined" class="card no-padding">
                         <qhana-plugin-uiframe [url]="frontendUrl" [plugin]="activePlugin.self"
                             [context]="{experimentId: experimentId??undefined}"
-                            (formDataSubmit)="onPluginUiFormSubmit($event)">
+                            (formDataSubmit)="onPluginUiFormSubmit($event)"
+                            (requestDataPreview)="previewData = $event">
                         </qhana-plugin-uiframe>
                     </mat-card>
+
+                    <qhana-data-preview class="data-preview" [data]="previewData" *ngIf="previewData">
+                        <h3 class="t-headline">Preview "{{previewData.name}}"</h3>
+                    </qhana-data-preview>
                 </div>
             </ng-container>
             <ng-container *ngIf="detailAreaActive">
