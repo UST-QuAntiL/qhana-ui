@@ -4,7 +4,7 @@ import { BehaviorSubject, Observable, Subject, Subscription, from, of, timer } f
 import { catchError, concatMap, debounceTime, filter, mergeAll, mergeMap, take, throttleTime } from 'rxjs/operators';
 import { ApiLink, CollectionApiObject, PageApiObject } from 'src/app/services/api-data-types';
 import { CurrentExperimentService } from 'src/app/services/current-experiment.service';
-import { ExperimentResultQuality, QhanaBackendService, TimelineStepApiObject, TimelineSubStepApiObject } from 'src/app/services/qhana-backend.service';
+import { ExperimentDataApiObject, ExperimentResultQuality, QhanaBackendService, TimelineStepApiObject, TimelineSubStepApiObject } from 'src/app/services/qhana-backend.service';
 import { PluginRegistryBaseService } from 'src/app/services/registry.service';
 import { TabDefinition } from '../timeline-step-nav/timeline-step-nav.component';
 
@@ -56,6 +56,8 @@ export class TimelineStepComponent implements OnInit, OnDestroy {
 
     pluginRecommendations: ApiLink[] = [];
 
+    previewData: ExperimentDataApiObject | null = null;
+
 
     constructor(private route: ActivatedRoute, private experiment: CurrentExperimentService, private backend: QhanaBackendService, private registry: PluginRegistryBaseService) {
         this.backendUrl = backend.backendRootUrl;
@@ -74,6 +76,7 @@ export class TimelineStepComponent implements OnInit, OnDestroy {
             this.stepId = params.step;
             this.stepTabId = params.stepTabId ?? "overview";
             if (hasChanged) {
+                this.previewData = null;
                 this.stepNotes = null;
                 this.lastSavedNotes = "";
                 this.notesStatus = "original";

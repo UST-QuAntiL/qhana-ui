@@ -1,5 +1,5 @@
-import { Component, Input } from '@angular/core';
-import { QhanaBackendService, TimelineSubStepApiObject, TimelineSubStepPostData } from 'src/app/services/qhana-backend.service';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { ExperimentDataApiObject, QhanaBackendService, TimelineSubStepApiObject, TimelineSubStepPostData } from 'src/app/services/qhana-backend.service';
 import { FormSubmitData } from '../plugin-uiframe/plugin-uiframe.component';
 
 @Component({
@@ -12,6 +12,7 @@ export class TimelineSubstepsComponent {
     @Input() experimentId: string | number | null = null;
     @Input() substeps: TimelineSubStepApiObject[] = [];
     @Input() parentFinished: boolean = false;
+    @Output() requestDataPreview: EventEmitter<ExperimentDataApiObject> = new EventEmitter();
 
     constructor(private backend: QhanaBackendService) { }
 

@@ -152,8 +152,13 @@
 
     <ng-container *ngIf="stepTabId === 'steps' || (stepTabId === 'overview' && timelineStep.status === 'PENDING')">
         <qhana-timeline-substeps class="timeline-substeps" [substeps]="substeps" [experimentId]="experimentId"
-            [parentFinished]="timelineStep.status !== 'PENDING'" *ngIf="substeps != null && substeps.length > 0">
+            [parentFinished]="timelineStep.status !== 'PENDING'" *ngIf="substeps != null && substeps.length > 0"
+            (requestDataPreview)="previewData = $event">
         </qhana-timeline-substeps>
+
+        <qhana-data-preview class="data-preview" [data]="previewData" *ngIf="previewData">
+            <h3 class="t-headline">Preview "{{previewData.name}}"</h3>
+        </qhana-data-preview>
     </ng-container>
     <div class="scroll-spacer"></div>
 </div>

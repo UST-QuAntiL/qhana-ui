@@ -8,7 +8,8 @@
             </mat-panel-title>
         </mat-expansion-panel-header>
         <div *ngIf="!parentFinished && !step.cleared && step.hrefUi">
-            <qhana-plugin-uiframe [url]="step.hrefUi" (formDataSubmit)="onPluginUiFormSubmit($event, step)">
+            <qhana-plugin-uiframe [url]="step.hrefUi" (formDataSubmit)="onPluginUiFormSubmit($event, step)"
+                (requestDataPreview)="requestDataPreview.emit($event)">
             </qhana-plugin-uiframe>
         </div>
         <p *ngIf="!parentFinished && !step.cleared && !step.hrefUi">
