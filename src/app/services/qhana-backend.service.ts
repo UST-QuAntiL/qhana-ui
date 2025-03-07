@@ -444,6 +444,21 @@ export class QhanaBackendService {
         );
     }
 
+    public getRelatedExperimentData(experimentId: number | string, dataName: string, version: string = "latest", relation: "any" | "exact" | "pre" | "post" = "any", includeSelf: boolean = false, dataType: string | null = null, contentType: string | null = null): Observable<ApiObjectList<ExperimentDataApiObject>> {
+        const params = new URLSearchParams();
+        params.set("version", version != null ? version : 'latest');
+        params.set("relation", relation);
+        params.set("include-self", includeSelf ? "true" : "false");
+        if (dataType) {
+            params.set("data-type", dataType);
+        }
+        if (contentType) {
+            params.set("content-type", contentType);
+        }
+        return this.callWithRootUrl<ApiObjectList<ExperimentDataApiObject>>(
+            rootUrl => this.http.get<any>(`${rootUrl}/experiments/${experimentId}/data/${dataName}/related?${params.toString()}`));
+    }
+
     public getExperimentDataContent(downloadLink: string): Observable<Blob> {
         return this.callWithRootUrl<Blob>(
             rootUrl => this.http.get(downloadLink, { responseType: "blob" })

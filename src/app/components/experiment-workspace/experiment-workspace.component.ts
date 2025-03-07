@@ -5,10 +5,10 @@ import { Subscription } from 'rxjs';
 import { ApiLink, CollectionApiObject } from 'src/app/services/api-data-types';
 import { CurrentExperimentService } from 'src/app/services/current-experiment.service';
 import { PluginApiObject } from 'src/app/services/qhana-api-data-types';
-import { QhanaBackendService } from 'src/app/services/qhana-backend.service';
+import { ExperimentDataApiObject, QhanaBackendService } from 'src/app/services/qhana-backend.service';
 import { PluginRegistryBaseService } from 'src/app/services/registry.service';
-import { FormSubmitData } from '../plugin-uiframe/plugin-uiframe.component';
 import { TemplateTabApiObject, TemplatesService } from 'src/app/services/templates.service';
+import { FormSubmitData } from '../plugin-uiframe/plugin-uiframe.component';
 
 @Component({
     selector: 'qhana-experiment-workspace',
@@ -27,6 +27,8 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
 
     parameterSubscription: Subscription | null = null;
     activePlugin: PluginApiObject | null = null;
+
+    previewData: ExperimentDataApiObject | null = null;
 
     frontendUrl: string | null = null;
 
@@ -62,6 +64,7 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
         if (newPluginId == null) {
             this.activePlugin = null;
             this.frontendUrl = null;
+            this.previewData = null;
             return;
         }
         const pluginPage = await this.registry.getByRel<CollectionApiObject>([["plugin", "collection"]], new URLSearchParams({ "plugin-id": newPluginId }), true);
@@ -76,6 +79,7 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
         }
         this.activePlugin = pluginResponse.data;
         this.frontendUrl = pluginResponse.data.entryPoint.uiHref;
+        this.previewData = null;
     }
 
     onKeyDown(event: KeyboardEvent) {

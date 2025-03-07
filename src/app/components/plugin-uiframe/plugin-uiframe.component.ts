@@ -5,6 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { catchError, concatAll, filter, map, mergeAll, mergeMap, toArray } from 'rxjs/operators';
 import { ChooseDataDialog } from 'src/app/dialogs/choose-data/choose-data.dialog';
+import { ChooseRelatedDataDialog, RelatedDataChooserData } from 'src/app/dialogs/choose-related-data/choose-related-data.dialog';
 import { ChoosePluginDialog } from 'src/app/dialogs/choose-plugin/choose-plugin.dialog';
 import { ApiLink, CollectionApiObject } from 'src/app/services/api-data-types';
 import { PluginApiObject } from 'src/app/services/qhana-api-data-types';
@@ -71,8 +72,39 @@ function isDataUrlRequest(data: any): data is DataUrlRequest {
     return true;
 }
 
+interface RelatedDataUrlRequest {
+    type: "request-related-data-url";
+    inputKey: string;
+    dataUrl: string;
+    relation: "any" | "exact" | "pre" | "post";
+    includeSelf?: boolean;
+    acceptedInputType?: string;
+    acceptedContentType?: string;
+    userInteraction?: boolean;
+}
+
+function isRelatedDataUrlRequest(data: any): data is RelatedDataUrlRequest {
+    if (data == null) {
+        return false;
+    }
+    if (data.type !== "request-related-data-url") {
+        return false;
+    }
+    if (data.inputKey == null || data.dataUrl == null || data.relation == null) {
+        return false;
+    }
+    if (typeof data.inputKey !== "string" || typeof data.dataUrl !== "string") {
+        return false;
+    }
+    const rel = data.relation;
+    if (!(rel === "any" || rel === "exact" || rel === "pre" || rel === "post")) {
+        return false;
+    }
+    return true;
+}
+
 interface DataUrlInfoRequest {
-    type: "request-data-url";
+    type: "request-data-url-info";
     inputKey: string;
     dataUrl: string;
 }
@@ -88,6 +120,24 @@ function isDataUrlInfoRequest(data: any): data is DataUrlInfoRequest {
         return false;
     }
     if (typeof data.inputKey !== "string" || typeof data.dataUrl !== "string") {
+        return false;
+    }
+    return true;
+}
+
+interface DataPreviewRequest {
+    type: "request-data-preview";
+    dataUrl: string;
+}
+
+function isDataPreviewRequest(data: any): data is DataPreviewRequest {
+    if (data == null) {
+        return false;
+    }
+    if (data.type !== "request-data-preview") {
+        return false;
+    }
+    if (data.dataUrl == null || typeof data.dataUrl !== "string") {
         return false;
     }
     return true;
@@ -166,6 +216,7 @@ export class PluginUiframeComponent implements OnChanges, OnDestroy {
 
     @Input() url: string | null = null;
     @Output() formDataSubmit: EventEmitter<FormSubmitData> = new EventEmitter();
+    @Output() requestDataPreview: EventEmitter<ExperimentDataApiObject> = new EventEmitter();
 
     @Input() plugin: ApiLink | null = null;
     @Input() context: PluginUiContext | null = null;
@@ -338,6 +389,94 @@ export class PluginUiframeComponent implements OnChanges, OnDestroy {
                 filename: result.name,
                 version: result.version,
             });
+            this.requestDataPreview.emit(result);
+        });
+    }
+
+    private extractExperimentDataInfoFromUrl(url: string) {
+        const backendUrl = this.backend.backendRootUrl
+        if (backendUrl != null && !url.startsWith(backendUrl)) {
+            return null; // unknown data source
+        }
+        const dataUrl = new URL(url);
+        const pathMatch = dataUrl.pathname.match(/^\/experiments\/([0-9]+)\/data\/([^\/\s]+)\/download\/?$/);
+        const versionMatch = dataUrl.searchParams.get("version");
+        if (pathMatch && pathMatch[1] != null && pathMatch[2] != null && versionMatch != null) {
+            return {
+                "experimentId": pathMatch[1],
+                "dataId": pathMatch[2],
+                "version": versionMatch
+            }
+        }
+        return null;
+    }
+
+    private selectRelatedData(request: RelatedDataUrlRequest) {
+        const dataRef = this.extractExperimentDataInfoFromUrl(request.dataUrl);
+        if (!dataRef) {
+            return;
+        }
+        this.backend.getRelatedExperimentData(dataRef.experimentId, dataRef.dataId, dataRef.version, request.relation, request.includeSelf ?? false, request.acceptedInputType ?? null, request.acceptedContentType ?? null).subscribe((results) => {
+            if (!request.userInteraction) {
+                const data = results.items[0];
+                if (!data) {
+                    return;
+                }
+                let url = data.download;
+                if (url.startsWith("/")) {
+                    url = this.backend.backendRootUrl + url;
+                }
+                this.sendMessage({
+                    type: "data-url-response",
+                    inputKey: request.inputKey,
+                    href: url,
+                    dataType: data.type,
+                    contentType: data.contentType,
+                    filename: data.name,
+                    version: data.version,
+                });
+            } else {
+                this.selectRelatedDataInteractive(request, dataRef.experimentId, dataRef.dataId, dataRef.version);
+            }
+        });
+    }
+
+    private selectRelatedDataInteractive(request: RelatedDataUrlRequest, experimentId: string, dataId: string, version: string) {
+        if (!request.userInteraction) {
+            return;
+        }
+        if (this.dialogActive) {
+            return; // only ever show one dialog at a time
+        }
+        this.dialogActive = true;
+        const dialogData: RelatedDataChooserData = {
+            dataId: dataId,
+            version: version,
+            relation: request.relation,
+            includeSelf: request.includeSelf ?? false,
+            acceptedDataType: request.acceptedInputType ?? null,
+            acceptedContentType: request.acceptedContentType ?? null,
+        };
+        const dialogRef = this.dialog.open(ChooseRelatedDataDialog, { data: dialogData });
+        dialogRef.afterClosed().subscribe((result: ExperimentDataApiObject) => {
+            this.dialogActive = false;
+            if (result == null) {
+                return; // nothing was selected
+            }
+            let url = result.download;
+            if (url.startsWith("/")) {
+                url = this.backend.backendRootUrl + url;
+            }
+            this.sendMessage({
+                type: "data-url-response",
+                inputKey: request.inputKey,
+                href: url,
+                dataType: result.type,
+                contentType: result.contentType,
+                filename: result.name,
+                version: result.version,
+            });
+            this.requestDataPreview.emit(result);
         });
     }
 
@@ -360,16 +499,9 @@ export class PluginUiframeComponent implements OnChanges, OnDestroy {
     }
 
     private handleInputDataInfoRequest(request: DataUrlInfoRequest) {
-        // http://localhost:9090/experiments/1/data/out.txt/download?version=2
-        const backendUrl = this.backend.backendRootUrl
-        if (backendUrl != null && !request.dataUrl.startsWith(backendUrl)) {
-            return; // unknown data source
-        }
-        const dataUrl = new URL(request.dataUrl);
-        const pathMatch = dataUrl.pathname.match(/^\/experiments\/([0-9]+)\/data\/([^\/\s]+)\/download\/?$/);
-        const versionMatch = dataUrl.searchParams.get("version");
-        if (pathMatch && pathMatch[1] != null && pathMatch[2] != null && versionMatch != null) {
-            this.backend.getExperimentData(pathMatch[1], pathMatch[2], versionMatch).subscribe(dataResult => {
+        const dataRef = this.extractExperimentDataInfoFromUrl(request.dataUrl);
+        if (dataRef) {
+            this.backend.getExperimentData(dataRef.experimentId, dataRef.dataId, dataRef.version).subscribe(dataResult => {
                 this.sendMessage({
                     type: "data-url-response",
                     inputKey: request.inputKey,
@@ -379,6 +511,15 @@ export class PluginUiframeComponent implements OnChanges, OnDestroy {
                     filename: dataResult.name,
                     version: dataResult.version,
                 });
+            });
+        }
+    }
+
+    private handleDataPreviewRequest(request: DataPreviewRequest) {
+        const dataRef = this.extractExperimentDataInfoFromUrl(request.dataUrl);
+        if (dataRef) {
+            this.backend.getExperimentData(dataRef.experimentId, dataRef.dataId, dataRef.version).subscribe(result => {
+                this.requestDataPreview.emit(result);
             });
         }
     }
@@ -521,11 +662,23 @@ export class PluginUiframeComponent implements OnChanges, OnDestroy {
                 }
                 this.selectInputData(data);
             }
+            if (data?.type === "request-related-data-url") {
+                if (!isRelatedDataUrlRequest(data)) {
+                    return;
+                }
+                this.selectRelatedData(data);
+            }
             if (data?.type === "request-data-url-info") {
                 if (!isDataUrlInfoRequest(data)) {
                     return;
                 }
                 this.handleInputDataInfoRequest(data);
+            }
+            if (data?.type === "request-data-preview") {
+                if (!isDataPreviewRequest(data)) {
+                    return;
+                }
+                this.handleDataPreviewRequest(data);
             }
             if (data.type === "request-plugin-url") {
                 if (!isPluginUrlRequest(data)) {

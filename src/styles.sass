@@ -779,15 +779,43 @@ form.qhana-form
     border-radius: 4px
     font-weight: 500
 
-.qhana-choose-file-button:hover, .qhana-choose-plugin-button:hover
+.qhana-choose-file-button:hover:not([disabled]), .qhana-choose-plugin-button:hover:not([disabled])
     background-color: var(--primary, purple)
     color: var(--text-primary, white)
 
-.qhana-choose-file-button:active, .qhana-choose-plugin-button:active
+.qhana-choose-file-button:active:not([disabled]), .qhana-choose-plugin-button:active:not([disabled])
     background-color: var(--primary-lighter, purple)
     color: var(--text-dark-primary, black)
 
 .qhana-choose-file-button:focus-visible, .qhana-choose-plugin-button:focus-visible
+    outline: 4px solid var(--accent-darker, black)
+
+.qhana-choose-file-button[disabled], .qhana-choose-plugin-button[disabled]
+    cursor: revert
+    color: var(--text-disabled, black)
+    border-color: var(--text-disabled, black)
+
+.qhana-show-preview-button
+    display: inline-block
+    padding-inline: 0.5rem
+    padding-block: 0.3ex
+    color: var(--primary-text, purple)
+    background-color: transparent
+    cursor: pointer
+    outline: none
+    border: none
+    border-radius: 4px
+    font-weight: 500
+
+.qhana-show-preview-button:hover
+    background-color: var(--primary, purple)
+    color: var(--text-primary, white)
+
+.qhana-show-preview-button:active
+    background-color: var(--primary-lighter, purple)
+    color: var(--text-dark-primary, black)
+
+.qhana-show-preview-button:focus-visible
     outline: 4px solid var(--accent-darker, black)
 
 .qhana-input-description

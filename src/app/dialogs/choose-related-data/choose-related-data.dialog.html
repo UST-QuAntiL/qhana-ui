@@ -1,0 +1,26 @@
+<h1 mat-dialog-title align-arrow>Choose related data</h1>
+<div mat-dialog-content>
+    <div>
+        <p>Accepts: {{dataType}} – {{contentType}}</p>
+        <mat-selection-list [multiple]="false" color="primary" #selection>
+            <mat-list-option *ngFor="let data of dataList" [disabled]="!matching.has(data['@self'])" [value]="data">
+                <span class="bold break-words" matListItemTitle>
+                        {{data.name}}
+                </span>
+                <span matListItemLine>
+                    (v{{data.version}})
+                    <span class="italic ml2">
+                        {{data.type}} – {{data.contentType}}
+                    </span>
+                </span>
+            </mat-list-option>
+        </mat-selection-list>
+    </div>
+</div>
+<div class="dialog-actions" mat-dialog-actions>
+    <button mat-button (click)="onCancel()">Cancel</button>
+    <button mat-button [mat-dialog-close]="selection.selectedOptions.selected[0]?.value"
+        [disabled]="selection.selectedOptions.isEmpty()">
+        Choose
+    </button>
+</div>
