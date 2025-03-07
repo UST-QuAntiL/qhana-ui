@@ -104,7 +104,7 @@ function isRelatedDataUrlRequest(data: any): data is RelatedDataUrlRequest {
 }
 
 interface DataUrlInfoRequest {
-    type: "request-data-url";
+    type: "request-data-url-info";
     inputKey: string;
     dataUrl: string;
 }
