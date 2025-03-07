@@ -125,6 +125,24 @@ function isDataUrlInfoRequest(data: any): data is DataUrlInfoRequest {
     return true;
 }
 
+interface DataPreviewRequest {
+    type: "request-data-preview";
+    dataUrl: string;
+}
+
+function isDataPreviewRequest(data: any): data is DataPreviewRequest {
+    if (data == null) {
+        return false;
+    }
+    if (data.type !== "request-data-preview") {
+        return false;
+    }
+    if (data.dataUrl == null || typeof data.dataUrl !== "string") {
+        return false;
+    }
+    return true;
+}
+
 interface PluginUrlRequest {
     type: "request-plugin-url";
     inputKey: string;
@@ -198,6 +216,7 @@ export class PluginUiframeComponent implements OnChanges, OnDestroy {
 
     @Input() url: string | null = null;
     @Output() formDataSubmit: EventEmitter<FormSubmitData> = new EventEmitter();
+    @Output() requestDataPreview: EventEmitter<ExperimentDataApiObject> = new EventEmitter();
 
     @Input() plugin: ApiLink | null = null;
     @Input() context: PluginUiContext | null = null;
@@ -370,6 +389,7 @@ export class PluginUiframeComponent implements OnChanges, OnDestroy {
                 filename: result.name,
                 version: result.version,
             });
+            this.requestDataPreview.emit(result);
         });
     }
 
@@ -456,6 +476,7 @@ export class PluginUiframeComponent implements OnChanges, OnDestroy {
                 filename: result.name,
                 version: result.version,
             });
+            this.requestDataPreview.emit(result);
         });
     }
 
@@ -490,6 +511,15 @@ export class PluginUiframeComponent implements OnChanges, OnDestroy {
                     filename: dataResult.name,
                     version: dataResult.version,
                 });
+            });
+        }
+    }
+
+    private handleDataPreviewRequest(request: DataPreviewRequest) {
+        const dataRef = this.extractExperimentDataInfoFromUrl(request.dataUrl);
+        if (dataRef) {
+            this.backend.getExperimentData(dataRef.experimentId, dataRef.dataId, dataRef.version).subscribe(result => {
+                this.requestDataPreview.emit(result);
             });
         }
     }
@@ -643,6 +673,12 @@ export class PluginUiframeComponent implements OnChanges, OnDestroy {
                     return;
                 }
                 this.handleInputDataInfoRequest(data);
+            }
+            if (data?.type === "request-data-preview") {
+                if (!isDataPreviewRequest(data)) {
+                    return;
+                }
+                this.handleDataPreviewRequest(data);
             }
             if (data.type === "request-plugin-url") {
                 if (!isPluginUrlRequest(data)) {
