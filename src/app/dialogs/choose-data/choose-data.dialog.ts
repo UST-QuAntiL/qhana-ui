@@ -4,6 +4,7 @@ import { Subscription } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { CurrentExperimentService } from 'src/app/services/current-experiment.service';
 import { ApiObjectList, ExperimentDataApiObject, QhanaBackendService } from 'src/app/services/qhana-backend.service';
+import { getMimetypeLikeMatcher } from 'src/app/utils';
 
 @Component({
     selector: 'qhana-choose-data',
@@ -37,8 +38,8 @@ export class ChooseDataDialog implements OnInit {
     constructor(public dialogRef: MatDialogRef<ChooseDataDialog>, @Inject(MAT_DIALOG_DATA) public data: { acceptedDataType: string, acceptedContentTypes: string[] }, private experiment: CurrentExperimentService, private backend: QhanaBackendService) { }
 
     ngOnInit(): void {
-        this.acceptedDataTypeMatcher = this.getMimetypeLikeMatcher(this.data.acceptedDataType);
-        this.acceptedContentTypeMatchers = this.data.acceptedContentTypes.map(this.getMimetypeLikeMatcher);
+        this.acceptedDataTypeMatcher = getMimetypeLikeMatcher(this.data.acceptedDataType);
+        this.acceptedContentTypeMatchers = this.data.acceptedContentTypes.map(getMimetypeLikeMatcher);
         this.experiment.experimentId.pipe(take(1)).subscribe(id => {
             this.experimentId = id;
             this.loadData();
@@ -96,21 +97,4 @@ export class ChooseDataDialog implements OnInit {
     onOk(): void {
         this.dialogRef.close();
     }
-
-    getMimetypeLikeMatcher(pattern: string) {
-        if (pattern === "*" || pattern === "*/*" || pattern === "/") {
-            return (typeString: string) => true;
-        }
-        if (pattern.startsWith("*/") || pattern.startsWith("/")) {
-            const suffix = pattern.replace("^\*?/", "");
-            return (typeString: string) => typeString.endsWith(suffix);
-        }
-        if (pattern.endsWith("/*") || pattern.endsWith("/") || !pattern.includes("/")) {
-            const prefix = pattern.replace("/\*?$", "");
-            const extendedPrefix = prefix + "/";
-            return (typeString: string) => typeString.startsWith(extendedPrefix) || typeString === prefix;
-        }
-        return (typeString: string) => typeString === pattern;
-    }
-
 }
