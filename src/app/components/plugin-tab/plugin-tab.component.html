@@ -1,5 +1,5 @@
 <ng-container *ngFor="let navTabBar of navigationTabs">
-    <nav mat-tab-nav-bar class="big-nav-tabs" [tabPanel]="panel">
+    <nav mat-tab-nav-bar class="big-nav-tabs" [tabPanel]="tabContentPanel">
         <a mat-tab-link
             [routerLink]="navTabLinkPrefix.concat(navTab.link)"
             [queryParamsHandling]="'preserve'" [active]="navTab.tabId === currentTabId || currentPath?.startsWith(navTab.path)"
@@ -13,10 +13,9 @@
             </span>
         </a>
     </nav>
-    <mat-tab-nav-panel #panel></mat-tab-nav-panel>
 </ng-container>
 <ng-container *ngIf="navigationTabs.length === 0 && (currentPluginGroup?.collectionSize ?? 0) > 1 && (currentPluginGroup?.collectionSize ?? 0) < 6">
-    <nav mat-tab-nav-bar class="big-nav-tabs" [tabPanel]="pluginsPanel">
+    <nav mat-tab-nav-bar class="big-nav-tabs" [tabPanel]="tabContentPanel">
         <a mat-tab-link
             [routerLink]="navTabLinkPrefix.concat(currentPath ? [currentPath] : []).concat([currentTabId ?? '-1', 'plugin', plugin.resourceKey?.pluginId ?? '-1'])"
             [queryParamsHandling]="'preserve'" [active]="plugin.resourceKey?.pluginId === currentPluginId || plugin.resourceKey?.pluginId === activePlugin?.resourceKey?.pluginId"
@@ -24,9 +23,8 @@
             {{plugin.name}}
         </a>
     </nav>
-    <mat-tab-nav-panel #pluginsPanel></mat-tab-nav-panel>
 </ng-container>
-<div class="main-content">
+<mat-tab-nav-panel class="main-content" #tabContentPanel>
     <mat-card class="sidebar" *ngIf="currentPluginGroup && ((currentPluginGroup?.collectionSize ?? 0) >= 6 || (navigationTabs.length > 0 && (currentPluginGroup?.collectionSize ?? 0) > 1))">
         <mat-card-header class="sidebar-header t-title">Plugins</mat-card-header>
         <mat-card-content class="sidebar-content-wrapper">
@@ -46,4 +44,4 @@
         *ngIf="previewData">
         <h3 class="t-headline">Preview "{{previewData.name}}"</h3>
     </qhana-data-preview>
-</div>
+</mat-tab-nav-panel>
