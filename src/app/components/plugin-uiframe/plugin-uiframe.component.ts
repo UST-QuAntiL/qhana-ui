@@ -24,6 +24,7 @@ export interface FormSubmitData {
 export interface PluginUiContext {
     experimentId?: string | number;
     stepId?: string | number;
+    location?: "navigation" | "workspace" | "experiment-navigation" | "timeline-step" | "data-preview" | string;
     data?: Array<{ downloadUrl: string, dataType: string, contentType: string }>;
 }
 
@@ -277,6 +278,9 @@ export class PluginUiframeComponent implements OnChanges, OnDestroy {
         if (changes.plugin != null || changes.context != null) {
             this.processContext();
         }
+        if (changes.context != null) {
+            this.sendMessage({ type: "plugin-context", ...this.getPluginContext() });
+        }
     }
 
     async autofillLatest() {
@@ -326,6 +330,23 @@ export class PluginUiframeComponent implements OnChanges, OnDestroy {
         }
         this.autofillData = null;
         return;
+    }
+
+    private getPluginContext() {
+        const context: { [props: string]: unknown } = {};
+        if (this.experimentId) {
+            context.experimentId = this.experimentId.toString();
+        }
+        if (this.context?.experimentId) {
+            context.experimentId = this.context.experimentId.toString();
+        }
+        if (this.context?.stepId) {
+            context.experimentId = this.context.stepId.toString();
+        }
+        if (this.context?.location) {
+            context.location = this.context.location.toString();
+        }
+        return context;
     }
 
     private calculateMaxHeight(): number | undefined {
@@ -616,6 +637,7 @@ export class PluginUiframeComponent implements OnChanges, OnDestroy {
                     styleUrls.push(styleElement.href.toString());
                 })
                 this.sendMessage({ type: "load-css", "urls": styleUrls });
+                this.sendMessage({ type: "plugin-context", ...this.getPluginContext() });
                 this.loading = false;
             }
             if (data === "ui-loading") {
