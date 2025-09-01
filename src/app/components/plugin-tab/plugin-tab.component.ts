@@ -32,6 +32,7 @@ export class PluginTabComponent implements OnInit, OnDestroy {
     private currentTemplate: TemplateApiObject | null = null;
     private currentTemplateTab: TemplateTabApiObject | null = null;
 
+    currentLocation: string | null = null;
     currentExperimentId: string | null = null;
     currentPath: string | null = null;
     currentTemplateId: string | null = null;
@@ -100,6 +101,7 @@ export class PluginTabComponent implements OnInit, OnDestroy {
     private async onParamsChanged() {
         if (this.currentTabId == null || this.currentTemplate == null) {
             this.currentTemplateTab = null;
+            this.currentLocation = null;
             this.navigationTabs = [];
             this.currentPluginGroup = null;
             this.onPluginGroupChanged();
@@ -139,6 +141,7 @@ export class PluginTabComponent implements OnInit, OnDestroy {
 
         const tab = await this.registry.getByApiLink<TemplateTabApiObject>(tabLink, null, false);
         this.currentTemplateTab = tab?.data ?? null;
+        this.currentLocation = tab?.data?.location ?? null;
 
         if (tab == null) {
             return;

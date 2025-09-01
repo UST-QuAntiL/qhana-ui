@@ -35,6 +35,8 @@
                 (clickItem)="selectPlugin($event)"></qhana-growing-list>
         </mat-card-content>
     </mat-card>
-    <qhana-plugin-uiframe class="plugin-frame" [url]="activePluginFrontendUrl" *ngIf="activePluginFrontendUrl != null">
+    <qhana-plugin-uiframe class="plugin-frame" [url]="activePluginFrontendUrl"
+        [context]="{experimentId: currentExperimentId??undefined, location: currentLocation??undefined}"
+        *ngIf="activePluginFrontendUrl != null">
     </qhana-plugin-uiframe>
 </div>

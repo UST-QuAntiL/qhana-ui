@@ -16,11 +16,15 @@
         </div>
         <details class="collapsible-item">
             <summary class="summary-item">Parameters</summary>
-            <qhana-data-preview [data]="substep"></qhana-data-preview>
+            <qhana-data-preview [data]="substep"
+                [context]="{experimentId: experimentId??undefined, stepId: substep?.stepId, location: 'timeline-step.substep.parameters.data-preview'}">
+            </qhana-data-preview>
         </details>
     </dl>
 </mat-card-content>
 <ng-container *ngIf="substep && substep.inputData != null && substep.inputData.length > 0">
     <h2>Input</h2>
-    <qhana-preview-list [dataList]="substep.inputData"></qhana-preview-list>
+    <qhana-preview-list [dataList]="substep.inputData"
+        [context]="{experimentId: experimentId??undefined, stepId: substep.stepId, location: 'timeline-step.substep.input.data-preview'}">
+    </qhana-preview-list>
 </ng-container>

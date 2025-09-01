@@ -45,13 +45,15 @@
                     </mat-card>
                     <mat-card appearance="outlined" class="card no-padding">
                         <qhana-plugin-uiframe [url]="frontendUrl" [plugin]="activePlugin.self"
-                            [context]="{experimentId: experimentId??undefined}"
+                            [context]="{experimentId: experimentId??undefined, location: 'workspace'}"
                             (formDataSubmit)="onPluginUiFormSubmit($event)"
                             (requestDataPreview)="previewData = $event">
                         </qhana-plugin-uiframe>
                     </mat-card>
 
-                    <qhana-data-preview class="data-preview" [data]="previewData" *ngIf="previewData">
+                    <qhana-data-preview class="data-preview" [data]="previewData"
+                        [context]="{experimentId: experimentId??undefined, location: 'workspace.data-preview'}"
+                        *ngIf="previewData">
                         <h3 class="t-headline">Preview "{{previewData.name}}"</h3>
                     </qhana-data-preview>
                 </div>

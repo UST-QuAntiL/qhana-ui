@@ -139,14 +139,20 @@
     <ng-container
         *ngIf="stepTabId === 'outputs' && timelineStep.outputData != null && timelineStep.outputData.length > 0">
         <h2>Output</h2>
-        <qhana-preview-list class="data-preview-list" [dataList]="timelineStep.outputData"></qhana-preview-list>
+        <qhana-preview-list class="data-preview-list" [dataList]="timelineStep.outputData"
+            [context]="{experimentId: experimentId, stepId: stepId??undefined, location: 'timeline-step.output.data-preview'}">
+        </qhana-preview-list>
     </ng-container>
     <ng-container *ngIf="stepTabId === 'inputs'">
         <h2>Parameters</h2>
-        <qhana-data-preview [data]="timelineStep"></qhana-data-preview>
+        <qhana-data-preview [data]="timelineStep"
+            [context]="{experimentId: experimentId, stepId: stepId??undefined, location: 'timeline-step.parameters.data-preview'}">
+        </qhana-data-preview>
         <ng-container *ngIf="(timelineStep.inputData) && timelineStep.inputData.length > 0">
             <h2>Data Input</h2>
-            <qhana-preview-list class="data-preview-list" [dataList]="timelineStep.inputData"></qhana-preview-list>
+            <qhana-preview-list class="data-preview-list" [dataList]="timelineStep.inputData"
+                [context]="{experimentId: experimentId, stepId: stepId??undefined, location: 'timeline-step.input.data-preview'}">
+            </qhana-preview-list>
         </ng-container>
     </ng-container>
 
@@ -156,7 +162,9 @@
             (requestDataPreview)="previewData = $event">
         </qhana-timeline-substeps>
 
-        <qhana-data-preview class="data-preview" [data]="previewData" *ngIf="previewData">
+        <qhana-data-preview class="data-preview" [data]="previewData"
+            [context]="{experimentId: experimentId, stepId: stepId??undefined, location: 'timeline-step.substep.data-preview'}"
+            *ngIf="previewData">
             <h3 class="t-headline">Preview "{{previewData.name}}"</h3>
         </qhana-data-preview>
     </ng-container>
