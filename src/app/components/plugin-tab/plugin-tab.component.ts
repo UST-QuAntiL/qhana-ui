@@ -4,8 +4,10 @@ import { Subscription } from 'rxjs';
 import { ApiLink, CollectionApiObject, PageApiObject } from 'src/app/services/api-data-types';
 import { CurrentExperimentService } from 'src/app/services/current-experiment.service';
 import { PluginApiObject } from 'src/app/services/qhana-api-data-types';
+import { ExperimentDataApiObject, QhanaBackendService } from 'src/app/services/qhana-backend.service';
 import { PluginRegistryBaseService } from 'src/app/services/registry.service';
 import { TemplateApiObject, TemplatesService, TemplateTabApiObject } from 'src/app/services/templates.service';
+import { FormSubmitData } from '../plugin-uiframe/plugin-uiframe.component';
 
 
 interface NavTab {
@@ -50,7 +52,9 @@ export class PluginTabComponent implements OnInit, OnDestroy {
 
     activePluginFrontendUrl: string | null = null;
 
-    constructor(private route: ActivatedRoute, private router: Router, private registry: PluginRegistryBaseService, private templates: TemplatesService, private experiment: CurrentExperimentService) { }
+    previewData: ExperimentDataApiObject | null = null;
+
+    constructor(private route: ActivatedRoute, private router: Router, private registry: PluginRegistryBaseService, private backend: QhanaBackendService, private templates: TemplatesService, private experiment: CurrentExperimentService) { }
 
     ngOnInit(): void {
         this.currentTemplateSubscription = this.templates.currentTemplate.subscribe(template => {
@@ -245,6 +249,34 @@ export class PluginTabComponent implements OnInit, OnDestroy {
         this.onActivePluginChanged();
 
         this.router.navigate([...this.navTabLinkPrefix, this.currentTabId, 'plugin', plugin.resourceKey?.pluginId], { queryParamsHandling: 'preserve' });
+    }
+
+    async onPluginUiFormSubmit(formData: FormSubmitData) {
+        const location = this.currentLocation;
+        if (location == null) {
+            return;
+        }
+        if (!location.startsWith("experiment-navigation")) {
+            return;  // only allow submit in experiment navigation tabs
+        }
+        const pluginLink = this.activePlugin;
+        if (pluginLink == null) {
+            return;
+        }
+        const experimentId = this.currentExperimentId;
+        const plugin = (await this.registry.getByApiLink<PluginApiObject>(pluginLink, null, false))?.data ?? null;
+        if (experimentId == null || plugin == null) {
+            return; // should never happen outside of race conditions
+        }
+        this.backend.createTimelineStep(experimentId, {
+            inputData: formData.dataInputs,
+            parameters: formData.formData,
+            parametersContentType: formData.formDataType,
+            processorLocation: plugin.href,
+            processorName: plugin.identifier,
+            processorVersion: plugin.version,
+            resultLocation: formData.resultUrl,
+        }).subscribe(timelineStep => this.router.navigate(['/experiments', experimentId, 'timeline', timelineStep.sequence.toString()], { queryParamsHandling: 'preserve' }));
     }
 
 }

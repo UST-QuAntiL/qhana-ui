@@ -37,6 +37,13 @@
     </mat-card>
     <qhana-plugin-uiframe class="plugin-frame" [url]="activePluginFrontendUrl"
         [context]="{experimentId: currentExperimentId??undefined, location: currentLocation??undefined}"
+        (formDataSubmit)="onPluginUiFormSubmit($event)" (requestDataPreview)="previewData = $event"
         *ngIf="activePluginFrontendUrl != null">
     </qhana-plugin-uiframe>
+
+    <qhana-data-preview class="data-preview" [data]="previewData"
+        [context]="{experimentId: currentExperimentId??undefined, location: currentLocation ? currentLocation + '.data-preview' : undefined}"
+        *ngIf="previewData">
+        <h3 class="t-headline">Preview "{{previewData.name}}"</h3>
+    </qhana-data-preview>
 </div>
