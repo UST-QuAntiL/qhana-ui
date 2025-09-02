@@ -1,4 +1,4 @@
-<nav mat-tab-nav-bar class="big-nav-tabs">
+<nav mat-tab-nav-bar [tabPanel]="tabPanel" class="big-nav-tabs">
     <a mat-tab-link [routerLink]="['/experiments', experimentId, 'timeline', timelineStep, 'overview']" queryParamsHandling="merge"
         [active]="active === 'overview'">
         Overview

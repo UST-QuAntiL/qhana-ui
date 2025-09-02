@@ -14,7 +14,10 @@
         </mat-select>
     </mat-form-field>
 </div>
-<qhana-plugin-preview  [src]="downloadUrl" [dataType]="previewData?.dataType ?? null" [contentType]="previewData?.contentType ?? null" [plugin]="chosenPreview.plugin" *ngIf="chosenPreview != null && chosenPreview.type === 'plugin'"></qhana-plugin-preview>
+<qhana-plugin-preview  [src]="downloadUrl"
+    [dataType]="previewData?.dataType ?? null" [contentType]="previewData?.contentType ?? null"
+    [plugin]="chosenPreview.plugin" [context]="context"
+    *ngIf="chosenPreview != null && chosenPreview.type === 'plugin'"></qhana-plugin-preview>
 <mat-card appearance="outlined" class="data-preview card" *ngIf="chosenPreview?.type !== 'plugin'">
     <mat-card-content>
         <ng-container *ngIf="chosenPreview != null && chosenPreview.type === 'internal'">

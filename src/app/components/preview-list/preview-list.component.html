@@ -1,5 +1,5 @@
 <ng-container *ngFor="let data of resolvedDataList; trackBy: trackByFn">
-    <qhana-data-preview [data]="data">
+    <qhana-data-preview [data]="data" [context]="context">
         <a [routerLink]="['/experiments', experimentId, 'data', data.name, {version: data.version}]" queryParamsHandling="merge">
             <h5>{{data.name}} (version {{data.version}})</h5>
         </a>

@@ -1,4 +1,5 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { PluginUiContext } from 'src/app/components/plugin-uiframe/plugin-uiframe.component';
 import { ApiLink } from 'src/app/services/api-data-types';
 import { isPluginApiObject, PluginApiObject } from 'src/app/services/qhana-api-data-types';
 import { PluginRegistryBaseService } from 'src/app/services/registry.service';
@@ -16,6 +17,7 @@ export class PluginPreviewComponent implements OnChanges {
     @Input() dataType: string | null = null;
     @Input() contentType: string | null = null;
     @Input() plugin: ApiLink | null = null;
+    @Input() context: PluginUiContext | null = null;
 
     pluginApiObject: PluginApiObject | null = null;
 

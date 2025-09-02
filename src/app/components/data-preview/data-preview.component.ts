@@ -4,6 +4,7 @@ import { EnvService } from 'src/app/services/env.service';
 import { PluginApiObject } from 'src/app/services/qhana-api-data-types';
 import { ExperimentDataApiObject, QhanaBackendService, TimelineStepApiObject, TimelineSubStepApiObject } from 'src/app/services/qhana-backend.service';
 import { PluginRegistryBaseService } from 'src/app/services/registry.service';
+import { PluginUiContext } from '../plugin-uiframe/plugin-uiframe.component';
 
 
 interface PreviewOption {
@@ -144,6 +145,7 @@ const INTERNAL_PREVIEWS: InternalPreviewOption[] = [
 export class DataPreviewComponent implements OnChanges {
 
     @Input() data: ExperimentDataApiObject | TimelineStepApiObject | TimelineSubStepApiObject | null = null;
+    @Input() context: PluginUiContext | null = null;
 
     previewData: PreviewData | null = null;
 

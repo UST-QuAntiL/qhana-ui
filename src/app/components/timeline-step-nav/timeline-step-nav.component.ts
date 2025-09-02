@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { MatTabNavPanel } from '@angular/material/tabs';
 
 export interface TabDefinition {
     tabId: string;
@@ -15,6 +16,7 @@ export class TimelineStepNavComponent {
     @Input() experimentId: string | number = "";
     @Input() timelineStep: string | number = 1;
     @Input() tabs: TabDefinition[] = [];
+    @Input() tabPanel: MatTabNavPanel | undefined = undefined;
 
     constructor() { }
 

@@ -92,8 +92,7 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
     onPluginUiFormSubmit(formData: FormSubmitData) {
         const experimentId = this.experimentId;
         const plugin = this.activePlugin;
-        const frontendUrl = ""; //this.frontendUrl?.toString();
-        if (experimentId == null || plugin == null || frontendUrl == null) {
+        if (experimentId == null || plugin == null) {
             return; // should never happen outside of race conditions
         }
         this.backend.createTimelineStep(experimentId, {

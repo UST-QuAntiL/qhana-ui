@@ -3,6 +3,7 @@ import { Subscription, from } from 'rxjs';
 import { concatMap, toArray } from 'rxjs/operators';
 import { CurrentExperimentService } from 'src/app/services/current-experiment.service';
 import { ExperimentDataApiObject, ExperimentDataRef, QhanaBackendService } from 'src/app/services/qhana-backend.service';
+import { PluginUiContext } from '../plugin-uiframe/plugin-uiframe.component';
 
 @Component({
     selector: 'qhana-preview-list',
@@ -12,6 +13,7 @@ import { ExperimentDataApiObject, ExperimentDataRef, QhanaBackendService } from 
 export class PreviewListComponent implements OnInit, OnChanges, OnDestroy {
 
     @Input() dataList: ExperimentDataRef[] = [];
+    @Input() context: PluginUiContext | null = null;
 
     resolvedDataList: ExperimentDataApiObject[] = [];
 
