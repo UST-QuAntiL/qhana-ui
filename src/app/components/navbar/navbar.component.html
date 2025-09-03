@@ -17,9 +17,16 @@
 
     <ng-container *ngIf="(currentExperiment|async) != null">
         <a class="navigation-link" mat-button [routerLink]="['/experiments', (experimentId|async), 'info']"
-            routerLinkActive="active">
+            routerLinkActive="active" [style]="{'anchor-name': '--' + (infoHelp.anchor|async)}">
             Info
         </a>
+        <qhana-help-tooltip label="Show help for experiment info tab." #infoHelp>
+            <p>
+                The experiment info tab shows the basic experiment information like name and description.
+                It can also be used to change this information.
+                The functions for exporting experiment data or cloning the experiment can also be found in this tab.
+            </p>
+        </qhana-help-tooltip>
         <a class="navigation-link" mat-button [routerLink]="['/experiments', (experimentId|async), 'workspace']"
             queryParamsHandling="merge" routerLinkActive="active">
             Workspace
@@ -91,6 +98,7 @@
             </div>
         </ng-container>
     </mat-menu>
+    <qhana-help-toggle></qhana-help-toggle>
     <a class="settings-link" [routerLink]="['/settings']">
         <mat-icon aria-hidden="false" aria-label="Settings">settings</mat-icon>
     </a>

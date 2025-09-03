@@ -1,0 +1,49 @@
+:host
+    display: contents
+
+.tooltip-button
+    width: 1.3rem
+    height: 1.3rem
+    padding: 0px
+    background-color: var(--accent, orange)
+    color: var(--text-accent, black)
+    border: none
+    border-radius: 100%
+    display: flex
+    justify-content: center
+    align-items: center
+    font-weight: 700
+    transition-property: width, height
+    transition-duration: 0.3s
+    @supports (position-anchor: --anchor)
+        position: absolute
+        top: calc(anchor(top) - 0.3rem)
+        right: calc(anchor(right) - 0.3rem)
+        z-index: 1
+
+.tooltip-button:hover, .tooltip-button:focus
+    width: 1.5rem
+    height: 1.5rem
+
+.tooltip-content
+    background-color: var(--background, white)
+    color: var(--text, black)
+    border-color: var(--border-color)
+    border-radius: 0.4rem
+    font-size: initial
+    line-height: initial
+    max-width: 60ch
+    text-wrap: auto
+    padding: 1rem
+    @supports (position-anchor: --anchor)
+        position: absolute
+        position-area: bottom span-right
+        position-try-fallbacks: bottom span-left, right, left, top span-right, top span-left
+        margin: 0.1rem
+
+::ng-deep.tooltip-content p
+    margin-block: 0px
+
+@supports not (position-anchor: --anchor)
+    .tooltip-content::backdrop
+        background-color: #00000077
