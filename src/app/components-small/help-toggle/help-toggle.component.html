@@ -1,0 +1,4 @@
+<button mat-icon-button [attr.aria-label]="showHelpButtons ? 'Hide help buttons' : 'Show help buttons'"
+    [attr.aria-pressed]="showHelpButtons" (click)="toggleHelp()">
+    <mat-icon [color]="showHelpButtons ? 'accent' : 'text'" aria-hidden="true">help</mat-icon>
+</button>

@@ -94,6 +94,8 @@ import { UiTemplateTabComponent } from './components-small/ui-template-tab/ui-te
 import { PluginFilterViewComponent } from './components-small/plugin-filter-view/plugin-filter-view.component';
 import { UiTemplateTabFormComponent } from './components-small/ui-template-tab-form/ui-template-tab-form.component';
 import { PluginFilterFormComponent } from './components-small/plugin-filter-form/plugin-filter-form.component';
+import { HelpTooltipComponent } from "src/app/components-small/help-tooltip/help-tooltip.component";
+import { HelpToggleComponent } from "src/app/components-small/help-toggle/help-toggle.component";
 
 @NgModule({
     declarations: [
@@ -181,6 +183,8 @@ import { PluginFilterFormComponent } from './components-small/plugin-filter-form
         MatMenuModule,
         MatBadgeModule,
         MatRadioModule,
+        HelpTooltipComponent,
+        HelpToggleComponent
     ],
     providers: [
         { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: "outline" } }
