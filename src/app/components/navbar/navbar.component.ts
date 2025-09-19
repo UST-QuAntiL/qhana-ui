@@ -50,11 +50,14 @@ export class NavbarComponent implements OnInit, OnDestroy {
     templateId: string | null = null;
     template: TemplateApiObject | null = null;
 
+    currentTab: ApiLink | null = null;
+
     routeTemplateId: string | null = null;
 
     private currentTemplateIdSubscription: Subscription | null = null;
     private currentTemplateSubscription: Subscription | null = null;
     private templateTabUpdatesSubscription: Subscription | null = null;
+    private currentTemplateTabSubscription: Subscription | null = null;
     private routeParamsSubscription: Subscription | null = null;
 
     constructor(private route: ActivatedRoute, private experiment: CurrentExperimentService, private templates: TemplatesService, private registry: PluginRegistryBaseService, private backend: QhanaBackendService, private downloadService: DownloadsService) {
@@ -72,6 +75,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
         this.currentTemplateIdSubscription?.unsubscribe();
         this.currentTemplateSubscription?.unsubscribe();
         this.templateTabUpdatesSubscription?.unsubscribe();
+        this.currentTemplateTabSubscription?.unsubscribe();
         this.routeParamsSubscription?.unsubscribe();
     }
 
@@ -86,6 +90,9 @@ export class NavbarComponent implements OnInit, OnDestroy {
             this.updateGeneralExtraTabGroup();
             this.updateExperimentExtraTabGroup();
         });
+        this.currentTemplateTabSubscription = this.templates.currentTemplateTab.subscribe(tab => {
+            this.currentTab = tab;
+        });
     }
 
     trackExport: TrackByFunction<ExportResult> = (index, item) => item.exportId.toString();
@@ -96,6 +103,19 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
     exportListIsEmpty() {
         return this.downloadBadgeCounter?.subscribe();
+    }
+
+    isActive(tab: ApiLink): boolean {
+        let location = tab.resourceKey?.["?group"] ?? null;
+        const group = this.tabLinkHrefToApiObject.get(tab.href)?.groupKey ?? null;
+        if (location && group) {
+            location = `${location}.${group}`;
+            const currentLocation = this.currentTab?.resourceKey?.["?group"] ?? null;
+            if (location && currentLocation && currentLocation.startsWith(location + ".")) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private onTemplateChanges(template: TemplateApiObject | null) {

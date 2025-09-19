@@ -15,6 +15,7 @@ interface NavTab {
     name: string;
     icon: string | null;
     path: string;
+    groupPath: string | null;
     isGroup: boolean;
     link: string[];
 }
@@ -163,12 +164,16 @@ export class PluginTabComponent implements OnInit, OnDestroy {
                         link.push(tab?.data?.location);
                     }
                     link.push(tabLink.resourceKey?.uiTemplateTabId ?? "-1");
+                    const path = (tab?.data?.location ?? "") + ".";
+                    const groupPath = path + (tab?.data?.groupKey ?? "");
+                    const isGroup = Boolean(tab?.data?.groupKey);
                     const t: NavTab = {
                         tabId: tab?.data?.self?.resourceKey?.uiTemplateTabId ?? "-1",
                         name: tab?.data?.name ?? tabLink.name ?? "UNNAMED TAB",
                         icon: tab?.data?.icon ?? null,
-                        path: (tab?.data?.location ?? "") + ".",
-                        isGroup: Boolean(tab?.data?.groupKey),
+                        path: path,
+                        groupPath: isGroup ? groupPath : null,
+                        isGroup: isGroup,
                         link: link,
                     }
                     return t;
