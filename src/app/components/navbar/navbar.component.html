@@ -74,7 +74,7 @@
                 Additionally notes can be be stored for each step.
             </p>
         </qhana-help-tooltip>
-        <a class="navigation-link" mat-button
+        <a class="navigation-link {{isActive(tab) ? 'active' : ''}}" mat-button
             [routerLink]="['/experiments', (experimentId|async), 'extra', tab.resourceKey?.uiTemplateTabId]"
             queryParamsHandling="merge" routerLinkActive="active" *ngFor="let tab of experimentExtraTabs">
             <span class="link-label">
@@ -87,7 +87,7 @@
         </a>
     </ng-container>
     <ng-container *ngIf="(currentExperiment|async) == null">
-        <a class="navigation-link" mat-button [routerLink]="['extra', tab.resourceKey?.uiTemplateTabId]"
+        <a class="navigation-link {{isActive(tab) ? 'active' : ''}}" mat-button [routerLink]="['extra', tab.resourceKey?.uiTemplateTabId]"
             queryParamsHandling="merge" routerLinkActive="active" *ngFor="let tab of generalExtraTabs">
             <span class="link-label">
                 <mat-icon *ngIf="tabLinkHrefToApiObject.get(tab.href)?.icon">

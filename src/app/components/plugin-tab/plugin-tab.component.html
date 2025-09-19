@@ -2,7 +2,7 @@
     <nav mat-tab-nav-bar class="big-nav-tabs" [tabPanel]="tabContentPanel">
         <a mat-tab-link
             [routerLink]="navTabLinkPrefix.concat(navTab.link)"
-            [queryParamsHandling]="'preserve'" [active]="navTab.tabId === currentTabId || currentPath?.startsWith(navTab.path)"
+            [queryParamsHandling]="'preserve'" [active]="navTab.tabId === currentTabId || (navTab.groupPath && currentPath?.startsWith(navTab.groupPath))"
             *ngFor="let navTab of navTabBar">
             <span class="link-label">
                 <mat-icon *ngIf="navTab.icon">
