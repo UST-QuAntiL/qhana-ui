@@ -81,6 +81,7 @@ export class EnvService {
         this.registrySubscription = this.registryService.apiObjectSubject.subscribe((apiObject => {
             if (isDeletedApiObject(apiObject) && apiObject.deleted.resourceType === "env") {
                 if (apiObject.deleted.name === "DEFAULT_UI_TEMPLATE") {
+                    this.currentUiTemplateEnvVar = null;
                     this.uiTemplateSubject.next(null);
                 }
             }
