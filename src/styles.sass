@@ -52,6 +52,11 @@ $my-dark-theme: mat.define-dark-theme((color: (primary: $my-primary,accent: $my-
     // line is for milkdown
     --line: 150,150,150
 
+    --mdc-filled-text-field-focus-label-text-color: rgba(103, 58, 183, 0.99)
+    --mdc-outlined-text-field-focus-label-text-color: rgba(103, 58, 183, 0.99)
+    --mat-form-field-focus-select-arrow-color: rgba(103, 58, 183, 0.99)
+    --mat-select-focused-arrow-color: rgba(103, 58, 183, 0.99)
+
 .mat-mdc-form-field
     margin-top: 5px !important
 
@@ -112,17 +117,25 @@ $my-dark-theme: mat.define-dark-theme((color: (primary: $my-primary,accent: $my-
         --mat-option-selected-state-label-text-color: var(--primary-text)
         --mdc-filled-text-field-caret-color: var(--primary-text)
         --mdc-filled-text-field-focus-active-indicator-color: var(--primary-text)
-        --mdc-filled-text-field-focus-label-text-color: rgba(179, 136, 255, 0.87)
+        --mdc-filled-text-field-focus-label-text-color: rgba(187, 149, 254, 0.99)
         --mdc-outlined-text-field-caret-color: var(--primary-text)
         --mdc-outlined-text-field-focus-outline-color: var(--primary-text)
-        --mdc-outlined-text-field-focus-label-text-color: rgba(179, 136, 255, 0.87)
-        --mat-form-field-focus-select-arrow-color: rgba(179, 136, 255, 0.87)
-        --mat-select-focused-arrow-color: rgba(179, 136, 255, 0.87)
+        --mdc-outlined-text-field-focus-label-text-color: rgba(188, 149, 254, 0.99)
+        --mat-form-field-focus-select-arrow-color: rgba(187, 149, 254, 0.99)
+        --mat-select-focused-arrow-color: rgba(187, 149, 254, 0.99)
         --mdc-circular-progress-active-indicator-color: var(--primary-text)
         --mat-badge-background-color: var(--primary-text)
         --mat-stepper-header-selected-state-icon-background-color: var(--primary-text)
         --mat-stepper-header-done-state-icon-background-color: var(--primary-text)
         --mat-stepper-header-edit-state-icon-background-color: var(--primary-text)
+
+        .mat-mdc-tab-nav-bar
+            --mdc-tab-indicator-active-indicator-color: var(--primary-text)
+            --mat-tab-header-active-label-text-color: var(--primary-text)
+            --mat-tab-header-active-focus-label-text-color: var(--primary-text)
+            --mat-tab-header-active-hover-label-text-color: var(--primary-text)
+            --mat-tab-header-active-focus-indicator-color: var(--primary-text)
+            --mat-tab-header-active-hover-indicator-color: var(--primary-text)
 
     .mat-mdc-card, .mat-expansion-panel, .color-scheme-card
         --background: #{mat.get-color-from-palette(mat.$dark-theme-background-palette, 'card')}
@@ -135,6 +148,8 @@ $my-dark-theme: mat.define-dark-theme((color: (primary: $my-primary,accent: $my-
         --text-primary-darker: var(--text-primary)
         --text-accent: #{mat.get-color-from-palette($my-accent, 'card-contrast')}
         --text-warn: #{mat.get-color-from-palette($my-warn, 'card-contrast')}
+        --primary-text: #d3b9ff
+        --primary-text-visited: #caacff
 
     .mat-mdc-dialog, .color-scheme-dialog
         --background: #{mat.get-color-from-palette(mat.$dark-theme-background-palette, 'dialog')}
@@ -145,6 +160,8 @@ $my-dark-theme: mat.define-dark-theme((color: (primary: $my-primary,accent: $my-
         --text-primary-darker: var(--text-primary)
         --text-accent: #{mat.get-color-from-palette($my-accent, 'dialog-contrast')}
         --text-warn: #{mat.get-color-from-palette($my-warn, 'dialog-contrast')}
+        --primary-text: #d3b9ff
+        --primary-text-visited: #caacff
 
     .card.mat-mdc-card
         box-shadow: none
@@ -188,6 +205,9 @@ $my-dark-theme: mat.define-dark-theme((color: (primary: $my-primary,accent: $my-
                 background-color: #{mat.get-color-from-palette($my-primary, 600)}
             .mat-mdc-progress-bar-fill::after
                 background-color: var(--primary-text)
+
+        .mat-icon.mat-primary
+            --mat-icon-color: var(--primary-text)
 
         .mat-mdc-primary
 
