@@ -6,7 +6,7 @@
         </button>
         <div class="flex-space"></div>
 
-        <button mat-raised-button color="primary" aria-label="Export workflow">
+        <button *ngIf="workflowGroupExists" mat-raised-button color="primary" (click)="exportWorkflow()">
             Export Workflow
         </button>
 
