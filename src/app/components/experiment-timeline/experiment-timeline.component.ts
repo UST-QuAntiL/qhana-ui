@@ -6,6 +6,8 @@ import { catchError, map } from 'rxjs/operators';
 import { CurrentExperimentService } from 'src/app/services/current-experiment.service';
 import { ExperimentResultQuality, ExperimentResultQualityValues, QhanaBackendService, TimelineStepApiObject } from 'src/app/services/qhana-backend.service';
 import { ServiceRegistryService } from 'src/app/services/service-registry.service';
+import { HttpClient } from '@angular/common/http';
+import { SettingsPageComponent } from '../settings-page/settings-page.component';
 
 interface SelectValue {
     value: number | string;
@@ -54,7 +56,13 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
     resultQualityValues = ExperimentResultQualityValues;
     workflowGroupExists: any;
     
-    constructor(private route: ActivatedRoute, private experiment: CurrentExperimentService, private backend: QhanaBackendService, private serviceRegistry: ServiceRegistryService) { }
+    constructor(
+        private route: ActivatedRoute,
+        private experiment: CurrentExperimentService,
+        private backend: QhanaBackendService,
+        private serviceRegistry: ServiceRegistryService,
+        private http: HttpClient,
+        private settings: SettingsPageComponent) { }
 
     ngOnInit(): void {
         this.backendUrlSubscription = this.serviceRegistry.backendRootUrl.subscribe(url => this.backendUrl = url);
@@ -134,6 +142,20 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
     }
 
     exportWorkflow() {
+        if (!this.backendUrl || !this.experimentId) {
+            console.error('Backend URL or experimentId is not set');
+            return;
+        }
+        // TODO: export workflow
+    }
+
+    private getTemplateIdForExperiment(experimentId: string): Observable<number> {
+        // const backendHost = ""
+        // const backendPort = "";
+        // TODO: find out hostname and port
+
+        const url = `http://${backendHost}:${backendPort}/experiments/${experimentId}`;
+        return this.http.get<any>(url).pipe(map(data => data.templateId));
     }
 
 }
