@@ -52,7 +52,8 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
     ];
     resultQuality: ExperimentResultQuality | "" = "";
     resultQualityValues = ExperimentResultQualityValues;
-
+    workflowGroupExists: any;
+    
     constructor(private route: ActivatedRoute, private experiment: CurrentExperimentService, private backend: QhanaBackendService, private serviceRegistry: ServiceRegistryService) { }
 
     ngOnInit(): void {
@@ -130,6 +131,9 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
             const { page, itemCount } = this.currentPage;
             this.updatePageContent(page, itemCount);
         }
+    }
+
+    exportWorkflow() {
     }
 
 }
