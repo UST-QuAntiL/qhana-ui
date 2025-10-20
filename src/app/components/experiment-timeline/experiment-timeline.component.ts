@@ -54,7 +54,7 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
     ];
     resultQuality: ExperimentResultQuality | "" = "";
     resultQualityValues = ExperimentResultQualityValues;
-    workflowGroupExists: any;
+    workflowGroupExists = true;
     
     constructor(
         private route: ActivatedRoute,
@@ -62,7 +62,8 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
         private backend: QhanaBackendService,
         private serviceRegistry: ServiceRegistryService,
         private http: HttpClient,
-        private settings: SettingsPageComponent) { }
+        //private settings: SettingsPageComponent
+        ) { }
 
     ngOnInit(): void {
         this.backendUrlSubscription = this.serviceRegistry.backendRootUrl.subscribe(url => this.backendUrl = url);
@@ -150,11 +151,8 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
     }
 
     private getTemplateIdForExperiment(experimentId: string): Observable<number> {
-        // const backendHost = ""
-        // const backendPort = "";
-        // TODO: find out hostname and port
 
-        const url = `http://${backendHost}:${backendPort}/experiments/${experimentId}`;
+        const url = `${this.backendUrl}/experiments/${experimentId}`;
         return this.http.get<any>(url).pipe(map(data => data.templateId));
     }
 
