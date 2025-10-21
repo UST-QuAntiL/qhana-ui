@@ -8,6 +8,7 @@ import { ExperimentResultQuality, ExperimentResultQualityValues, QhanaBackendSer
 import { ServiceRegistryService } from 'src/app/services/service-registry.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { SettingsPageComponent } from '../settings-page/settings-page.component';
+import { PluginRegistryBaseService } from 'src/app/services/registry.service';
 
 interface SelectValue {
     value: number | string;
@@ -64,7 +65,8 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
         private serviceRegistry: ServiceRegistryService,
         private http: HttpClient,
         private router: Router,
-        private settings: SettingsPageComponent
+        private registry: PluginRegistryBaseService,
+        //private settings: SettingsPageComponent
         ) { }
 
     ngOnInit(): void {
@@ -78,6 +80,7 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
                 this.experiment.setExperimentId(experimentId);
                 if (change) {
                     this.updatePageContent();
+                    this.checkWorkflowGroup(experimentId);
                 }
             });
     }
@@ -193,7 +196,7 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
     }
 
     private getWorkflowTab(templateId: number): Observable<string> {
-        const tabsUrl = `${this.settings.registryUrl}/api/templates/${templateId}/tabs/?group=experiment-navigation`;
+        const tabsUrl = `${this.registry.registryRootUrl}templates/${templateId}/tabs/?group=experiment-navigation`;
         return this.http.get<any>(tabsUrl).pipe(
             map(data => {
                 const workflowTab = data.data.items.find((tab: any) => tab.name === 'Workflow');
@@ -207,7 +210,7 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
         this.getTemplateIdForExperiment(experimentId)
         .pipe(
             switchMap(templateId => this.http.get<any>(
-                `${this.settings.registryUrl}/api/templates/${templateId}/tabs/?group=experiment-navigation`
+                `${this.registry.registryRootUrl}templates/${templateId}/tabs/?group=experiment-navigation`
             )),
             map(data => {
                 const workflowTab = data.data.items.find((tab: any) => tab.name === 'Workflow');
@@ -218,6 +221,7 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
         .subscribe(exists => {
             this.workflowExists = exists;
         });
+        this.router.config
     }
 
 }
