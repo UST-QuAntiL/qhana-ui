@@ -62,6 +62,7 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
         private backend: QhanaBackendService,
         private serviceRegistry: ServiceRegistryService,
         private http: HttpClient,
+        private settings: SettingsPageComponent
         ) { }
 
     ngOnInit(): void {
@@ -150,9 +151,36 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
     }
 
     private getTemplateIdForExperiment(experimentId: string): Observable<number> {
-
         const url = `${this.backendUrl}/experiments/${experimentId}`;
         return this.http.get<any>(url).pipe(map(data => data.templateId));
+    }
+
+    private getWorkflowTab(templateId: number): Observable<string> {
+        const tabsUrl = `${this.settings.registryUrl}/api/templates/${templateId}/tabs/?group=experiment-navigation`;
+        return this.http.get<any>(tabsUrl).pipe(
+            map(data => {
+                const workflowTab = data.data.items.find((tab: any) => tab.name === 'Workflow');
+                if (!workflowTab) throw new Error('Workflow tab not found');
+                return workflowTab.resourceKey.uiTemplateTabId;
+            })
+        );
+    }
+
+    private checkWorkflowGroup(experimentId: string): void {
+        this.getTemplateIdForExperiment(experimentId)
+        .pipe(
+            switchMap(templateId => this.http.get<any>(
+                `${this.settings.registryUrl}/api/templates/${templateId}/tabs/?group=experiment-navigation`
+            )),
+            map(data => {
+                const workflowTab = data.data.items.find((tab: any) => tab.name === 'Workflow');
+                return !!workflowTab;
+            }),
+            catchError(() => of(false))
+        )
+        .subscribe(exists => {
+            this.workflowExists = exists;
+        });
     }
 
 }
