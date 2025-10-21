@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { PageEvent } from '@angular/material/paginator';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, Subscription, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { catchError, map, switchMap} from 'rxjs/operators';
 import { CurrentExperimentService } from 'src/app/services/current-experiment.service';
 import { ExperimentResultQuality, ExperimentResultQualityValues, QhanaBackendService, TimelineStepApiObject } from 'src/app/services/qhana-backend.service';
 import { ServiceRegistryService } from 'src/app/services/service-registry.service';
@@ -54,7 +54,7 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
     ];
     resultQuality: ExperimentResultQuality | "" = "";
     resultQualityValues = ExperimentResultQualityValues;
-    workflowGroupExists = true;
+    workflowExists = false;
     
     constructor(
         private route: ActivatedRoute,
@@ -62,7 +62,6 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
         private backend: QhanaBackendService,
         private serviceRegistry: ServiceRegistryService,
         private http: HttpClient,
-        //private settings: SettingsPageComponent
         ) { }
 
     ngOnInit(): void {
