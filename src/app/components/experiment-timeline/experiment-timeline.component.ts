@@ -1,12 +1,12 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { PageEvent } from '@angular/material/paginator';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, Subscription, of } from 'rxjs';
 import { catchError, map, switchMap} from 'rxjs/operators';
 import { CurrentExperimentService } from 'src/app/services/current-experiment.service';
 import { ExperimentResultQuality, ExperimentResultQualityValues, QhanaBackendService, TimelineStepApiObject } from 'src/app/services/qhana-backend.service';
 import { ServiceRegistryService } from 'src/app/services/service-registry.service';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { SettingsPageComponent } from '../settings-page/settings-page.component';
 
 interface SelectValue {
@@ -55,6 +55,7 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
     resultQuality: ExperimentResultQuality | "" = "";
     resultQualityValues = ExperimentResultQualityValues;
     workflowExists = false;
+    activeTabId: string | null = null;
     
     constructor(
         private route: ActivatedRoute,
@@ -62,6 +63,7 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
         private backend: QhanaBackendService,
         private serviceRegistry: ServiceRegistryService,
         private http: HttpClient,
+        private router: Router,
         private settings: SettingsPageComponent
         ) { }
 
@@ -147,7 +149,42 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
             console.error('Backend URL or experimentId is not set');
             return;
         }
-        // TODO: export workflow
+             this.backend.getTimelineStepsPage(this.experimentId, {
+            page: 0,
+            itemCount: 100, // must be between 1 and 500
+            sort: 1
+        }).subscribe({
+            next: (pageData) => {
+                const steps = pageData.items || [];
+                console.log(steps);
+                const xml = this.buildBpmnXml(steps);
+
+                const postUrl = `http://localhost:5005/plugins/workflow-editor@v0-1-0/workflows/`;
+                // TODO: edit url, so it does not contain 'localhost' link
+
+                const headers = new HttpHeaders({ 'Content-Type': 'application/bpmn+xml' });
+
+                this.http.post(postUrl, xml, { headers }).pipe(
+                    switchMap(() => this.getTemplateIdForExperiment(this.experimentId!)),
+                    switchMap(templateId => this.getWorkflowTab(templateId))
+                ).subscribe({
+                    next: (tabId) => {
+                        this.activeTabId = tabId;
+                        console.log('Switching to workflow tab:', tabId);
+                        const targetRoute = ['/experiments', this.experimentId, 'extra', tabId];
+                        this.router.navigate(targetRoute, { relativeTo: this.route });
+                    },
+                    error: (err) => console.error('Failed to export workflow or switch tab', err)
+                });
+            },
+            error: (err) => {
+                console.error('Failed to load timeline steps', err);
+            }
+        });
+    }
+
+    private buildBpmnXml(steps: any[]) {
+        // TODO: Implement method
     }
 
     private getTemplateIdForExperiment(experimentId: string): Observable<number> {
