@@ -62,7 +62,6 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
     resultQuality: ExperimentResultQuality | '' = '';
     resultQualityValues = ExperimentResultQualityValues;
     workflowExists = false;
-    activeTabId: string | null = null;
 
     constructor(
         private route: ActivatedRoute,
@@ -209,7 +208,6 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
                         )
                         .subscribe({
                             next: (tabId) => {
-                                this.activeTabId = tabId;
                                 console.log(
                                     'Switching to workflow tab:',
                                     tabId
