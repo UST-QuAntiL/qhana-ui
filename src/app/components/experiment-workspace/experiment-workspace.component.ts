@@ -20,6 +20,7 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
     private routeSubscription: Subscription | null = null;
 
     experimentId: string | null = null;
+    extraParams: Map<string, string> | null = null;
 
     detailAreaActive: boolean = false;
     templateTab: TemplateTabApiObject | null = null;
@@ -48,6 +49,21 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
 
     registerParameterSubscription() {
         this.parameterSubscription = this.route.queryParamMap.subscribe(params => {
+            const extraParams = new Map<string, string>();
+            params.keys.forEach(key => {
+                if (key.startsWith("param-")) {
+                    const value = params.get(key);
+                    if (value) {
+                        extraParams.set(key.substring(6), value);
+                    }
+                }
+            })
+            if (extraParams.size > 0) {
+                this.extraParams = extraParams;
+            } else {
+                this.extraParams = null;
+            }
+
             const pluginId = params.get('plugin');
             const templateTabId = params.get('tab');
             this.detailAreaActive = templateTabId != null;
@@ -78,8 +94,20 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
             return; // TODO error message
         }
         this.activePlugin = pluginResponse.data;
-        this.frontendUrl = pluginResponse.data.entryPoint.uiHref;
+        this.frontendUrl = this.applyExtraParams(pluginResponse.data.entryPoint.uiHref);
         this.previewData = null;
+    }
+
+    private applyExtraParams(url: string): string {
+        const extraParams = this.extraParams;
+        if (extraParams == null || extraParams.size == 0) {
+            return url;
+        }
+        const parsed = new URL(url);
+        extraParams.forEach((value, param) => {
+            parsed.searchParams.set(param, value);
+        });
+        return parsed.toString();
     }
 
     onKeyDown(event: KeyboardEvent) {

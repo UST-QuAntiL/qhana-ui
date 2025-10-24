@@ -2,7 +2,8 @@
     <nav mat-tab-nav-bar class="big-nav-tabs" [tabPanel]="tabContentPanel">
         <a mat-tab-link
             [routerLink]="navTabLinkPrefix.concat(navTab.link)"
-            [queryParamsHandling]="'preserve'" [active]="navTab.tabId === currentTabId || (navTab.groupPath && currentPath?.startsWith(navTab.groupPath))"
+            [queryParams]="(templateParam != null) ? {'template': templateParam} : {}"
+            [active]="navTab.tabId === currentTabId || (navTab.groupPath && currentPath?.startsWith(navTab.groupPath))"
             *ngFor="let navTab of navTabBar">
             <span class="link-label">
                 <mat-icon *ngIf="navTab.icon">
@@ -18,7 +19,8 @@
     <nav mat-tab-nav-bar class="big-nav-tabs" [tabPanel]="tabContentPanel">
         <a mat-tab-link
             [routerLink]="navTabLinkPrefix.concat(currentPath ? [currentPath] : []).concat([currentTabId ?? '-1', 'plugin', plugin.resourceKey?.pluginId ?? '-1'])"
-            [queryParamsHandling]="'preserve'" [active]="plugin.resourceKey?.pluginId === currentPluginId || plugin.resourceKey?.pluginId === activePlugin?.resourceKey?.pluginId"
+            [queryParams]="(templateParam != null) ? {'template': templateParam} : {}"
+            [active]="plugin.resourceKey?.pluginId === currentPluginId || plugin.resourceKey?.pluginId === activePlugin?.resourceKey?.pluginId"
             *ngFor="let plugin of currentPluginGroup?.items">
             {{plugin.name}}
         </a>

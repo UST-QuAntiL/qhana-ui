@@ -29,6 +29,7 @@ interface NavTab {
 export class PluginTabComponent implements OnInit, OnDestroy {
 
     private routeParamsSubscription: Subscription | null = null;
+    private queryParamsSubscription: Subscription | null = null;
     private currentTemplateSubscription: Subscription | null = null;
     private templateTabUpdatesSubscription: Subscription | null = null;
 
@@ -46,6 +47,9 @@ export class PluginTabComponent implements OnInit, OnDestroy {
     navigationTabs: NavTab[][] = [];
     navTabLinkPrefix: string[] = [];
 
+    templateParam: string | undefined = undefined;
+    extraParams: Map<string, string> | null = null;
+
     currentPluginGroup: PageApiObject | null = null;
 
     activePlugin: ApiLink | null = null;
@@ -61,6 +65,23 @@ export class PluginTabComponent implements OnInit, OnDestroy {
         this.currentTemplateSubscription = this.templates.currentTemplate.subscribe(template => {
             this.currentTemplate = template;
             this.onParamsChanged();
+        });
+        this.queryParamsSubscription = this.route.queryParamMap.subscribe(params => {
+            this.templateParam = params.get("template") ?? undefined;
+            const extraParams = new Map<string, string>();
+            params.keys.forEach(key => {
+                if (key.startsWith("param-")) {
+                    const value = params.get(key);
+                    if (value) {
+                        extraParams.set(key.substring(6), value);
+                    }
+                }
+            })
+            if (extraParams.size > 0) {
+                this.extraParams = extraParams;
+            } else {
+                this.extraParams = null;
+            }
         });
         this.routeParamsSubscription = this.route.params.subscribe(params => {
             this.currentExperimentId = params?.experimentId ?? null;
@@ -82,6 +103,7 @@ export class PluginTabComponent implements OnInit, OnDestroy {
 
     ngOnDestroy(): void {
         this.routeParamsSubscription?.unsubscribe();
+        this.queryParamsSubscription?.unsubscribe();
         this.currentTemplateSubscription?.unsubscribe();
         this.templateTabUpdatesSubscription?.unsubscribe();
     }
@@ -246,14 +268,31 @@ export class PluginTabComponent implements OnInit, OnDestroy {
         this.highlightedPlugin = new Set([this.activePlugin.resourceKey?.pluginId ?? ""]);
 
         const pluginResponse = await this.registry.getByApiLink<PluginApiObject>(this.activePlugin);
-        this.activePluginFrontendUrl = pluginResponse?.data?.entryPoint?.uiHref ?? null; // FIXME for relative URLs!
+        const nextUrl = pluginResponse?.data?.entryPoint?.uiHref ?? null;
+
+        if (nextUrl == null) {
+            this.activePluginFrontendUrl = null;
+            return;
+        }
+
+        const parsed = new URL(nextUrl, pluginResponse?.data?.self?.href);
+        const extraParams = this.extraParams;
+        if (extraParams != null) {
+            extraParams.forEach((value, param) => {
+                parsed.searchParams.set(param, value);
+            });
+        }
+        this.activePluginFrontendUrl = parsed.toString();
     }
 
     selectPlugin(plugin: ApiLink) {
         this.activePlugin = plugin;
         this.onActivePluginChanged();
 
-        this.router.navigate([...this.navTabLinkPrefix, this.currentTabId, 'plugin', plugin.resourceKey?.pluginId], { queryParamsHandling: 'preserve' });
+        this.router.navigate(
+            [...this.navTabLinkPrefix, this.currentTabId, 'plugin', plugin.resourceKey?.pluginId],
+            { queryParams: (this.templateParam != null) ? { "template": this.templateParam } : {} }
+        );
     }
 
     async onPluginUiFormSubmit(formData: FormSubmitData) {
@@ -281,7 +320,10 @@ export class PluginTabComponent implements OnInit, OnDestroy {
             processorName: plugin.identifier,
             processorVersion: plugin.version,
             resultLocation: formData.resultUrl,
-        }).subscribe(timelineStep => this.router.navigate(['/experiments', experimentId, 'timeline', timelineStep.sequence.toString()], { queryParamsHandling: 'preserve' }));
+        }).subscribe(timelineStep => this.router.navigate(
+            ['/experiments', experimentId, 'timeline', timelineStep.sequence.toString()],
+            { queryParams: (this.templateParam != null) ? { "template": this.templateParam } : {} }
+        ));
     }
 
 }
