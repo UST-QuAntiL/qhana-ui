@@ -87,6 +87,7 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
                 this.experiment.setExperimentId(experimentId);
                 if (change) {
                     this.updatePageContent();
+                    // call method to conditionally set workflowExists
                     this.checkWorkflowGroup(experimentId);
                 }
             });
@@ -177,11 +178,13 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
         this.backend
             .getTimelineStepsPage(this.experimentId, {
                 page: 0,
-                itemCount: 100, // must be between 1 and 500
+                itemCount: 100,
                 sort: 1,
             })
             .subscribe({
+                // if the observable retruns something, next will be executed with the value the observable returned
                 next: (pageData) => {
+                    // save all items or an empty array in steps
                     const steps = pageData.items || [];
                     console.log(steps);
                     const xml = this.buildBpmnXml(steps);
@@ -197,11 +200,13 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
                     this.http
                         .post(postUrl, xml, { headers })
                         .pipe(
+                            // First switchMap: wait for POST response, then get template ID
                             switchMap(() =>
                                 this.getTemplateIdForExperiment(
                                     this.experimentId!
                                 )
                             ),
+                            // Second switchMap: wait for template ID, then get workflow tab
                             switchMap((templateId) =>
                                 this.getWorkflowTab(templateId)
                             )
@@ -218,6 +223,7 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
                                     'extra',
                                     tabId,
                                 ];
+                                // Navigate to Workflow tab
                                 this.router.navigate(targetRoute, {
                                     relativeTo: this.route,
                                 });
@@ -248,7 +254,6 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
         targetNamespace="http://bpmn.io/schema/bpmn"
         xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd">`;
 
-        // TODO adapt name
         const processOpen = `<bpmn2:process id="Experiment_${this.experimentName}" isExecutable="true">`;
 
         const startX = 200;
@@ -425,14 +430,20 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
         );
     }
 
+    /**
+     * Checks if a workflow tab exists for the given experiment
+     * and updates the workflowExists property accordingly
+     */
     private checkWorkflowGroup(experimentId: string): void {
         this.getTemplateIdForExperiment(experimentId)
             .pipe(
+                // Use the TemplateId to get the navigation elements that are available for the experiment.
                 switchMap((templateId) =>
                     this.http.get<any>(
                         `${this.registry.registryRootUrl}templates/${templateId}/tabs/?group=experiment-navigation`
                     )
                 ),
+                // Check if there is a Workflow tab in the navigation elements
                 map((data) => {
                     const workflowTab = data.data.items.find(
                         (tab: any) => tab.name === 'Workflow'
@@ -441,9 +452,9 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
                 }),
                 catchError(() => of(false))
             )
+            // If there is an workflow tab set workflowExists to true else false
             .subscribe((exists) => {
                 this.workflowExists = exists;
             });
-        this.router.config;
     }
 }
