@@ -6,6 +6,10 @@
         </button>
         <div class="flex-space"></div>
 
+        <button *ngIf="workflowExists" mat-raised-button color="primary" (click)="exportWorkflow()">
+            Export Workflow
+        </button>
+
         <mat-paginator #paginatorTop class="paginator"
             (page)="paginatorBottom.pageSize = $event.pageSize; paginatorBottom.pageIndex = $event.pageIndex; onPageChange($event)"
             [length]="collectionSize" [pageSize]="10" [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page">
