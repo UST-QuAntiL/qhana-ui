@@ -79,6 +79,7 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
     {}
 
     ngOnInit(): void {
+        this.templateIdSubscription = this.template.currentTemplateId.subscribe((currentTempalteId) => this.currentTemplateId = currentTempalteId);
         this.backendUrlSubscription = this.serviceRegistry.backendRootUrl.subscribe((url) => (this.backendUrl = url));
         this.routeSubscription = this.route.params
             .pipe(map((params) => params.experimentId))
@@ -100,7 +101,6 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
                         ''
                     ))
             );
-        this.templateIdSubscription = this.template.currentTemplateId.subscribe((currentTempalteId) => this.currentTemplateId = currentTempalteId);
     }
 
     ngOnDestroy(): void {
@@ -185,10 +185,8 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
             })
             .subscribe({
                 // if the observable retruns something, next will be executed with the value the observable returned
-                next: (pageData) => { this.processTimelineSteps(pageData) },
-                error: (err) => {
-                    console.error('Failed to load timeline steps', err);
-                },
+                next: (pageData) => this.processTimelineSteps(pageData),
+                error: (err) => console.error('Failed to load timeline steps', err),
             });
     }
 
@@ -207,28 +205,23 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
 
     this.http
         .post(postUrl, xml, { headers })
-        .pipe(
-            switchMap(() =>
-                this.getWorkflowTab(this.currentTemplateId!)
-            )
-        )
+        .pipe(switchMap(() => this.getWorkflowTab(this.currentTemplateId!)))
         .subscribe({
-            next: (tabId) => {
-                console.log(`Switching to workflow tab: ${tabId}`);
-                const targetRoute = [
-                    '/experiments',
-                    this.experimentId,
-                    'extra',
-                    tabId,
-                ];
-                // Navigate to Workflow tab
-                this.router.navigate(targetRoute, {
-                    relativeTo: this.route,
-                });
-            },
-            error: (err) =>
-                console.error(`Failed to export workflow or switch tab ${err}`),
+            next: (tabId) => this.navigateToTabId(tabId),
+            error: (err) => console.error(`Failed to export workflow or switch tab ${err}`),
         });
+    }
+
+    private navigateToTabId(tabId: string): void {
+        console.log(`Switching to workflow tab: ${tabId}`);
+        const targetRoute = [
+            '/experiments',
+            this.experimentId,
+            'extra',
+            tabId,
+        ];
+        // Navigate to Workflow tab
+        this.router.navigate(targetRoute, { relativeTo: this.route });
     }
 
     private buildBpmnXml(steps: any[]): string {
@@ -400,13 +393,6 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
         ].join('\n');
     }
 
-    private getTemplateIdForExperiment(
-        experimentId: string
-    ): Observable<string> {
-        const url = `${this.backendUrl}/experiments/${experimentId}`;
-        return this.http.get<any>(url).pipe(map((data) => data.templateId));
-    }
-
     private getWorkflowTab(templateId: string): Observable<string> {
         const tabsUrl = `${this.registry.registryRootUrl}templates/${templateId}/tabs/?group=experiment-navigation`;
         return this.http.get<any>(tabsUrl).pipe(
@@ -425,23 +411,15 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
      * and updates the workflowExists property accordingly
      */
     private checkWorkflowGroup(experimentId: string): void {
-        this.getTemplateIdForExperiment(experimentId)
+        this.http.get<any>(`${this.registry.registryRootUrl}templates/${this.currentTemplateId}/tabs/?group=experiment-navigation`)
             .pipe(
-                // Use the TemplateId to get the navigation elements that are available 
-                // for the experiment.
-                switchMap((templateId) =>
-                    this.http.get<any>(
-                        `${this.registry.registryRootUrl}templates/${templateId}/tabs/?group=experiment-navigation`
-                    )
-                ),
-                // Check if there is a Workflow tab in the navigation elements
                 map((data) => {
-                    const workflowTab = data.data.items.find(
-                        (tab: any) => tab.name === 'Workflow'
-                    );
-                    return !!workflowTab;
-                }),
-                catchError(() => of(false))
+                const workflowTab = data.data.items.find(
+                    (tab: any) => tab.name === 'Workflow'
+                );
+                return !!workflowTab;
+            }),
+            catchError(() => of(false))
             )
             // If there is an workflow tab set workflowExists to true else false
             .subscribe((exists) => {
