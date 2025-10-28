@@ -208,23 +208,13 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
     this.http
         .post(postUrl, xml, { headers })
         .pipe(
-            // First switchMap: wait for POST response, then get template ID
             switchMap(() =>
-                this.getTemplateIdForExperiment(
-                    this.experimentId!
-                )
-            ),
-            // Second switchMap: wait for template ID, then get workflow tab
-            switchMap((templateId) =>
-                this.getWorkflowTab(templateId)
+                this.getWorkflowTab(this.currentTemplateId!)
             )
         )
         .subscribe({
             next: (tabId) => {
-                console.log(
-                    'Switching to workflow tab:',
-                    tabId
-                );
+                console.log(`Switching to workflow tab: ${tabId}`);
                 const targetRoute = [
                     '/experiments',
                     this.experimentId,
@@ -237,10 +227,7 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
                 });
             },
             error: (err) =>
-                console.error(
-                    'Failed to export workflow or switch tab',
-                    err
-                ),
+                console.error(`Failed to export workflow or switch tab ${err}`),
         });
     }
 
@@ -415,12 +402,12 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
 
     private getTemplateIdForExperiment(
         experimentId: string
-    ): Observable<number> {
+    ): Observable<string> {
         const url = `${this.backendUrl}/experiments/${experimentId}`;
         return this.http.get<any>(url).pipe(map((data) => data.templateId));
     }
 
-    private getWorkflowTab(templateId: number): Observable<string> {
+    private getWorkflowTab(templateId: string): Observable<string> {
         const tabsUrl = `${this.registry.registryRootUrl}templates/${templateId}/tabs/?group=experiment-navigation`;
         return this.http.get<any>(tabsUrl).pipe(
             map((data) => {
