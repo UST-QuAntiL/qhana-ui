@@ -75,10 +75,7 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
     {}
 
     ngOnInit(): void {
-        this.backendUrlSubscription =
-            this.serviceRegistry.backendRootUrl.subscribe(
-                (url) => (this.backendUrl = url)
-            );
+        this.backendUrlSubscription = this.serviceRegistry.backendRootUrl.subscribe((url) => (this.backendUrl = url));
         this.routeSubscription = this.route.params
             .pipe(map((params) => params.experimentId))
             .subscribe((experimentId) => {
@@ -183,8 +180,15 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
             })
             .subscribe({
                 // if the observable retruns something, next will be executed with the value the observable returned
-                next: (pageData) => {
-                    // save all items or an empty array in steps
+                next: (pageData) => { this.processTimelineSteps(pageData) },
+                error: (err) => {
+                    console.error('Failed to load timeline steps', err);
+                },
+            });
+    }
+
+    private processTimelineSteps(pageData: any): void {
+        // save all items or an empty array in steps
                     const steps = pageData.items || [];
                     console.log(steps);
                     const xml = this.buildBpmnXml(steps);
@@ -234,11 +238,6 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
                                     err
                                 ),
                         });
-                },
-                error: (err) => {
-                    console.error('Failed to load timeline steps', err);
-                },
-            });
     }
 
     private buildBpmnXml(steps: any[]): string {
@@ -437,7 +436,8 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
     private checkWorkflowGroup(experimentId: string): void {
         this.getTemplateIdForExperiment(experimentId)
             .pipe(
-                // Use the TemplateId to get the navigation elements that are available for the experiment.
+                // Use the TemplateId to get the navigation elements that are available 
+                // for the experiment.
                 switchMap((templateId) =>
                     this.http.get<any>(
                         `${this.registry.registryRootUrl}templates/${templateId}/tabs/?group=experiment-navigation`
