@@ -14,6 +14,7 @@ import { ServiceRegistryService } from 'src/app/services/service-registry.servic
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { SettingsPageComponent } from '../settings-page/settings-page.component';
 import { PluginRegistryBaseService } from 'src/app/services/registry.service';
+import { TemplatesService } from 'src/app/services/templates.service';
 
 interface SelectValue {
     value: number | string;
@@ -29,6 +30,7 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
     private routeSubscription: Subscription | null = null;
     private backendUrlSubscription: Subscription | null = null;
     private experimentNameSubscription: Subscription | null = null;
+    private templateIdSubscription: Subscription | null = null;
 
     backendUrl: string | null = null;
 
@@ -62,6 +64,7 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
     resultQuality: ExperimentResultQuality | '' = '';
     resultQualityValues = ExperimentResultQualityValues;
     workflowExists = false;
+    currentTemplateId: string | null = null;
 
     constructor(
         private route: ActivatedRoute,
@@ -70,7 +73,8 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
         private serviceRegistry: ServiceRegistryService,
         private http: HttpClient,
         private router: Router,
-        private registry: PluginRegistryBaseService
+        private registry: PluginRegistryBaseService,
+        private template: TemplatesService
     ) //private settings: SettingsPageComponent
     {}
 
@@ -89,20 +93,21 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
                 }
             });
         // Subscribe to experiment name changes, keep only alphanumeric characters, hyphens, and underscores
-        this.experimentNameSubscription =
-            this.experiment.experimentName.subscribe(
+        this.experimentNameSubscription = this.experiment.experimentName.subscribe(
                 (name) =>
                     (this.experimentName = name?.replace(
                         /[^a-zA-Z0-9\-_]/g,
                         ''
                     ))
             );
+        this.templateIdSubscription = this.template.currentTemplateId.subscribe((currentTempalteId) => this.currentTemplateId = currentTempalteId);
     }
 
     ngOnDestroy(): void {
         this.backendUrlSubscription?.unsubscribe();
         this.routeSubscription?.unsubscribe();
         this.experimentNameSubscription?.unsubscribe();
+        this.templateIdSubscription?.unsubscribe();
     }
 
     onSort() {
@@ -189,55 +194,54 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
 
     private processTimelineSteps(pageData: any): void {
         // save all items or an empty array in steps
-                    const steps = pageData.items || [];
-                    console.log(steps);
-                    const xml = this.buildBpmnXml(steps);
+    const steps = pageData.items || [];
+    console.log(steps);
+    const xml = this.buildBpmnXml(steps);
 
-                    const postUrl = `http://localhost:5005/plugins/workflow-editor@v0-1-0/workflows/`;
-                    // TODO: edit url, so it does not contain 'localhost' link
+    const postUrl = `http://localhost:5005/plugins/workflow-editor@v0-1-0/workflows/`;
+    // TODO: edit url, so it does not contain 'localhost' link
 
-                    const headers = new HttpHeaders({
-                        'Content-Type': 'application/bpmn+xml',
-                    });
-                    console.log(xml);
+    const headers = new HttpHeaders({
+        'Content-Type': 'application/bpmn+xml',
+    });
 
-                    this.http
-                        .post(postUrl, xml, { headers })
-                        .pipe(
-                            // First switchMap: wait for POST response, then get template ID
-                            switchMap(() =>
-                                this.getTemplateIdForExperiment(
-                                    this.experimentId!
-                                )
-                            ),
-                            // Second switchMap: wait for template ID, then get workflow tab
-                            switchMap((templateId) =>
-                                this.getWorkflowTab(templateId)
-                            )
-                        )
-                        .subscribe({
-                            next: (tabId) => {
-                                console.log(
-                                    'Switching to workflow tab:',
-                                    tabId
-                                );
-                                const targetRoute = [
-                                    '/experiments',
-                                    this.experimentId,
-                                    'extra',
-                                    tabId,
-                                ];
-                                // Navigate to Workflow tab
-                                this.router.navigate(targetRoute, {
-                                    relativeTo: this.route,
-                                });
-                            },
-                            error: (err) =>
-                                console.error(
-                                    'Failed to export workflow or switch tab',
-                                    err
-                                ),
-                        });
+    this.http
+        .post(postUrl, xml, { headers })
+        .pipe(
+            // First switchMap: wait for POST response, then get template ID
+            switchMap(() =>
+                this.getTemplateIdForExperiment(
+                    this.experimentId!
+                )
+            ),
+            // Second switchMap: wait for template ID, then get workflow tab
+            switchMap((templateId) =>
+                this.getWorkflowTab(templateId)
+            )
+        )
+        .subscribe({
+            next: (tabId) => {
+                console.log(
+                    'Switching to workflow tab:',
+                    tabId
+                );
+                const targetRoute = [
+                    '/experiments',
+                    this.experimentId,
+                    'extra',
+                    tabId,
+                ];
+                // Navigate to Workflow tab
+                this.router.navigate(targetRoute, {
+                    relativeTo: this.route,
+                });
+            },
+            error: (err) =>
+                console.error(
+                    'Failed to export workflow or switch tab',
+                    err
+                ),
+        });
     }
 
     private buildBpmnXml(steps: any[]): string {
