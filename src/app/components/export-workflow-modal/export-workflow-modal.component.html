@@ -1,1 +1,28 @@
-<p>export-workflow-modal works!</p>
+<h2 mat-dialog-title>Select Steps for Workflow Export</h2>
+
+<mat-dialog-content>
+  <mat-form-field>
+    <mat-label>Result Quality Filter</mat-label>
+    <mat-select [(ngModel)]="resultQualityFilter" (selectionChange)="onFilterChange()">
+      <mat-option [value]="''">All</mat-option>
+      <mat-option *ngFor="let quality of resultQualityValues" [value]="quality">
+        {{ quality.charAt(0).toUpperCase() + quality.slice(1).toLowerCase() }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-selection-list>
+    <mat-list-option *ngFor="let step of filteredSteps" [(selected)]="stepSelection[step.sequence]">
+      {{step.sequence}} - {{step.processorName}} ({{step.resultQuality}})
+    </mat-list-option>
+  </mat-selection-list>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="closeDialog(false)">Cancel</button>
+  <button mat-raised-button color="primary" 
+          (click)="closeDialog(true)" 
+          [disabled]="!hasSelectedSteps">
+    Export Selected
+  </button>
+</mat-dialog-actions>
