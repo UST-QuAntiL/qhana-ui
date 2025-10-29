@@ -96,6 +96,7 @@ import { UiTemplateTabFormComponent } from './components-small/ui-template-tab-f
 import { PluginFilterFormComponent } from './components-small/plugin-filter-form/plugin-filter-form.component';
 import { HelpTooltipComponent } from "src/app/components-small/help-tooltip/help-tooltip.component";
 import { HelpToggleComponent } from "src/app/components-small/help-toggle/help-toggle.component";
+import { ExportWorkflowModalComponent } from './components/export-workflow-modal/export-workflow-modal.component';
 
 @NgModule({
     declarations: [
@@ -150,6 +151,7 @@ import { HelpToggleComponent } from "src/app/components-small/help-toggle/help-t
         UiTemplateTabFormComponent,
         PluginFilterViewComponent,
         PluginFilterFormComponent,
+        ExportWorkflowModalComponent
     ],
     imports: [
         BrowserModule,

@@ -12,9 +12,10 @@ import {
 } from 'src/app/services/qhana-backend.service';
 import { ServiceRegistryService } from 'src/app/services/service-registry.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { SettingsPageComponent } from '../settings-page/settings-page.component';
 import { PluginRegistryBaseService } from 'src/app/services/registry.service';
 import { TemplatesService } from 'src/app/services/templates.service';
+import { MatDialog } from '@angular/material/dialog';
+import { ExportWorkflowModalComponent } from '../export-workflow-modal/export-workflow-modal.component';
 
 interface SelectValue {
     value: number | string;
@@ -74,8 +75,9 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
         private http: HttpClient,
         private router: Router,
         private registry: PluginRegistryBaseService,
-        private template: TemplatesService
-    ) //private settings: SettingsPageComponent
+        private template: TemplatesService,
+        private dialog: MatDialog
+    )
     {}
 
     ngOnInit(): void {
@@ -185,7 +187,45 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
             })
             .subscribe({
                 // if the observable retruns something, next will be executed with the value the observable returned
-                next: (pageData) => this.processTimelineSteps(pageData),
+                next: (pageData) => {
+                const steps = pageData.items || [];
+
+                // Open modal to select steps
+                const dialogRef = this.dialog.open(ExportWorkflowModalComponent, {
+                    width: '700px',
+                    data: { steps },
+                });
+
+                dialogRef.afterClosed().subscribe((selectedSteps: TimelineStepApiObject[] | null) => {
+                    if (!selectedSteps || selectedSteps.length === 0) {
+                        console.log('No steps selected for export');
+                        return;
+                    }
+
+                    // Build BPMN XML from selected steps
+                    const xml = this.buildBpmnXml(selectedSteps);
+
+                    const postUrl = `http://localhost:5005/plugins/workflow-editor@v0-1-0/workflows/`;
+                    const headers = new HttpHeaders({ 'Content-Type': 'application/bpmn+xml' });
+
+                    // Post BPMN XML
+                    this.http
+                        .post(postUrl, xml, { headers })
+                        .pipe(
+                            switchMap(() => this.currentTemplateId!),
+                            switchMap((templateId) => this.getWorkflowTab(templateId))
+                        )
+                        .subscribe({
+                            next: (tabId) => {
+                                console.log('Switching to workflow tab:', tabId);
+                                const targetRoute = ['/experiments', this.experimentId, 'extra', tabId];
+                                this.router.navigate(targetRoute, { relativeTo: this.route });
+                            },
+                            error: (err) =>
+                                console.error('Failed to export workflow or switch tab', err),
+                        });
+                });
+            },
                 error: (err) => console.error('Failed to load timeline steps', err),
             });
     }
