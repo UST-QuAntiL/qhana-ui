@@ -187,68 +187,37 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
             })
             .subscribe({
                 // if the observable retruns something, next will be executed with the value the observable returned
-                next: (pageData) => {
-                const steps = pageData.items || [];
-
-                // Open modal to select steps
-                const dialogRef = this.dialog.open(ExportWorkflowModalComponent, {
-                    width: '700px',
-                    data: { steps },
-                });
-
-                dialogRef.afterClosed().subscribe((selectedSteps: TimelineStepApiObject[] | null) => {
-                    if (!selectedSteps || selectedSteps.length === 0) {
-                        console.log('No steps selected for export');
-                        return;
-                    }
-
-                    // Build BPMN XML from selected steps
-                    const xml = this.buildBpmnXml(selectedSteps);
-
-                    const postUrl = `http://localhost:5005/plugins/workflow-editor@v0-1-0/workflows/`;
-                    const headers = new HttpHeaders({ 'Content-Type': 'application/bpmn+xml' });
-
-                    // Post BPMN XML
-                    this.http
-                        .post(postUrl, xml, { headers })
-                        .pipe(
-                            switchMap(() => this.currentTemplateId!),
-                            switchMap((templateId) => this.getWorkflowTab(templateId))
-                        )
-                        .subscribe({
-                            next: (tabId) => {
-                                console.log('Switching to workflow tab:', tabId);
-                                const targetRoute = ['/experiments', this.experimentId, 'extra', tabId];
-                                this.router.navigate(targetRoute, { relativeTo: this.route });
-                            },
-                            error: (err) =>
-                                console.error('Failed to export workflow or switch tab', err),
-                        });
-                });
-            },
+                next: (pageData) => this.processTimelineSteps(pageData),
                 error: (err) => console.error('Failed to load timeline steps', err),
             });
     }
 
     private processTimelineSteps(pageData: any): void {
         // save all items or an empty array in steps
-    const steps = pageData.items || [];
-    console.log(steps);
-    const xml = this.buildBpmnXml(steps);
+        const steps = pageData.items || [];
+        const dialogRef = this.dialog.open(ExportWorkflowModalComponent, {
+            width: '700px',
+            data: { steps },
+        });
 
-    const postUrl = `http://localhost:5005/plugins/workflow-editor@v0-1-0/workflows/`;
-    // TODO: edit url, so it does not contain 'localhost' link
+        dialogRef.afterClosed().subscribe((selectedSteps: TimelineStepApiObject[] | null) => {
+            if (!selectedSteps || selectedSteps.length === 0) {
+                console.log('No steps selected for export');
+                return;
+            }
+        const xml = this.buildBpmnXml(selectedSteps);
 
-    const headers = new HttpHeaders({
-        'Content-Type': 'application/bpmn+xml',
-    });
+        const postUrl = `http://localhost:5005/plugins/workflow-editor@v0-1-0/workflows/`;
+        // TODO: edit url, so it does not contain 'localhost' link
 
-    this.http
-        .post(postUrl, xml, { headers })
-        .pipe(switchMap(() => this.getWorkflowTab(this.currentTemplateId!)))
-        .subscribe({
-            next: (tabId) => this.navigateToTabId(tabId),
-            error: (err) => console.error(`Failed to export workflow or switch tab ${err}`),
+        const headers = new HttpHeaders({ 'Content-Type': 'application/bpmn+xml' });
+
+        this.http.post(postUrl, xml, { headers })
+            .pipe(switchMap(() => this.getWorkflowTab(this.currentTemplateId!)))
+            .subscribe({
+                next: (tabId) => this.navigateToTabId(tabId),
+                error: (err) => console.error(`Failed to export workflow or switch tab ${err}`),
+            })
         });
     }
 
