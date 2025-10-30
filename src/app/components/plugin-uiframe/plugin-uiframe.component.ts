@@ -5,8 +5,8 @@ import { ActivatedRoute } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { catchError, concatAll, filter, map, mergeAll, mergeMap, toArray } from 'rxjs/operators';
 import { ChooseDataDialog } from 'src/app/dialogs/choose-data/choose-data.dialog';
-import { ChooseRelatedDataDialog, RelatedDataChooserData } from 'src/app/dialogs/choose-related-data/choose-related-data.dialog';
 import { ChoosePluginDialog } from 'src/app/dialogs/choose-plugin/choose-plugin.dialog';
+import { ChooseRelatedDataDialog, RelatedDataChooserData } from 'src/app/dialogs/choose-related-data/choose-related-data.dialog';
 import { ApiLink, CollectionApiObject } from 'src/app/services/api-data-types';
 import { PluginApiObject } from 'src/app/services/qhana-api-data-types';
 import { ApiObjectList, ExperimentDataApiObject, QhanaBackendService } from 'src/app/services/qhana-backend.service';
@@ -227,6 +227,7 @@ export class PluginUiframeComponent implements OnChanges, OnDestroy {
     pluginOrigin: string | null = null;
     frontendUrl: SafeResourceUrl;
     frontendHeight: number = 100;
+    requestedFullHeight: boolean = false;
     itemsPerPage: number = 100;
     experimentId: number | null = null;
     hasFullscreenMode: boolean = false;
@@ -240,6 +241,8 @@ export class PluginUiframeComponent implements OnChanges, OnDestroy {
     autofillData: { value: string, encoding: string } | null = null;
 
     private dialogActive = false;
+
+    private resizeObserver: ResizeObserver = new ResizeObserver(() => this.updateMaxHeight());
 
 
     listenerFunction = (event: MessageEvent) => this.handleMicroFrontendEvent(event);
@@ -258,6 +261,7 @@ export class PluginUiframeComponent implements OnChanges, OnDestroy {
 
     ngOnDestroy(): void {
         window.removeEventListener("message", this.listenerFunction);
+        this.resizeObserver.disconnect();
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -266,12 +270,14 @@ export class PluginUiframeComponent implements OnChanges, OnDestroy {
             this.pluginOrigin = null;
             this.frontendUrl = this.blank;
             this.frontendHeight = 100;
+            this.requestedFullHeight = false;
             return;
         }
         if (changes.url != null) {
             this.loading = true;
             this.pluginOrigin = (new URL(url)).origin;
             this.frontendHeight = 100;
+            this.requestedFullHeight = false;
             this.frontendUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url);
             this.hasFullscreenMode = false;
         }
@@ -347,6 +353,17 @@ export class PluginUiframeComponent implements OnChanges, OnDestroy {
             context.location = this.context.location.toString();
         }
         return context;
+    }
+
+    private updateMaxHeight() {
+        if (!this.requestedFullHeight) {
+            this.resizeObserver.disconnect();
+            return;
+        }
+        const maxHeight = this.calculateMaxHeight();
+        if (maxHeight != null) {
+            this.frontendHeight = maxHeight;
+        }
     }
 
     private calculateMaxHeight(): number | undefined {
@@ -656,6 +673,8 @@ export class PluginUiframeComponent implements OnChanges, OnDestroy {
                     newHeight = Math.max(newHeight, data.targetHeight);
                     // use target height * 2 as the maximum height (to allow for some slack)
                     newHeight = Math.min(newHeight, 2 * data.targetHeight);
+                    this.requestedFullHeight = false;
+                    this.resizeObserver.disconnect();
                 }
                 if (data.targetHeight === "full") {
                     // if target height is full set iframe to max height to fill the current screen
@@ -663,6 +682,8 @@ export class PluginUiframeComponent implements OnChanges, OnDestroy {
                     if (maxHeight != null) {
                         newHeight = maxHeight;
                     }
+                    this.requestedFullHeight = true;
+                    this.resizeObserver.observe(document.documentElement, { box: 'content-box' });
                 }
                 this.frontendHeight = newHeight;
             }
