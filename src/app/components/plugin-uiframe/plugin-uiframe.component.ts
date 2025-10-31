@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, NgZone, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
@@ -247,7 +247,7 @@ export class PluginUiframeComponent implements OnChanges, OnDestroy {
 
     listenerFunction = (event: MessageEvent) => this.handleMicroFrontendEvent(event);
 
-    constructor(private sanitizer: DomSanitizer, private dialog: MatDialog, private backend: QhanaBackendService, private registry: PluginRegistryBaseService, private route: ActivatedRoute) {
+  constructor(private sanitizer: DomSanitizer, private dialog: MatDialog, private backend: QhanaBackendService, private registry: PluginRegistryBaseService, private route: ActivatedRoute, private ngZone: NgZone) {
         this.blank = this.sanitizer.bypassSecurityTrustResourceUrl("about://blank");
         this.frontendUrl = this.blank;
         window.addEventListener(
@@ -362,7 +362,9 @@ export class PluginUiframeComponent implements OnChanges, OnDestroy {
         }
         const maxHeight = this.calculateMaxHeight();
         if (maxHeight != null) {
-            this.frontendHeight = maxHeight;
+	    this.ngZone.run(() => {
+                this.frontendHeight = maxHeight;
+	    });
         }
     }
 
