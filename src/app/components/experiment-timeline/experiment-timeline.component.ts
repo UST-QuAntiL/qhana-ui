@@ -202,17 +202,20 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
             }
             const xml = new BpmnXmlBuilder(this.experimentName, selectedSteps).toString();
 
-            const postUrl = `http://localhost:5005/plugins/workflow-editor@v0-1-0/workflows/`;
-            // TODO: edit url, so it does not contain 'localhost' link
+            this.getWorkflowEditorEntryPoint(this.currentTemplateId!).subscribe(entryPoint => {
+                const baseUrl = this.getPortFromEntryPoint(entryPoint);
 
-            const headers = new HttpHeaders({ 'Content-Type': 'application/bpmn+xml' });
+                const postUrl =`${baseUrl}/plugins/workflow-editor@v0-1-0/workflows/`;
 
-            this.http.post(postUrl, xml, { headers })
-                .pipe(switchMap(() => this.getWorkflowTab(this.currentTemplateId!)))
-                .subscribe({
-                    next: (tabId) => this.navigateToTabId(tabId),
-                    error: (err) => console.error(`Failed to export workflow or switch tab ${err}`),
-                });
+                const headers = new HttpHeaders({'Content-Type': 'application/bpmn+xml'});
+
+                this.http.post(postUrl, xml, { headers })
+                    .pipe(switchMap(() => this.getWorkflowTab(this.currentTemplateId!)))
+                    .subscribe({
+                        next: tabId => this.navigateToTabId(tabId),
+                        error: err => console.error('Failed to export workflow', err),
+                    });
+            });
         });
     }
 
@@ -256,5 +259,41 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
                 }), catchError(() => of(false)))
             // If there is an workflow tab set workflowExists to true else false
             .subscribe((exists) => this.workflowExists = exists);
+    }
+
+    /**
+     * Retrieves the entry point URL of the Workflow Editor plugin from the plugin registry.
+     *
+     * The method performs a service discovery by querying the central plugin registry,
+     * filtering the available plugins by their technical identifier (e.g. "workflow-editor"),
+     * and returning the corresponding entry point URL.
+     *
+     * @returns Observable<string> containing the Workflow Editor entry point URL
+     */
+    private getWorkflowEditorEntryPoint(templateId: string): Observable<string> {
+        return this.getWorkflowTab(templateId).pipe(
+            switchMap((tabId) => {
+                const url = `${this.registry.registryRootUrl}plugins/?template-tab=${tabId}`;
+
+                return this.http.get<any>(url).pipe(
+                    map(response => {
+                        const plugin = response.embedded
+                            ?.map((e: any) => e.data)
+                            ?.find((p: any) => p.identifier === 'workflow-editor');
+
+                        if (!plugin?.entryPoint?.href) {
+                            throw new Error('Workflow Editor entryPoint not found');
+                        }
+
+                        return plugin.entryPoint.href;
+                    })
+                );
+            })
+        );
+    }
+
+    private getPortFromEntryPoint(entryPoint: string): string {
+        const url = new URL(entryPoint);
+        return `${url.protocol}//${url.hostname}${url.port ? ':' + url.port : ''}`;
     }
 }
