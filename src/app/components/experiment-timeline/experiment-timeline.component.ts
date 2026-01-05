@@ -202,10 +202,10 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
             }
             const xml = new BpmnXmlBuilder(this.experimentName, selectedSteps).toString();
 
-            this.getWorkflowEditorEntryPoint(this.currentTemplateId!).subscribe(entryPoint => {
-                const baseUrl = this.getPortFromEntryPoint(entryPoint);
+            this.getWorkflowEditorHref(this.currentTemplateId!).subscribe(href => {
 
-                const postUrl =`${baseUrl}/plugins/workflow-editor@v0-1-0/workflows/`;
+                const postUrl = `${href}workflows/`;
+                console.log(postUrl);
 
                 const headers = new HttpHeaders({'Content-Type': 'application/bpmn+xml'});
 
@@ -262,15 +262,15 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
     }
 
     /**
-     * Retrieves the entry point URL of the Workflow Editor plugin from the plugin registry.
+     * Retrieves the URL of the Workflow Editor plugin from the plugin registry.
      *
      * The method performs a service discovery by querying the central plugin registry,
      * filtering the available plugins by their technical identifier (e.g. "workflow-editor"),
-     * and returning the corresponding entry point URL.
+     * and returning the corresponding URL.
      *
-     * @returns Observable<string> containing the Workflow Editor entry point URL
+     * @returns Observable<string> containing the Workflow Editor URL
      */
-    private getWorkflowEditorEntryPoint(templateId: string): Observable<string> {
+    private getWorkflowEditorHref(templateId: string): Observable<string> {
         return this.getWorkflowTab(templateId).pipe(
             switchMap((tabId) => {
                 const url = `${this.registry.registryRootUrl}plugins/?template-tab=${tabId}`;
@@ -281,19 +281,11 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
                             ?.map((e: any) => e.data)
                             ?.find((p: any) => p.identifier === 'workflow-editor');
 
-                        if (!plugin?.entryPoint?.href) {
-                            throw new Error('Workflow Editor entryPoint not found');
-                        }
-
-                        return plugin.entryPoint.href;
+                        return plugin.href;
                     })
                 );
             })
         );
     }
 
-    private getPortFromEntryPoint(entryPoint: string): string {
-        const url = new URL(entryPoint);
-        return `${url.protocol}//${url.hostname}${url.port ? ':' + url.port : ''}`;
-    }
 }
