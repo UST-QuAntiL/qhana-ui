@@ -742,7 +742,7 @@ export class PluginUiframeComponent implements OnChanges, OnDestroy {
                     return;
                 }
                 const queryParams = Object.fromEntries([
-                    ["pluginName", data.pluginName],
+                    ["plugin-name", data.pluginName],
                     ...Object.entries(data.parameters).map(([key,value]) => ["param-" + key,value])
                 ]);
                 this.router.navigate(
