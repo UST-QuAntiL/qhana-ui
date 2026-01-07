@@ -48,7 +48,7 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
     }
 
     registerParameterSubscription() {
-        this.parameterSubscription = this.route.queryParamMap.subscribe(params => {
+        this.parameterSubscription = this.route.queryParamMap.subscribe(async params => {
             const extraParams = new Map<string, string>();
             params.keys.forEach(key => {
                 if (key.startsWith("param-")) {
@@ -64,7 +64,17 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
                 this.extraParams = null;
             }
 
-            const pluginId = params.get('plugin');
+            let pluginId = params.get('plugin');
+            const pluginName = params.get('plugin-name');
+            if (pluginName != null){
+                const pluginPage = await this.registry.getByRel<CollectionApiObject>([["plugin", "collection"]], new URLSearchParams({ }), true);
+
+                pluginPage?.data?.items?.forEach(item => {
+                    if(item.name?.startsWith(pluginName+" (")){
+                        pluginId = item.resourceKey?.pluginId??null;
+                    }
+                })
+            }
             const templateTabId = params.get('tab');
             this.detailAreaActive = templateTabId != null;
             this.onPluginIdChange(pluginId);

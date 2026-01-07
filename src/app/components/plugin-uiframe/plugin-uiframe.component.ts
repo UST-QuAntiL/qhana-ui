@@ -1,7 +1,7 @@
 import { Component, ElementRef, EventEmitter, Input, NgZone, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { catchError, concatAll, filter, map, mergeAll, mergeMap, toArray } from 'rxjs/operators';
 import { ChooseDataDialog } from 'src/app/dialogs/choose-data/choose-data.dialog';
@@ -247,7 +247,7 @@ export class PluginUiframeComponent implements OnChanges, OnDestroy {
 
     listenerFunction = (event: MessageEvent) => this.handleMicroFrontendEvent(event);
 
-  constructor(private sanitizer: DomSanitizer, private dialog: MatDialog, private backend: QhanaBackendService, private registry: PluginRegistryBaseService, private route: ActivatedRoute, private ngZone: NgZone) {
+  constructor(private sanitizer: DomSanitizer, private dialog: MatDialog, private backend: QhanaBackendService, private registry: PluginRegistryBaseService, private route: ActivatedRoute, private ngZone: NgZone, private router: Router) {
         this.blank = this.sanitizer.bypassSecurityTrustResourceUrl("about://blank");
         this.frontendUrl = this.blank;
         window.addEventListener(
@@ -736,6 +736,18 @@ export class PluginUiframeComponent implements OnChanges, OnDestroy {
                     return;
                 }
                 this.handlePluginInfoRequest(data);
+            }
+            if (data.type === "switch-plugin") {
+                if (typeof data.pluginName !== "string" ) {
+                    return;
+                }
+                const queryParams = Object.fromEntries([
+                    ["pluginName", data.pluginName],
+                    ...Object.entries(data.parameters).map(([key,value]) => ["param-" + key,value])
+                ]);
+                this.router.navigate(
+                ['/experiments', this.experimentId, 'workspace'],
+                { queryParams : queryParams});
             }
         }
     }
