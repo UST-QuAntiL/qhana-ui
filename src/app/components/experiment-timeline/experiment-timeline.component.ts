@@ -221,14 +221,29 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
 
     private navigateToTabId(tabId: string): void {
         console.log(`Switching to workflow tab: ${tabId}`);
+
         const targetRoute = [
             '/experiments',
             this.experimentId,
             'extra',
             tabId,
         ];
+
+        // Forward all param-* query parameters to the workflow micro frontend
+        // without interpreting them
+        const currentQueryParams = this.route.snapshot.queryParams;
+
+        const queryParams = Object.fromEntries(
+            Object.entries(currentQueryParams)
+                .filter(([key]) => key.startsWith('param-'))
+                .map(([key, value]) => [key.replace(/^param-/, ''), value])
+        );
+
         // Navigate to Workflow tab
-        this.router.navigate(targetRoute, { relativeTo: this.route });
+        this.router.navigate(targetRoute, {
+            relativeTo: this.route,
+            queryParams,
+        });
     }
 
     private getWorkflowTab(templateId: string): Observable<string> {
