@@ -1,3 +1,28 @@
+export interface EnrichedStep {
+    processorName: string;
+    processorVersion: string;
+    notes: string;
+    inputData: Array<{ type: string; contentType: string; name: string; version: number }>;
+    outputData: Array<{ type: string; contentType: string; name: string; version: number }>;
+    parameters: Record<string, string>;
+    pluginDataInput: Array<{ parameter: string; dataType: string; contentType: string[] }>;
+    pluginDataOutput: Array<{ dataType: string; contentType: string[] }>;
+}
+
+interface InputMapping {
+    paramName: string;
+    mapped: boolean;
+    fromOutputRef?: string;
+    globPattern?: string;
+    dataType?: string;
+}
+
+interface StartFormField {
+    paramName: string;
+    label: string;
+    defaultValue: string;
+}
+
 export class BpmnXmlBuilder {
     private static readonly xmlHeader = `<?xml version="1.0" encoding="UTF-8"?>`;
     private static readonly defsOpen = `<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -5,6 +30,7 @@ export class BpmnXmlBuilder {
         xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
         xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
         xmlns:qhana="https://github.com/qhana"
+        xmlns:camunda="http://camunda.org/schema/1.0/bpmn"
         xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
         id="sample-diagram"
         targetNamespace="http://bpmn.io/schema/bpmn"
@@ -18,12 +44,17 @@ export class BpmnXmlBuilder {
     private static readonly stepHeight = 80;
     private static readonly gap = 120;
 
+    private startFormFields: StartFormField[] = [];
+    private stepInputMappings: InputMapping[][] = [];
+
     public constructor(
         private experimentName: any,
-        private steps: any[]) {}
+        private steps: EnrichedStep[]) {
+        this.computeMappings();
+    }
 
     public toString(): string {
-        const processOpen = `<bpmn2:process id="Experiment_${this.experimentName}" isExecutable="true">`;
+        const processOpen = `<bpmn2:process id="Experiment_${this.experimentName}" isExecutable="true" name="Experiment_${this.experimentName}" camunda:historyTimeToLive="360000">`;
         const diagramXml = `
         <bpmndi:BPMNDiagram id="BPMNDiagram_1">
             <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1">
@@ -44,11 +75,89 @@ export class BpmnXmlBuilder {
         ].join('\n');
     }
 
+    private computeMappings(): void {
+        const seenStartFields = new Set<string>();
+
+        this.steps.forEach((step, stepIndex) => {
+            const mappings: InputMapping[] = [];
+
+            for (const [paramName, paramValue] of Object.entries(step.parameters)) {
+                if (this.isDataUrl(paramValue)) {
+                    const filename = this.extractFilenameFromDataUrl(paramValue);
+                    const match = this.findOutputMatch(filename, stepIndex);
+
+                    if (match) {
+                        mappings.push({
+                            paramName,
+                            mapped: true,
+                            fromOutputRef: `qoutput.${this.toCamelCase(match.producerName)}`,
+                            globPattern: this.buildGlobPattern(match.outputName),
+                            dataType: match.dataType,
+                        });
+                        continue;
+                    }
+                }
+
+                mappings.push({ paramName, mapped: false });
+
+                if (!seenStartFields.has(paramName)) {
+                    seenStartFields.add(paramName);
+                    const pluginInput = step.pluginDataInput.find(d => d.parameter === paramName);
+                    const defaultValue = pluginInput
+                        ? `file_url:: ${pluginInput.dataType}, ${pluginInput.contentType.join(', ')}`
+                        : paramValue;
+                    this.startFormFields.push({
+                        paramName,
+                        label: this.toLabel(paramName),
+                        defaultValue,
+                    });
+                }
+            }
+
+            this.stepInputMappings.push(mappings);
+        });
+    }
+
+    private findOutputMatch(filename: string, currentStepIndex: number):
+        { producerName: string; outputName: string; dataType: string } | null {
+        for (let i = 0; i < currentStepIndex; i++) {
+            const prevStep = this.steps[i];
+            for (const output of prevStep.outputData) {
+                if (output.name === filename) {
+                    return {
+                        producerName: prevStep.processorName,
+                        outputName: output.name,
+                        dataType: output.type,
+                    };
+                }
+            }
+        }
+        return null;
+    }
+
     private getProcessXml(): string {
-        let processXml = `
+        let processXml: string;
+
+        if (this.startFormFields.length > 0) {
+            let formFieldsXml = '';
+            for (const field of this.startFormFields) {
+                formFieldsXml += `
+                    <camunda:formField id="start_${field.paramName}" label="${field.label}" type="string"${field.defaultValue ? ` defaultValue="${field.defaultValue}"` : ''} />`;
+            }
+            processXml = `
+        <bpmn2:startEvent id="StartEvent_1">
+            <bpmn2:extensionElements>
+                <camunda:formData>${formFieldsXml}
+                </camunda:formData>
+            </bpmn2:extensionElements>
+            <bpmn2:outgoing>Flow_0</bpmn2:outgoing>
+        </bpmn2:startEvent>`;
+        } else {
+            processXml = `
         <bpmn2:startEvent id="StartEvent_1">
             <bpmn2:outgoing>Flow_0</bpmn2:outgoing>
         </bpmn2:startEvent>`;
+        }
 
         if (this.steps.length > 0) {
             this.steps.forEach((step, i) => {
@@ -64,6 +173,8 @@ export class BpmnXmlBuilder {
                     `Run plugin ${qhanaIdentifier}`;
                 const selectedConfigurationId = qhanaIdentifier;
 
+                const extensionXml = this.getTaskExtensionXml(step, i);
+
                 processXml += `
                 <qhana:qHAnaServiceTask
                     id="${id}"
@@ -72,7 +183,7 @@ export class BpmnXmlBuilder {
                     qhanaVersion="${qhanaVersion}"
                     qhanaName="${name}"
                     qhanaDescription="${qhanaDescription}"
-                    selectedConfigurationId="${selectedConfigurationId}">
+                    selectedConfigurationId="${selectedConfigurationId}">${extensionXml}
                     <bpmn2:incoming>${incoming}</bpmn2:incoming>
                     <bpmn2:outgoing>${outgoing}</bpmn2:outgoing>
                 </qhana:qHAnaServiceTask>`;
@@ -85,6 +196,47 @@ export class BpmnXmlBuilder {
         </bpmn2:endEvent>`;
 
         return processXml;
+    }
+
+    private getTaskExtensionXml(step: EnrichedStep, stepIndex: number): string {
+        const mappings = this.stepInputMappings[stepIndex];
+        const hasInputs = mappings.length > 0;
+        const hasOutputs = step.outputData.length > 0;
+        const isLastStep = this.steps.length == stepIndex + 1;
+
+        if (!hasInputs && !hasOutputs) {
+            return '';
+        }
+
+        let inputOutputXml = '';
+
+        for (const mapping of mappings) {
+            if (mapping.mapped) {
+                inputOutputXml += `
+                        <camunda:inputParameter name="qinput.${mapping.paramName}">
+                            <camunda:map>
+                                <camunda:entry key="from">${mapping.fromOutputRef}</camunda:entry>
+                                <camunda:entry key="name">${mapping.globPattern}</camunda:entry>
+                                <camunda:entry key="dataType">${mapping.dataType}</camunda:entry>
+                            </camunda:map>
+                        </camunda:inputParameter>`;
+            } else {
+                inputOutputXml += `
+                        <camunda:inputParameter name="qinput.${mapping.paramName}">\${start_${mapping.paramName}}</camunda:inputParameter>`;
+            }
+        }
+
+        if (hasOutputs) {
+            const pluginCamelCase = this.toCamelCase(step.processorName);
+            inputOutputXml += `
+                        <camunda:outputParameter name="${isLastStep?'return.':''}qoutput.${pluginCamelCase}">\${output}</camunda:outputParameter>`;
+        }
+
+        return `
+                    <bpmn2:extensionElements>
+                        <camunda:inputOutput>${inputOutputXml}
+                        </camunda:inputOutput>
+                    </bpmn2:extensionElements>`;
     }
 
     private getFlowXml(): string {
@@ -167,5 +319,41 @@ export class BpmnXmlBuilder {
             });
         }
         return edgesXml;
+    }
+
+    // --- Helper utilities ---
+
+    private isDataUrl(value: string): boolean {
+        return value.includes('/data/') && value.includes('/download');
+    }
+
+    private extractFilenameFromDataUrl(url: string): string {
+        // URL pattern: .../data/{filename}/download?version=...
+        const match = url.match(/\/data\/([^/]+)\/download/);
+        return match ? decodeURIComponent(match[1]) : '';
+    }
+
+    private buildGlobPattern(outputName: string): string {
+        // Strip random suffix pattern like _Htczxs-Ofctc before the extension
+        const dotIndex = outputName.lastIndexOf('.');
+        const baseName = dotIndex >= 0 ? outputName.substring(0, dotIndex) : outputName;
+        const ext = dotIndex >= 0 ? outputName.substring(dotIndex) : '';
+
+        const stripped = baseName.replace(/_[A-Z][a-z]+-[A-Z][a-z]+$/, '');
+        if (stripped !== baseName) {
+            return `${stripped}_*${ext}`;
+        }
+        return outputName;
+    }
+
+    private toCamelCase(pluginName: string): string {
+        return pluginName.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+    }
+
+    private toLabel(paramName: string): string {
+        return paramName
+            .replace(/([A-Z])/g, ' $1')
+            .replace(/^./, s => s.toUpperCase())
+            .trim();
     }
 }

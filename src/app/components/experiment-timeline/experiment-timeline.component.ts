@@ -16,7 +16,7 @@ import { PluginRegistryBaseService } from 'src/app/services/registry.service';
 import { TemplatesService } from 'src/app/services/templates.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ExportWorkflowModalComponent } from '../export-workflow-modal/export-workflow-modal.component';
-import { BpmnXmlBuilder } from './bpmn-xml-builder';
+import { BpmnXmlBuilder, EnrichedStep } from './bpmn-xml-builder';
 
 interface SelectValue {
     value: number | string;
@@ -195,28 +195,63 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
             data: { steps },
         });
 
-        dialogRef.afterClosed().subscribe((selectedSteps: TimelineStepApiObject[] | null) => {
+        dialogRef.afterClosed().subscribe(async (selectedSteps: TimelineStepApiObject[] | null) => {
             if (!selectedSteps || selectedSteps.length === 0) {
                 console.log('No steps selected for export');
                 return;
             }
-            const xml = new BpmnXmlBuilder(this.experimentName, selectedSteps).toString();
 
-            this.getWorkflowEditorHref(this.currentTemplateId!).subscribe(href => {
+            try {
+                const enrichedSteps = await this.fetchEnrichedSteps(selectedSteps);
+                const xml = new BpmnXmlBuilder(this.experimentName, enrichedSteps).toString();
 
-                const postUrl = `${href}workflows/`;
-                console.log(postUrl);
+                this.getWorkflowEditorHref(this.currentTemplateId!).subscribe(href => {
+                    const postUrl = `${href}workflows/`;
+                    const headers = new HttpHeaders({'Content-Type': 'application/bpmn+xml'});
 
-                const headers = new HttpHeaders({'Content-Type': 'application/bpmn+xml'});
-
-                this.http.post(postUrl, xml, { headers })
-                    .pipe(switchMap(() => this.getWorkflowTab(this.currentTemplateId!)))
-                    .subscribe({
-                        next: tabId => this.navigateToTabId(tabId),
-                        error: err => console.error('Failed to export workflow', err),
-                    });
-            });
+                    this.http.post(postUrl, xml, { headers })
+                        .pipe(switchMap(() => this.getWorkflowTab(this.currentTemplateId!)))
+                        .subscribe({
+                            next: tabId => this.navigateToTabId(tabId),
+                            error: err => console.error('Failed to export workflow', err),
+                        });
+                });
+            } catch (err) {
+                console.error('Failed to enrich timeline steps', err);
+            }
         });
+    }
+
+    private async fetchEnrichedSteps(selectedSteps: TimelineStepApiObject[]): Promise<EnrichedStep[]> {
+        const enriched = await Promise.all(selectedSteps.map(async (step): Promise<EnrichedStep> => {
+            const selfUrl = (step as any)['@self'] as string;
+            const parametersUrl = step.parameters;
+            const pluginUrl = step.processorLocation;
+
+            const [stepDetail, paramsText, pluginInfo] = await Promise.all([
+                fetch(selfUrl).then(r => r.json()),
+                fetch(parametersUrl).then(r => r.text()),
+                fetch(pluginUrl).then(r => r.json()),
+            ]);
+
+            const params: Record<string, string> = {};
+            new URLSearchParams(paramsText).forEach((value, key) => {
+                params[key] = value;
+            });
+
+            return {
+                processorName: step.processorName,
+                processorVersion: step.processorVersion,
+                notes: step.notes,
+                inputData: stepDetail.inputData ?? [],
+                outputData: stepDetail.outputData ?? [],
+                parameters: params,
+                pluginDataInput: pluginInfo.entryPoint?.dataInput ?? [],
+                pluginDataOutput: pluginInfo.entryPoint?.dataOutput ?? [],
+            };
+        }));
+
+        return enriched;
     }
 
     private navigateToTabId(tabId: string): void {
