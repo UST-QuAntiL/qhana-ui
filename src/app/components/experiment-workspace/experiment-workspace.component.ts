@@ -67,7 +67,7 @@ export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
             let pluginId = params.get('plugin');
             const pluginName = params.get('plugin-name');
             if (pluginId == null && pluginName != null){
-                const pluginPage = await this.registry.getByRel<CollectionApiObject>([["plugin", "collection"]], new URLSearchParams({ }), true);
+                const pluginPage = await this.registry.getByRel<CollectionApiObject>([["plugin", "collection"]], new URLSearchParams({ "item-count": "100" }), true);
 
                 pluginPage?.data?.items?.forEach(item => {
                     if(item.name?.startsWith(pluginName+" (")){
