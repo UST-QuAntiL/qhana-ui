@@ -105,7 +105,7 @@ export class BpmnXmlBuilder {
                     const pluginInput = step.pluginDataInput.find(d => d.parameter === paramName);
                     const defaultValue = pluginInput
                         ? `file_url:: ${pluginInput.dataType}, ${pluginInput.contentType.join(', ')}`
-                        : paramValue;
+                        : paramValue === "***" ? "" : paramValue;
                     this.startFormFields.push({
                         paramName,
                         label: this.toLabel(paramName),
