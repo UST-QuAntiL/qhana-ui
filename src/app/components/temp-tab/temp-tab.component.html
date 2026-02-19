@@ -1,3 +1,4 @@
+<div class="tab-content {{previewData ? 'with-preview' : ''}}">
 <qhana-plugin-uiframe class="plugin-frame" [url]="activePluginFrontendUrl"
     [context]="{experimentId: currentExperimentId??undefined, location: 'temp'}"
     (formDataSubmit)="onPluginUiFormSubmit($event)" (requestDataPreview)="previewData = $event"
@@ -9,3 +10,4 @@
     *ngIf="previewData">
     <h3 class="t-headline">Preview "{{previewData.name}}"</h3>
 </qhana-data-preview>
+</div>
