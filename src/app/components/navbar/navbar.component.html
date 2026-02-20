@@ -98,6 +98,20 @@
             </span>
         </a>
     </ng-container>
+    <ng-container *ngIf="tempTabLink != null">
+        <a class="navigation-link temporary active" mat-button [routerLink]="templateTabRouterLink()"
+            queryParamsHandling="merge" routerLinkActive="active" [style]="{'anchor-name': '--' + (tempTabHelp.anchor|async)}">
+            <span class="link-label">
+                {{tempTabLink.name ?? 'temp'}}
+            </span>
+        </a>
+        <qhana-help-tooltip label="Show help for the temporary plugin tab." #tempTabHelp>
+            <p>
+                An ephemeral tab that displays the UI of a single plugin.
+                Disappears when navigated away from.
+            </p>
+        </qhana-help-tooltip>
+    </ng-container>
 
     <div class="toolbar-spacer"></div>
 

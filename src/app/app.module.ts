@@ -70,6 +70,7 @@ import { MarkdownComponent } from './components/markdown/markdown.component';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { PluginSidebarComponent } from './components/plugin-sidebar/plugin-sidebar.component';
 import { PluginTabComponent } from './components/plugin-tab/plugin-tab.component';
+import { TempTabComponent } from './components/temp-tab/temp-tab.component';
 import { PluginUiframeComponent } from './components/plugin-uiframe/plugin-uiframe.component';
 import { PreviewListComponent } from './components/preview-list/preview-list.component';
 import { SettingsPageComponent } from './components/settings-page/settings-page.component';
@@ -135,6 +136,7 @@ import { HelpToggleComponent } from "src/app/components-small/help-toggle/help-t
         RawTextPreviewComponent,
         PluginPreviewComponent,
         PluginTabComponent,
+        TempTabComponent,
         ChangeUiTemplateDialog,
         TemplateDetailsComponent,
         ExperimentWorkspaceDetailComponent,
