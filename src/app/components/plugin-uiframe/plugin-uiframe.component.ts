@@ -193,6 +193,26 @@ function isPluginUrlInfoRequest(data: any): data is PluginUrlInfoRequest {
     return true;
 }
 
+interface SwitchPluginRequest {
+    type: "switch-plugin";
+    pluginName: string;
+    parameters: {
+        [index: string]: string;
+    };
+}
+
+function isSwitchPluginRequest(data: any): data is SwitchPluginRequest {
+    if (data?.type !== "switch-plugin")
+        return false;
+    if (typeof data.pluginName !== "string" )
+        return false;
+    if (typeof data.parameters !== "object" )
+        return false;
+    if (Object.entries(data.parameters).some(([k,v]) => typeof k !== "string" || typeof v !== "string"))
+        return false;
+    return true;
+}
+
 const allowedImplementationContentTypes: Set<string> = new Set(["text/x-qasm", "text/x-qiskit"]);
 const implementationsContentTypeMap: Map<string, string> = new Map([
     ["text/x-qasm", "qasm"],
@@ -538,6 +558,22 @@ export class PluginUiframeComponent implements OnChanges, OnDestroy {
         }
     }
 
+    private async handleSwitchPluginRequest(request: SwitchPluginRequest) {
+        const queryParams = Object.fromEntries([
+            ...Object.entries(request.parameters).map(([key,value]) => ["param-" + key,value])
+        ]);
+        const plugins = await this.registry.getByRel<CollectionApiObject>(["plugin", "collection"], new URLSearchParams({ "name": request.pluginName }), true);
+        const pluginId = plugins?.data?.items[0]?.resourceKey?.pluginId;
+        if (typeof pluginId !== "string" || !/^[0-9]+$/.test(pluginId)) {
+            console.error(`no plugin with name ${request.pluginName} found!`);
+            return;
+        }
+        this.router.navigate(
+            ['/experiments', this.experimentId, 'temp', pluginId ],
+            { queryParams : queryParams}
+        );
+    }
+
     private handleInputDataInfoRequest(request: DataUrlInfoRequest) {
         const dataRef = this.extractExperimentDataInfoFromUrl(request.dataUrl);
         if (dataRef) {
@@ -738,16 +774,10 @@ export class PluginUiframeComponent implements OnChanges, OnDestroy {
                 this.handlePluginInfoRequest(data);
             }
             if (data.type === "switch-plugin") {
-                if (typeof data.pluginName !== "string" ) {
+                if (!isSwitchPluginRequest(data)) {
                     return;
                 }
-                const queryParams = Object.fromEntries([
-                    ["plugin-name", data.pluginName],
-                    ...Object.entries(data.parameters).map(([key,value]) => ["param-" + key,value])
-                ]);
-                this.router.navigate(
-                ['/experiments', this.experimentId, 'workspace'],
-                { queryParams : queryParams});
+                this.handleSwitchPluginRequest(data)
             }
         }
     }
