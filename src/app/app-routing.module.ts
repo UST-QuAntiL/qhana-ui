@@ -23,6 +23,7 @@ import { ExperimentWorkspaceComponent } from './components/experiment-workspace/
 import { ExperimentComponent } from './components/experiment/experiment.component';
 import { ExperimentsPageComponent } from './components/experiments-page/experiments-page.component';
 import { PluginTabComponent } from './components/plugin-tab/plugin-tab.component';
+import { TempTabComponent } from './components/temp-tab/temp-tab.component';
 import { SettingsPageComponent } from './components/settings-page/settings-page.component';
 import { TimelineStepComponent } from './components/timeline-step/timeline-step.component';
 import { UiTemplatesPageComponent } from './components/ui-templates-page/ui-templates-page.component';
@@ -115,6 +116,7 @@ const routes: Routes = [
     { path: 'settings', component: SettingsPageComponent },
     { path: 'templates', component: UiTemplatesPageComponent },
     { path: 'templates/:templateId', component: UiTemplatesPageComponent },
+    { path: 'temp/:pluginId', component: TempTabComponent },
     { path: 'experiments', component: ExperimentsPageComponent },
     { path: 'experiments/:experimentId', redirectTo: "info" },
     { path: 'experiments/:experimentId/info', component: ExperimentComponent },
@@ -129,6 +131,7 @@ const routes: Routes = [
         matcher: extraTabsMatcher,
         component: PluginTabComponent,
     },
+    { path: 'experiments/:experimentId/temp/:pluginId', component: TempTabComponent },
 ];
 
 @NgModule({

@@ -21,6 +21,7 @@ import { CurrentExperimentService } from 'src/app/services/current-experiment.se
 import { DownloadsService } from 'src/app/services/downloads.service';
 import { ExportResult, QhanaBackendService } from 'src/app/services/qhana-backend.service';
 import { PluginRegistryBaseService } from 'src/app/services/registry.service';
+import { TempTabService } from 'src/app/services/temp-tab.service';
 import { TemplateApiObject, TemplateTabApiObject, TemplatesService } from 'src/app/services/templates.service';
 
 @Component({
@@ -52,6 +53,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
     currentTab: ApiLink | null = null;
 
+    tempTabLink: ApiLink | null = null;
+
     routeTemplateId: string | null = null;
 
     private currentTemplateIdSubscription: Subscription | null = null;
@@ -59,8 +62,17 @@ export class NavbarComponent implements OnInit, OnDestroy {
     private templateTabUpdatesSubscription: Subscription | null = null;
     private currentTemplateTabSubscription: Subscription | null = null;
     private routeParamsSubscription: Subscription | null = null;
+    private tempTabSubscription: Subscription | null = null;
 
-    constructor(private route: ActivatedRoute, private experiment: CurrentExperimentService, private templates: TemplatesService, private registry: PluginRegistryBaseService, private backend: QhanaBackendService, private downloadService: DownloadsService) {
+    constructor(
+        private route: ActivatedRoute,
+        private experiment: CurrentExperimentService,
+        private templates: TemplatesService,
+        private registry: PluginRegistryBaseService,
+        private backend: QhanaBackendService,
+        private downloadService: DownloadsService,
+        private tempTab: TempTabService,
+    ) {
         this.currentExperiment = this.experiment.experimentName;
         this.experimentId = this.experiment.experimentId;
     }
@@ -69,6 +81,9 @@ export class NavbarComponent implements OnInit, OnDestroy {
         this.registerSubscriptions();
         this.downloadBadgeCounter = this.downloadService.getDownloadsCounter();
         this.exportList = this.downloadService.getExportList();
+        this.tempTab.tempTabPluginLink.subscribe(link => {
+            this.tempTabLink = link;
+        });
     }
 
     ngOnDestroy(): void {
@@ -77,6 +92,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
         this.templateTabUpdatesSubscription?.unsubscribe();
         this.currentTemplateTabSubscription?.unsubscribe();
         this.routeParamsSubscription?.unsubscribe();
+        this.tempTabSubscription?.unsubscribe();
     }
 
     private registerSubscriptions() {
@@ -116,6 +132,17 @@ export class NavbarComponent implements OnInit, OnDestroy {
             }
         }
         return false;
+    }
+
+    templateTabRouterLink() {
+        const routerLink = [];
+        if (this.experimentId) {
+            routerLink.push("experiments");
+            routerLink.push(this.experimentId);
+        }
+        routerLink.push("temp");
+        routerLink.push(this.tempTabLink?.resourceKey?.pluginId ?? "");
+        return routerLink;
     }
 
     private onTemplateChanges(template: TemplateApiObject | null) {
