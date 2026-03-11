@@ -202,14 +202,18 @@ interface SwitchPluginRequest {
 }
 
 function isSwitchPluginRequest(data: any): data is SwitchPluginRequest {
-    if (data?.type !== "switch-plugin")
+    if (data?.type !== "switch-plugin") {
         return false;
-    if (typeof data.pluginName !== "string" )
+    }
+    if (typeof data.pluginName !== "string" ) {
         return false;
-    if (typeof data.parameters !== "object" )
+    }
+    if (typeof data.parameters !== "object" ) {
         return false;
-    if (Object.entries(data.parameters).some(([k,v]) => typeof k !== "string" || typeof v !== "string"))
+    }
+    if (Object.entries(data.parameters).some(([k,v]) => typeof k !== "string" || typeof v !== "string")) {
         return false;
+    }
     return true;
 }
 
@@ -563,11 +567,11 @@ export class PluginUiframeComponent implements OnChanges, OnDestroy {
             ...Object.entries(request.parameters).map(([key,value]) => ["param-" + key,value])
         ]);
         const plugins = await this.registry.getByRel<CollectionApiObject>(["plugin", "collection"], new URLSearchParams({ "name": request.pluginName }), true);
-        const pluginId = plugins?.data?.items[0]?.resourceKey?.pluginId;
-        if (typeof pluginId !== "string" || !/^[0-9]+$/.test(pluginId)) {
+        if (plugins?.data?.collectionSize ?? 0 === 0) {
             console.error(`no plugin with name ${request.pluginName} found!`);
             return;
         }
+        const pluginId = plugins.data.items[0].resourceKey.pluginId;
         this.router.navigate(
             ['/experiments', this.experimentId, 'temp', pluginId ],
             { queryParams : queryParams}
