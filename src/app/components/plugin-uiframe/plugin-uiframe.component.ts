@@ -574,7 +574,7 @@ export class PluginUiframeComponent implements OnChanges, OnDestroy {
         const pluginId = plugins?.data.items[0].resourceKey?.pluginId;
         this.router.navigate(
             ['/experiments', this.experimentId, 'temp', pluginId ],
-            { queryParams : queryParams}
+            { queryParams: queryParams, queryParamsHandling: 'preserve' }
         );
     }
 
