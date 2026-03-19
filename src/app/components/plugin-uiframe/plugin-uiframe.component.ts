@@ -567,7 +567,7 @@ export class PluginUiframeComponent implements OnChanges, OnDestroy {
             ...Object.entries(request.parameters).map(([key,value]) => ["param-" + key,value])
         ]);
         const plugins = await this.registry.getByRel<CollectionApiObject>(["plugin", "collection"], new URLSearchParams({ "name": request.pluginName }), true);
-        if (plugins?.data?.collectionSize ?? 0 === 0) {
+        if ((plugins?.data?.collectionSize ?? 0) === 0) {
             console.error(`no plugin with name ${request.pluginName} found!`);
             return;
         }
