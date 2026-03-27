@@ -66,6 +66,7 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
     resultQuality: ExperimentResultQuality | '' = '';
     resultQualityValues = ExperimentResultQualityValues;
     workflowExists = false;
+    stepsExist = true;
     currentTemplateId: string | null = null;
 
     constructor(
@@ -145,6 +146,8 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
                         throw Error('Cancelled by other request.');
                     }
                     this.collectionSize = value.itemCount;
+                    // updates stepsExist if there is at least one timeline step
+                    this.stepsExist = (value.items && value.items.length > 0);
                     this.loading = false;
                     return value.items;
                 }),
