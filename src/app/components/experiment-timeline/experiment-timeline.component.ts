@@ -66,7 +66,7 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
     resultQuality: ExperimentResultQuality | '' = '';
     resultQualityValues = ExperimentResultQualityValues;
     workflowExists = false;
-    stepsExist = true;
+    stepsExist = false;
     currentTemplateId: string | null = null;
 
     constructor(
