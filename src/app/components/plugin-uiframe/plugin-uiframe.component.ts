@@ -571,10 +571,10 @@ export class PluginUiframeComponent implements OnChanges, OnDestroy {
             console.error(`no plugin with name ${request.pluginName} found!`);
             return;
         }
-        const pluginId = plugins?.data.items[0].resourceKey?.pluginId;
+        const pluginId = plugins?.data?.items[0]?.resourceKey?.pluginId;
         this.router.navigate(
             ['/experiments', this.experimentId, 'temp', pluginId ],
-            { queryParams: queryParams, queryParamsHandling: 'preserve' }
+            { queryParams: queryParams, queryParamsHandling: 'merge' }
         );
     }
 
