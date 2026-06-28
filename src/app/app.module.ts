@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatBadgeModule } from '@angular/material/badge';
@@ -98,8 +98,7 @@ import { PluginFilterFormComponent } from './components-small/plugin-filter-form
 import { HelpTooltipComponent } from "src/app/components-small/help-tooltip/help-tooltip.component";
 import { HelpToggleComponent } from "src/app/components-small/help-toggle/help-toggle.component";
 
-@NgModule({
-    declarations: [
+@NgModule({ declarations: [
         AppComponent,
         NavbarComponent,
         ExperimentsPageComponent,
@@ -153,12 +152,10 @@ import { HelpToggleComponent } from "src/app/components-small/help-toggle/help-t
         PluginFilterViewComponent,
         PluginFilterFormComponent,
     ],
-    imports: [
-        BrowserModule,
+    bootstrap: [AppComponent], imports: [BrowserModule,
         AppRoutingModule,
         FormsModule,
         BrowserAnimationsModule,
-        HttpClientModule,
         MatToolbarModule,
         MatPaginatorModule,
         MatCardModule,
@@ -186,11 +183,8 @@ import { HelpToggleComponent } from "src/app/components-small/help-toggle/help-t
         MatBadgeModule,
         MatRadioModule,
         HelpTooltipComponent,
-        HelpToggleComponent
-    ],
-    providers: [
-        { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: "outline" } }
-    ],
-    bootstrap: [AppComponent]
-})
+        HelpToggleComponent], providers: [
+        { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: "outline" } },
+        provideHttpClient(withInterceptorsFromDi())
+    ] })
 export class AppModule { }
