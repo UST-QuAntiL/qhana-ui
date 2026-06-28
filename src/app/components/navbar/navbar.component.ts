@@ -27,7 +27,8 @@ import { TemplateApiObject, TemplateTabApiObject, TemplatesService } from 'src/a
 @Component({
     selector: 'qhana-navbar',
     templateUrl: './navbar.component.html',
-    styleUrls: ['./navbar.component.sass']
+    styleUrls: ['./navbar.component.sass'],
+    standalone: false
 })
 export class NavbarComponent implements OnInit, OnDestroy {
 

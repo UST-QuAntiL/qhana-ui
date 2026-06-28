@@ -16,7 +16,8 @@ export function isInSetValidator(validValues: any[]): Validators {
 @Component({
     selector: 'qhana-template-details',
     templateUrl: './template-details.component.html',
-    styleUrls: ['./template-details.component.sass']
+    styleUrls: ['./template-details.component.sass'],
+    standalone: false
 })
 export class TemplateDetailsComponent implements OnInit {
     @Input() templateLink: ApiLink | null = null;

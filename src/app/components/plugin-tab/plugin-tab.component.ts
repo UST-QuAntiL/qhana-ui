@@ -24,7 +24,8 @@ interface NavTab {
 @Component({
     selector: 'qhana-plugin-tab',
     templateUrl: './plugin-tab.component.html',
-    styleUrls: ['./plugin-tab.component.sass']
+    styleUrls: ['./plugin-tab.component.sass'],
+    standalone: false
 })
 export class PluginTabComponent implements OnInit, OnDestroy {
 

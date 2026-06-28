@@ -4,7 +4,8 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 @Component({
     selector: 'qhana-iframe-preview',
     templateUrl: './iframe-preview.component.html',
-    styleUrls: ['./iframe-preview.component.sass']
+    styleUrls: ['./iframe-preview.component.sass'],
+    standalone: false
 })
 export class IframePreviewComponent implements OnChanges {
 

@@ -8,7 +8,6 @@ import { MatButtonToggleModule } from "@angular/material/button-toggle";
 
 @Component({
     selector: 'qhana-help-toggle',
-    standalone: true,
     imports: [CommonModule, MatButtonModule, MatIconModule, MatButtonToggleModule],
     templateUrl: './help-toggle.component.html',
     styleUrl: './help-toggle.component.sass'

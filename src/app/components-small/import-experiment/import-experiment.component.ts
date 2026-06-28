@@ -7,7 +7,8 @@ import { ExperimentImportApiObject, ExperimentImportPollObject, QhanaBackendServ
 @Component({
     selector: 'qhana-import-experiment',
     templateUrl: './import-experiment.component.html',
-    styleUrls: ['./import-experiment.component.sass']
+    styleUrls: ['./import-experiment.component.sass'],
+    standalone: false
 })
 export class ImportExperimentComponent {
 

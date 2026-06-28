@@ -9,7 +9,8 @@ export interface TabDefinition {
 @Component({
     selector: 'qhana-timeline-step-nav',
     templateUrl: './timeline-step-nav.component.html',
-    styleUrls: ['./timeline-step-nav.component.sass']
+    styleUrls: ['./timeline-step-nav.component.sass'],
+    standalone: false
 })
 export class TimelineStepNavComponent {
     @Input() active: string = "";

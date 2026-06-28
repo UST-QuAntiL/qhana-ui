@@ -10,7 +10,8 @@ import { ServiceRegistryService } from 'src/app/services/service-registry.servic
 @Component({
     selector: 'qhana-experiment-data',
     templateUrl: './experiment-data.component.html',
-    styleUrls: ['./experiment-data.component.sass']
+    styleUrls: ['./experiment-data.component.sass'],
+    standalone: false
 })
 export class ExperimentDataComponent implements OnInit, OnDestroy {
     private routeSubscription: Subscription | null = null;

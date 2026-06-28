@@ -12,7 +12,8 @@ import { FormSubmitData } from '../plugin-uiframe/plugin-uiframe.component';
 @Component({
     selector: 'qhana-temp-tab',
     templateUrl: './temp-tab.component.html',
-    styleUrl: './temp-tab.component.sass'
+    styleUrl: './temp-tab.component.sass',
+    standalone: false
 })
 export class TempTabComponent implements OnInit, OnDestroy {
 

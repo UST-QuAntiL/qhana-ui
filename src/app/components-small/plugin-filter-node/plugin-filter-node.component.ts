@@ -13,7 +13,8 @@ const isFilterType = (x: any): x is FilterType => filterTypes.includes(x);
 @Component({
     selector: 'qhana-plugin-filter-node',
     templateUrl: './plugin-filter-node.component.html',
-    styleUrls: ['./plugin-filter-node.component.sass']
+    styleUrls: ['./plugin-filter-node.component.sass'],
+    standalone: false
 })
 export class PluginFilterNodeComponent implements OnInit {
     @Input() filterIn: any;

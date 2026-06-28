@@ -15,7 +15,8 @@ interface SelectValue {
 @Component({
     selector: 'qhana-experiment-timeline',
     templateUrl: './experiment-timeline.component.html',
-    styleUrls: ['./experiment-timeline.component.sass']
+    styleUrls: ['./experiment-timeline.component.sass'],
+    standalone: false
 })
 export class ExperimentTimelineComponent implements OnInit, OnDestroy {
 

@@ -6,7 +6,8 @@ import { PluginRegistryBaseService } from 'src/app/services/registry.service';
 @Component({
     selector: 'qhana-plugin-list-item',
     templateUrl: './plugin-list-item.component.html',
-    styleUrls: ['./plugin-list-item.component.sass']
+    styleUrls: ['./plugin-list-item.component.sass'],
+    standalone: false
 })
 export class PluginListItemComponent implements OnChanges {
 

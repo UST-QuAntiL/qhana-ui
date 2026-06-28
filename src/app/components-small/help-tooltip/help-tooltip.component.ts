@@ -8,7 +8,6 @@ import { HelpServiceService } from 'src/app/services/help-service.service';
 
 @Component({
     selector: 'qhana-help-tooltip',
-    standalone: true,
     imports: [CommonModule, MatButtonModule, MatIconModule],
     templateUrl: './help-tooltip.component.html',
     styleUrl: './help-tooltip.component.sass'

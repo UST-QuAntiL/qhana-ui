@@ -10,7 +10,8 @@ function isAllowedFilter(filterType: string): filterType is 'and' | 'or' | 'not'
 @Component({
     selector: 'qhana-plugin-filter-view',
     templateUrl: './plugin-filter-view.component.html',
-    styleUrl: './plugin-filter-view.component.sass'
+    styleUrl: './plugin-filter-view.component.sass',
+    standalone: false
 })
 export class PluginFilterViewComponent implements OnChanges {
 

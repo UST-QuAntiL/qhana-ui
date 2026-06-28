@@ -15,7 +15,8 @@ export function isInSetValidator(validValues: any[]): ValidatorFn {
 @Component({
     selector: 'qhana-ui-template-tab-form',
     templateUrl: './ui-template-tab-form.component.html',
-    styleUrl: './ui-template-tab-form.component.sass'
+    styleUrl: './ui-template-tab-form.component.sass',
+    standalone: false
 })
 export class UiTemplateTabFormComponent implements OnChanges, OnDestroy, OnInit {
 

@@ -5,7 +5,8 @@ import { FormSubmitData } from '../plugin-uiframe/plugin-uiframe.component';
 @Component({
     selector: 'qhana-timeline-substeps',
     templateUrl: './timeline-substeps.component.html',
-    styleUrls: ['./timeline-substeps.component.sass']
+    styleUrls: ['./timeline-substeps.component.sass'],
+    standalone: false
 })
 export class TimelineSubstepsComponent {
 

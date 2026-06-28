@@ -4,7 +4,8 @@ import { QhanaBackendService } from 'src/app/services/qhana-backend.service';
 @Component({
     selector: 'qhana-query-param-preview',
     templateUrl: './query-param-preview.component.html',
-    styleUrls: ['./query-param-preview.component.sass']
+    styleUrls: ['./query-param-preview.component.sass'],
+    standalone: false
 })
 export class QueryParamPreviewComponent implements OnChanges {
 

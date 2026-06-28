@@ -24,7 +24,8 @@ import { isServiceApiObject, ServiceApiObject, ServiceRegistryService } from 'sr
 @Component({
     selector: 'qhana-settings-page',
     templateUrl: './settings-page.component.html',
-    styleUrls: ['./settings-page.component.sass']
+    styleUrls: ['./settings-page.component.sass'],
+    standalone: false
 })
 export class SettingsPageComponent implements OnInit, OnDestroy {
 

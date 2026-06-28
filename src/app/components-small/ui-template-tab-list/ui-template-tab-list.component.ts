@@ -16,7 +16,8 @@ interface NavTabGroup {
 @Component({
     selector: 'qhana-ui-template-tab-list',
     templateUrl: './ui-template-tab-list.component.html',
-    styleUrl: './ui-template-tab-list.component.sass'
+    styleUrl: './ui-template-tab-list.component.sass',
+    standalone: false
 })
 export class UiTemplateTabListComponent implements OnInit, OnChanges, OnDestroy {
 

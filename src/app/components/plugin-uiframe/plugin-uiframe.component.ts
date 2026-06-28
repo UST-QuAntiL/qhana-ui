@@ -209,7 +209,8 @@ interface ImplementationInfo {
 @Component({
     selector: 'qhana-plugin-uiframe',
     templateUrl: './plugin-uiframe.component.html',
-    styleUrls: ['./plugin-uiframe.component.sass']
+    styleUrls: ['./plugin-uiframe.component.sass'],
+    standalone: false
 })
 export class PluginUiframeComponent implements OnChanges, OnDestroy {
 

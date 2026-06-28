@@ -8,7 +8,8 @@ import { PluginUiContext } from '../plugin-uiframe/plugin-uiframe.component';
 @Component({
     selector: 'qhana-preview-list',
     templateUrl: './preview-list.component.html',
-    styleUrls: ['./preview-list.component.sass']
+    styleUrls: ['./preview-list.component.sass'],
+    standalone: false
 })
 export class PreviewListComponent implements OnInit, OnChanges, OnDestroy {
 

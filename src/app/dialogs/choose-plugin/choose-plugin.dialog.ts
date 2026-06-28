@@ -13,7 +13,8 @@ interface PluginRestrictions {
 @Component({
     selector: 'qhana-choose-plugin',
     templateUrl: './choose-plugin.dialog.html',
-    styleUrls: ['./choose-plugin.dialog.sass']
+    styleUrls: ['./choose-plugin.dialog.sass'],
+    standalone: false
 })
 export class ChoosePluginDialog {
 

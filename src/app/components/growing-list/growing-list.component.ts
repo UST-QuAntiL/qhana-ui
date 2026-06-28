@@ -10,7 +10,8 @@ import { PluginRegistryBaseService } from 'src/app/services/registry.service';
 @Component({
     selector: 'qhana-growing-list',
     templateUrl: './growing-list.component.html',
-    styleUrls: ['./growing-list.component.sass']
+    styleUrls: ['./growing-list.component.sass'],
+    standalone: false
 })
 export class GrowingListComponent implements OnInit, OnDestroy {
     @Input() rels: string[] | string[][] | null = null;

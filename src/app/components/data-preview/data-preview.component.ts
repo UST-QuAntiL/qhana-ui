@@ -140,7 +140,8 @@ const INTERNAL_PREVIEWS: InternalPreviewOption[] = [
 @Component({
     selector: 'qhana-data-preview',
     templateUrl: './data-preview.component.html',
-    styleUrls: ['./data-preview.component.sass']
+    styleUrls: ['./data-preview.component.sass'],
+    standalone: false
 })
 export class DataPreviewComponent implements OnChanges {
 

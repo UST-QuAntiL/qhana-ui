@@ -15,7 +15,8 @@ import { ALL_PLUGINS_TEMPLATE_ID, TAB_GROUP_NAME_OVERRIDES, TAB_GROUP_SORT_KEYS,
 @Component({
     selector: 'qhana-experiment-workspace-detail',
     templateUrl: './experiment-workspace-detail.component.html',
-    styleUrls: ['./experiment-workspace-detail.component.sass']
+    styleUrls: ['./experiment-workspace-detail.component.sass'],
+    standalone: false
 })
 export class ExperimentWorkspaceDetailComponent implements OnInit {
 

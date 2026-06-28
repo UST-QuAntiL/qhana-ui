@@ -9,7 +9,8 @@ import { getMimetypeLikeMatcher } from 'src/app/utils';
 @Component({
     selector: 'qhana-choose-data',
     templateUrl: './choose-data.dialog.html',
-    styleUrls: ['./choose-data.dialog.sass']
+    styleUrls: ['./choose-data.dialog.sass'],
+    standalone: false
 })
 export class ChooseDataDialog implements OnInit {
 
