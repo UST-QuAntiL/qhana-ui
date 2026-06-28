@@ -155,7 +155,7 @@ export class UiTemplateTabFormComponent implements OnChanges, OnDestroy, OnInit 
     }
 
     updateDirty() {
-        let dirty = (this.templateForm?.dirty ?? false) || (this.description !== this.tabData?.description ?? "");
+        let dirty = (this.templateForm?.dirty ?? false) || (this.description !== (this.tabData?.description ?? ""));
 
         if (Boolean(this.currentPluginFilter) && Boolean(this.updatedPluginFilter)) {
             if (JSON.stringify(this.currentPluginFilter) !== JSON.stringify(this.updatedPluginFilter)) {
