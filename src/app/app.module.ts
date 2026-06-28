@@ -23,7 +23,7 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatCommonModule, MatRippleModule } from '@angular/material/core';
+import { MatRippleModule } from '@angular/material/core';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS, MatFormFieldModule } from '@angular/material/form-field';
@@ -162,7 +162,6 @@ import { HelpToggleComponent } from "src/app/components-small/help-toggle/help-t
         MatButtonModule,
         MatButtonToggleModule,
         MatSlideToggleModule,
-        MatCommonModule,
         MatTabsModule,
         MatRippleModule,
         MatDialogModule,
