@@ -1,71 +1,75 @@
 <div class="big-content">
-    <div class="flex-header">
-        <h1 class="t-page-headline align-arrow">Experiment Data</h1>
-        <button mat-icon-button class="arrow-button" (click)="onSort()" aria-label="change sort order">
-            <mat-icon>{{sort>=0?"arrow_upward":"arrow_downward"}}</mat-icon>
-        </button>
-        <div class="flex-space"></div>
+  <div class="flex-header">
+    <h1 class="t-page-headline align-arrow">Experiment Data</h1>
+    <button mat-icon-button class="arrow-button" (click)="onSort()" aria-label="change sort order">
+      <mat-icon>{{sort>=0?"arrow_upward":"arrow_downward"}}</mat-icon>
+    </button>
+    <div class="flex-space"></div>
 
-        <mat-paginator #paginatorTop class="paginator"
-            (page)="paginatorBottom.pageSize = $event.pageSize; paginatorBottom.pageIndex = $event.pageIndex; onPageChange($event)"
-            [length]="collectionSize" [pageSize]="10" [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page">
-        </mat-paginator>
-    </div>
-    <div class="filter">
-        <mat-form-field class="search-field no-padding">
-            <mat-label>Search data</mat-label>
-            <input type="search" [(ngModel)]="searchValue" matInput (keydown.enter)="updatePageContent()">
-            <button mat-icon-button matSuffix (click)="updatePageContent()" [attr.aria-label]="'search'">
-                <mat-icon>search</mat-icon>
-            </button>
-        </mat-form-field>
-        <mat-checkbox color="primary" labelPosition="before" checked="true" (change)="onCheckAllVersions()">
-            Show all versions
-        </mat-checkbox>
-    </div>
-
-    <div class="page-item-list">
-        <mat-card appearance="outlined" class="page-item card" *ngIf="!(experimentData | async)">
-            <mat-card-title>
-                <span class="t-headline">no data</span>
-            </mat-card-title>
-            <mat-card-content>
-                Use the plugins in the experiment workspace to add data to the experiment.
-            </mat-card-content>
-        </mat-card>
-        <mat-card appearance="outlined" class="page-item card" *ngFor="let data of experimentData | async">
-            <mat-card-title>
-                <a class="t-headline title-link break-words" queryParamsHandling="merge"
-                    [routerLink]="['/experiments', experimentId, 'data', data.name, {version: data.version.toString()}]">{{data.name}}</a>
-            </mat-card-title>
-            <mat-card-content>
-                <dl class="data-details">
-                    <div>
-                        <dt>Version</dt>
-                        <dd>{{data.version}}</dd>
-                    </div>
-                    <div>
-                        <dt>Data Type</dt>
-                        <dd>{{data.type}}</dd>
-                    </div>
-                    <div>
-                        <dt>Content Type (mimetype)</dt>
-                        <dd>{{data.contentType}}</dd>
-                    </div>
-                    <div>
-                        <dt>Dowload link</dt>
-                        <dd><a class="download-button" href="{{data.download}}" target="_blank"
-                                rel="noopener noreferrer" mat-flat-button>Dowload as File</a></dd>
-                    </div>
-                </dl>
-                <button mat-flat-button (click)="reloadAllDataVersions(data.name)">Show all versions</button>
-            </mat-card-content>
-        </mat-card>
-    </div>
-
-    <mat-paginator #paginatorBottom class="paginator"
-        (page)="paginatorTop.pageSize = $event.pageSize; paginatorTop.pageIndex = $event.pageIndex; onPageChange($event)"
-        [length]="collectionSize" [pageSize]="10" [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page">
+    <mat-paginator #paginatorTop class="paginator"
+      (page)="paginatorBottom.pageSize = $event.pageSize; paginatorBottom.pageIndex = $event.pageIndex; onPageChange($event)"
+      [length]="collectionSize" [pageSize]="10" [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page">
     </mat-paginator>
-    <div class="scroll-spacer"></div>
+  </div>
+  <div class="filter">
+    <mat-form-field class="search-field no-padding">
+      <mat-label>Search data</mat-label>
+      <input type="search" [(ngModel)]="searchValue" matInput (keydown.enter)="updatePageContent()">
+      <button mat-icon-button matSuffix (click)="updatePageContent()" [attr.aria-label]="'search'">
+        <mat-icon>search</mat-icon>
+      </button>
+    </mat-form-field>
+    <mat-checkbox color="primary" labelPosition="before" checked="true" (change)="onCheckAllVersions()">
+      Show all versions
+    </mat-checkbox>
+  </div>
+
+  <div class="page-item-list">
+    @if (!(experimentData | async)) {
+      <mat-card appearance="outlined" class="page-item card">
+        <mat-card-title>
+          <span class="t-headline">no data</span>
+        </mat-card-title>
+        <mat-card-content>
+          Use the plugins in the experiment workspace to add data to the experiment.
+        </mat-card-content>
+      </mat-card>
+    }
+    @for (data of experimentData | async; track data) {
+      <mat-card appearance="outlined" class="page-item card">
+        <mat-card-title>
+          <a class="t-headline title-link break-words" queryParamsHandling="merge"
+          [routerLink]="['/experiments', experimentId, 'data', data.name, {version: data.version.toString()}]">{{data.name}}</a>
+        </mat-card-title>
+        <mat-card-content>
+          <dl class="data-details">
+            <div>
+              <dt>Version</dt>
+              <dd>{{data.version}}</dd>
+            </div>
+            <div>
+              <dt>Data Type</dt>
+              <dd>{{data.type}}</dd>
+            </div>
+            <div>
+              <dt>Content Type (mimetype)</dt>
+              <dd>{{data.contentType}}</dd>
+            </div>
+            <div>
+              <dt>Dowload link</dt>
+              <dd><a class="download-button" href="{{data.download}}" target="_blank"
+              rel="noopener noreferrer" mat-flat-button>Dowload as File</a></dd>
+            </div>
+          </dl>
+          <button mat-flat-button (click)="reloadAllDataVersions(data.name)">Show all versions</button>
+        </mat-card-content>
+      </mat-card>
+    }
+  </div>
+
+  <mat-paginator #paginatorBottom class="paginator"
+    (page)="paginatorTop.pageSize = $event.pageSize; paginatorTop.pageIndex = $event.pageIndex; onPageChange($event)"
+    [length]="collectionSize" [pageSize]="10" [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page">
+  </mat-paginator>
+  <div class="scroll-spacer"></div>
 </div>

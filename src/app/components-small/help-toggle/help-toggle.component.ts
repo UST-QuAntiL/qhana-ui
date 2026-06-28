@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatButtonModule } from "@angular/material/button";
 import { Subscription } from 'rxjs';
 import { HelpServiceService } from 'src/app/services/help-service.service';
@@ -8,7 +8,7 @@ import { MatButtonToggleModule } from "@angular/material/button-toggle";
 
 @Component({
     selector: 'qhana-help-toggle',
-    imports: [CommonModule, MatButtonModule, MatIconModule, MatButtonToggleModule],
+    imports: [MatButtonModule, MatIconModule, MatButtonToggleModule],
     templateUrl: './help-toggle.component.html',
     styleUrl: './help-toggle.component.sass'
 })

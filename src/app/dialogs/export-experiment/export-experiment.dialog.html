@@ -1,43 +1,59 @@
 <h1 mat-dialog-title>Export Config</h1>
 <div mat-dialog-content>
-    <div class="export-selection">
-        <mat-form-field class="full-width">
-            <mat-label>What to Export</mat-label>
-            <mat-select [(ngModel)]="configRestriction" name="restriction">
-                <mat-option *ngFor="let restriction of restrictionValues" (onSelectionChange)="resetSteps()"
-                    [value]="restriction.value">{{restriction.viewValue}}
-                </mat-option>
-            </mat-select>
-        </mat-form-field>
-        <mat-paginator class="full-width" *ngIf="configRestriction == 'STEPS'" (page)="onStepPageChange($event.pageIndex, $event.pageSize)" 
-            [length]="stepCollectionSize" [pageSize]="pageSize" aria-label="Select page">
-        </mat-paginator>
-    </div>
+  <div class="export-selection">
+    <mat-form-field class="full-width">
+      <mat-label>What to Export</mat-label>
+      <mat-select [(ngModel)]="configRestriction" name="restriction">
+        @for (restriction of restrictionValues; track restriction) {
+          <mat-option (onSelectionChange)="resetSteps()"
+            [value]="restriction.value">{{restriction.viewValue}}
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    @if (configRestriction == 'STEPS') {
+      <mat-paginator class="full-width" (page)="onStepPageChange($event.pageIndex, $event.pageSize)"
+        [length]="stepCollectionSize" [pageSize]="pageSize" aria-label="Select page">
+      </mat-paginator>
+    }
+  </div>
 
-    <div class="radio-label" *ngIf="configRestriction == 'DATA'">
-        <mat-label>Data versions</mat-label><br>
+  @if (configRestriction == 'DATA') {
+    <div class="radio-label">
+      <mat-label>Data versions</mat-label><br>
     </div>
-    <mat-radio-group *ngIf="configRestriction == 'DATA'" [(ngModel)]="allDataVersions" name="dataVersion">
-        <mat-radio-button *ngFor="let allDataVersionsValue of allDataVersionsValues"
-            [value]="allDataVersionsValue.value">{{allDataVersionsValue.viewValue}}
+  }
+  @if (configRestriction == 'DATA') {
+    <mat-radio-group [(ngModel)]="allDataVersions" name="dataVersion">
+      @for (allDataVersionsValue of allDataVersionsValues; track allDataVersionsValue) {
+        <mat-radio-button
+          [value]="allDataVersionsValue.value">{{allDataVersionsValue.viewValue}}
         </mat-radio-button>
-    </mat-radio-group><br>
+      }
+    </mat-radio-group>
+    }<br>
 
-    <div *ngIf="configRestriction == 'STEPS'">
+    @if (configRestriction == 'STEPS') {
+      <div>
         <mat-label>Step selection</mat-label><br>
         <mat-selection-list>
-            <mat-list-option *ngFor="let step of stepListPage" [value]="step.sequence" [selected]="stepList.includes(step.sequence)" 
-                    (selectedChange)="selectStep(step.sequence, $event)">
-                <div class="export-selection">
-                    <span>Step {{step.sequence}} ({{step.processorName}}&#64;{{step.processorVersion}})</span>
-                    <qhana-step-status matTooltip="Status: {{step.status}}" [step]="step" [noText]="step.status !== 'PENDING'" [spinner]="0"></qhana-step-status>
-                    <div matTooltip="Result Quality" *ngIf="step.resultQuality !== 'UNKNOWN'">- Quality: {{step.resultQuality}}</div>
-                </div>
+          @for (step of stepListPage; track step) {
+            <mat-list-option [value]="step.sequence" [selected]="stepList.includes(step.sequence)"
+              (selectedChange)="selectStep(step.sequence, $event)">
+              <div class="export-selection">
+                <span>Step {{step.sequence}} ({{step.processorName}}&#64;{{step.processorVersion}})</span>
+                <qhana-step-status matTooltip="Status: {{step.status}}" [step]="step" [noText]="step.status !== 'PENDING'" [spinner]="0"></qhana-step-status>
+                @if (step.resultQuality !== 'UNKNOWN') {
+                  <div matTooltip="Result Quality">- Quality: {{step.resultQuality}}</div>
+                }
+              </div>
             </mat-list-option>
+          }
         </mat-selection-list>
-    </div>
-</div>
-<div class="dialog-actions" mat-dialog-actions>
+      </div>
+    }
+  </div>
+  <div class="dialog-actions" mat-dialog-actions>
     <button mat-button (click)="onCancel()">Cancel</button>
     <button mat-button [disabled]="!canExport || (configRestriction === 'STEPS' && stepList.length === 0)" (click)="onExport()">Export</button>
-</div>
+  </div>

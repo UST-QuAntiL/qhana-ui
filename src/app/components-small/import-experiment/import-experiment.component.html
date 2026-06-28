@@ -1,21 +1,24 @@
 <div class="qhana-form-field">
-    <label class="qhana-form-label" for="experiment-file-import">Select a file to import:</label>
-    <input class="file-input qhana-form-input" type="file" id="experiment-file-import" [disabled]="isImporting"
-        (change)="selectedFile = fileInput.files?.item(0) ?? null" #fileInput>
-</div>
-<button mat-raised-button color="primary" [disabled]="!selectedFile || isImporting" (click)="startImport(selectedFile)">
+  <label class="qhana-form-label" for="experiment-file-import">Select a file to import:</label>
+  <input class="file-input qhana-form-input" type="file" id="experiment-file-import" [disabled]="isImporting"
+    (change)="selectedFile = fileInput.files?.item(0) ?? null" #fileInput>
+  </div>
+  <button mat-raised-button color="primary" [disabled]="!selectedFile || isImporting" (click)="startImport(selectedFile)">
     Start import
-</button>
-<div *ngIf="isImporting">
-    <p>
+  </button>
+  @if (isImporting) {
+    <div>
+      <p>
         <span [hidden]="importStep !== 'upload'">Uploading {{selectedFile?.name}}</span>
         <span [hidden]="importStep !== 'processing'">Processing file</span>
         <span [hidden]="importStep !== 'navigating'">Loading imported experiment</span>
+      </p>
+      <mat-progress-bar class="progress-bar" [mode]="importProgress == null ? 'indeterminate' : 'determinate'"
+      [value]="importProgress ?? 0"></mat-progress-bar>
+    </div>
+  }
+  @if (importError) {
+    <p class="import-error">
+      {{importError}}
     </p>
-
-    <mat-progress-bar class="progress-bar" [mode]="importProgress == null ? 'indeterminate' : 'determinate'"
-        [value]="importProgress ?? 0"></mat-progress-bar>
-</div>
-<p class="import-error" *ngIf="importError">
-    {{importError}}
-</p>
+  }

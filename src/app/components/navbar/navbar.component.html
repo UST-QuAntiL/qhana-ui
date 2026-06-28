@@ -1,172 +1,190 @@
 <mat-toolbar class="nav-bar" color="primary">
-    <a class="logo-link" [routerLink]="['/']">
-        <img class="app-logo" height="3rem" src="assets/QHAna_logo_notext_inv.png" alt="QHAna logo">
-        <span>{{title}}</span>
+  <a class="logo-link" [routerLink]="['/']">
+    <img class="app-logo" height="3rem" src="assets/QHAna_logo_notext_inv.png" alt="QHAna logo">
+    <span>{{title}}</span>
+  </a>
+
+  @if ((currentExperiment|async) == null) {
+    <a class="navigation-link" mat-button [routerLink]="['/']"
+      routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
+      [style]="{'anchor-name': '--' + (experimentsHelp.anchor|async)}">
+      Experiments
     </a>
-
-    <ng-container *ngIf="(currentExperiment|async) == null">
-        <a class="navigation-link" mat-button [routerLink]="['/']"
-            routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
-            [style]="{'anchor-name': '--' + (experimentsHelp.anchor|async)}">
-            Experiments
-        </a>
-        <qhana-help-tooltip label="Show help for the experiments tab." #experimentsHelp>
-            <p>
-                The experiments tab contains all known experiments.
-                Create a new experiment or import a previously exported experiment to get started.
-            </p>
-        </qhana-help-tooltip>
-        <a class="navigation-link" mat-button [routerLink]="['/templates']"
-            queryParamsHandling="merge" routerLinkActive="active"
-            [style]="{'anchor-name': '--' + (templatesHelp.anchor|async)}">
-            UI Templates
-        </a>
-        <qhana-help-tooltip label="Show help for the UI templates tab." #templatesHelp>
-            <p>
-                The QHAna user interface can be customized using UI Templates.
-                This tab contains all the UI Templates and allows for creating new templates or updating existing templates.
-            </p>
-        </qhana-help-tooltip>
-    </ng-container>
-
-    <ng-container *ngIf="(currentExperiment|async) != null">
-        <a class="navigation-link" mat-button [routerLink]="['/experiments', (experimentId|async), 'info']"
-            routerLinkActive="active" [style]="{'anchor-name': '--' + (infoHelp.anchor|async)}">
-            Info
-        </a>
-        <qhana-help-tooltip label="Show help for the experiment info tab." #infoHelp>
-            <p>
-                The experiment info tab shows the basic experiment information like name and description.
-                It can also be used to change this information.
-                The functions for exporting experiment data or cloning the experiment can also be found in this tab.
-            </p>
-        </qhana-help-tooltip>
-        <a class="navigation-link" mat-button [routerLink]="['/experiments', (experimentId|async), 'workspace']"
-            queryParamsHandling="merge" routerLinkActive="active" [style]="{'anchor-name': '--' + (workspaceHelp.anchor|async)}">
-            Workspace
-        </a>
-        <qhana-help-tooltip label="Show help for the experiment data tab." #workspaceHelp>
-            <p>
-                The experiment workspace allows for experiments using the available plugins to create, filter, analyze and otherwise manipulate data.
-                The available plugins are shown in the workspace sidebar to the left.
-                The plugin list is grouped by categories and can be searched.
-            </p>
-        </qhana-help-tooltip>
-        <a class="navigation-link" mat-button [routerLink]="['/experiments', (experimentId|async), 'data']"
-            queryParamsHandling="merge" routerLinkActive="active" [style]="{'anchor-name': '--' + (dataHelp.anchor|async)}">
-            Data
-        </a>
-        <qhana-help-tooltip label="Show help for the experiment data tab." #dataHelp>
-            <p>
-                Any data produced during the experiment can be found here.
-                If new data is produced with the same name, it is considered as a new version of the same data.
-            </p>
-        </qhana-help-tooltip>
-        <a class="navigation-link" mat-button [routerLink]="['/experiments', (experimentId|async), 'timeline']"
-            queryParamsHandling="merge" routerLinkActive="active" [style]="{'anchor-name': '--' + (timelineHelp.anchor|async)}">
-            Timeline
-        </a>
-        <qhana-help-tooltip label="Show help for the experiment timeline tab." #timelineHelp>
-            <p>
-                Every computation step of the experiment gets recorded in the experiment timeline.
-                Each step records its inputs and outputs, any sub-steps an execution log and more.
-                Steps can also be graded by the user to indicate how useful their result was.
-                Additionally notes can be be stored for each step.
-            </p>
-        </qhana-help-tooltip>
-        <a class="navigation-link {{isActive(tab) ? 'active' : ''}}" mat-button
-            [routerLink]="['/experiments', (experimentId|async), 'extra', tab.resourceKey?.uiTemplateTabId]"
-            queryParamsHandling="merge" routerLinkActive="active" *ngFor="let tab of experimentExtraTabs">
-            <span class="link-label">
-                <mat-icon *ngIf="tabLinkHrefToApiObject.get(tab.href)?.icon">
-                    {{tabLinkHrefToApiObject.get(tab.href)?.icon}}
-                </mat-icon>
-                {{tab.name}}
-                <mat-icon *ngIf="tabLinkHrefToApiObject.get(tab.href)?.groupKey">more_vert</mat-icon>
-            </span>
-        </a>
-    </ng-container>
-    <ng-container *ngIf="(currentExperiment|async) == null">
-        <a class="navigation-link {{isActive(tab) ? 'active' : ''}}" mat-button [routerLink]="['extra', tab.resourceKey?.uiTemplateTabId]"
-            queryParamsHandling="merge" routerLinkActive="active" *ngFor="let tab of generalExtraTabs">
-            <span class="link-label">
-                <mat-icon *ngIf="tabLinkHrefToApiObject.get(tab.href)?.icon">
-                    {{tabLinkHrefToApiObject.get(tab.href)?.icon}}
-                </mat-icon>
-                {{tab.name}}
-                <mat-icon *ngIf="tabLinkHrefToApiObject.get(tab.href)?.groupKey">more_vert</mat-icon>
-            </span>
-        </a>
-    </ng-container>
-    <ng-container *ngIf="tempTabLink != null">
-        <a class="navigation-link temporary active" mat-button [routerLink]="templateTabRouterLink()"
-            queryParamsHandling="merge" routerLinkActive="active" [style]="{'anchor-name': '--' + (tempTabHelp.anchor|async)}">
-            <span class="link-label">
-                {{tempTabLink.name ?? 'temp'}}
-            </span>
-        </a>
-        <qhana-help-tooltip label="Show help for the temporary plugin tab." #tempTabHelp>
-            <p>
-                An ephemeral tab that displays the UI of a single plugin.
-                Disappears when navigated away from.
-            </p>
-        </qhana-help-tooltip>
-    </ng-container>
-
-    <div class="toolbar-spacer"></div>
-
-    <div class="experiment-switcher" [hidden]="(currentExperiment|async) == null" [style]="{'anchor-name': '--' + (switcherHelp.anchor|async)}">
-        <span>{{currentExperiment|async}}</span>
-        <a class="navigation-link" mat-icon-button [hidden]="(currentExperiment|async) == null" [routerLink]="['/']"
-            aria-label="change experiment">
-            <mat-icon>swap_horiz</mat-icon>
-        </a>
-    </div>
-    <qhana-help-tooltip label="Show help for the experiment switcher." [hidden]="(currentExperiment|async) == null" #switcherHelp>
-        <p>
-            The experiment switcher shows the name of the current experiment and allows for switching to a different experiment.
-        </p>
+    <qhana-help-tooltip label="Show help for the experiments tab." #experimentsHelp>
+      <p>
+        The experiments tab contains all known experiments.
+        Create a new experiment or import a previously exported experiment to get started.
+      </p>
     </qhana-help-tooltip>
-    <button class="downloads-button" mat-icon-button [matMenuTriggerFor]="downloadList"
-        aria-label="Show downloads" [style]="{'anchor-name': '--' + (downloadHelp.anchor|async)}">
-        <mat-icon [matBadge]="downloadBadgeCounter | async" [matBadgeHidden]="!(downloadBadgeCounter | async)"
-            matBadgeColor="accent" matBadgeSize="small">download</mat-icon>
-    </button>
-    <qhana-help-tooltip label="Show help for the experiment download menu." #downloadHelp>
-        <p>
-            Exported experiments will show up here once they are ready to be downloaded.
-        </p>
-    </qhana-help-tooltip>
-    <mat-menu class="download" #downloadList="matMenu" yPosition="below">
-        <p class="download-heading">Available downloads:</p>
-        <ng-container *ngFor="let export of exportList | async; trackBy:trackExport">
-            <mat-divider></mat-divider>
-            <div class="download-item">
-                <div class="download-container">
-                    <a role="button" mat-icon-button aria-label="Download" *ngIf="export.status === 'SUCCESS'"
-                        href="{{export.fileLink}}" target="_blank">
-                        <mat-icon>download</mat-icon>
-                    </a>
-                    <mat-spinner [diameter]="24" *ngIf="export.status === 'PENDING'"></mat-spinner>
-                    <span class="download-name">{{export.name}}</span>
-                    <mat-icon color="warn" *ngIf="export.status === 'FAILURE'">error</mat-icon>
-                    <button class="delete-button" mat-icon-button color="warn" aria-label="Delete"
-                        (click)="deleteExport(export.experimentId, export.exportId); $event.stopPropagation()">
-                        <mat-icon>delete</mat-icon>
-                    </button>
-                </div>
-            </div>
-        </ng-container>
-    </mat-menu>
-    <qhana-help-toggle></qhana-help-toggle>
-    <a class="settings-link" [routerLink]="['/settings']" [style]="{'anchor-name': '--' + (settingsHelp.anchor|async)}">
-        <mat-icon aria-hidden="false" aria-label="Settings">settings</mat-icon>
+    <a class="navigation-link" mat-button [routerLink]="['/templates']"
+      queryParamsHandling="merge" routerLinkActive="active"
+      [style]="{'anchor-name': '--' + (templatesHelp.anchor|async)}">
+      UI Templates
     </a>
-    <qhana-help-tooltip label="Show help for the settings page." #settingsHelp>
-        <p>
-            The settings page can be used to change various settings.
-            It contains the settings for connecting to the plugin registry.
-            It also allows editing services and environment variables stored in the plugin registry.
-        </p>
+    <qhana-help-tooltip label="Show help for the UI templates tab." #templatesHelp>
+      <p>
+        The QHAna user interface can be customized using UI Templates.
+        This tab contains all the UI Templates and allows for creating new templates or updating existing templates.
+      </p>
     </qhana-help-tooltip>
+  }
+
+  @if ((currentExperiment|async) != null) {
+    <a class="navigation-link" mat-button [routerLink]="['/experiments', (experimentId|async), 'info']"
+      routerLinkActive="active" [style]="{'anchor-name': '--' + (infoHelp.anchor|async)}">
+      Info
+    </a>
+    <qhana-help-tooltip label="Show help for the experiment info tab." #infoHelp>
+      <p>
+        The experiment info tab shows the basic experiment information like name and description.
+        It can also be used to change this information.
+        The functions for exporting experiment data or cloning the experiment can also be found in this tab.
+      </p>
+    </qhana-help-tooltip>
+    <a class="navigation-link" mat-button [routerLink]="['/experiments', (experimentId|async), 'workspace']"
+      queryParamsHandling="merge" routerLinkActive="active" [style]="{'anchor-name': '--' + (workspaceHelp.anchor|async)}">
+      Workspace
+    </a>
+    <qhana-help-tooltip label="Show help for the experiment data tab." #workspaceHelp>
+      <p>
+        The experiment workspace allows for experiments using the available plugins to create, filter, analyze and otherwise manipulate data.
+        The available plugins are shown in the workspace sidebar to the left.
+        The plugin list is grouped by categories and can be searched.
+      </p>
+    </qhana-help-tooltip>
+    <a class="navigation-link" mat-button [routerLink]="['/experiments', (experimentId|async), 'data']"
+      queryParamsHandling="merge" routerLinkActive="active" [style]="{'anchor-name': '--' + (dataHelp.anchor|async)}">
+      Data
+    </a>
+    <qhana-help-tooltip label="Show help for the experiment data tab." #dataHelp>
+      <p>
+        Any data produced during the experiment can be found here.
+        If new data is produced with the same name, it is considered as a new version of the same data.
+      </p>
+    </qhana-help-tooltip>
+    <a class="navigation-link" mat-button [routerLink]="['/experiments', (experimentId|async), 'timeline']"
+      queryParamsHandling="merge" routerLinkActive="active" [style]="{'anchor-name': '--' + (timelineHelp.anchor|async)}">
+      Timeline
+    </a>
+    <qhana-help-tooltip label="Show help for the experiment timeline tab." #timelineHelp>
+      <p>
+        Every computation step of the experiment gets recorded in the experiment timeline.
+        Each step records its inputs and outputs, any sub-steps an execution log and more.
+        Steps can also be graded by the user to indicate how useful their result was.
+        Additionally notes can be be stored for each step.
+      </p>
+    </qhana-help-tooltip>
+    @for (tab of experimentExtraTabs; track tab) {
+      <a class="navigation-link {{isActive(tab) ? 'active' : ''}}" mat-button
+        [routerLink]="['/experiments', (experimentId|async), 'extra', tab.resourceKey?.uiTemplateTabId]"
+        queryParamsHandling="merge" routerLinkActive="active">
+        <span class="link-label">
+          @if (tabLinkHrefToApiObject.get(tab.href)?.icon) {
+            <mat-icon>
+              {{tabLinkHrefToApiObject.get(tab.href)?.icon}}
+            </mat-icon>
+          }
+          {{tab.name}}
+          @if (tabLinkHrefToApiObject.get(tab.href)?.groupKey) {
+            <mat-icon>more_vert</mat-icon>
+          }
+        </span>
+      </a>
+    }
+  }
+  @if ((currentExperiment|async) == null) {
+    @for (tab of generalExtraTabs; track tab) {
+      <a class="navigation-link {{isActive(tab) ? 'active' : ''}}" mat-button [routerLink]="['extra', tab.resourceKey?.uiTemplateTabId]"
+        queryParamsHandling="merge" routerLinkActive="active">
+        <span class="link-label">
+          @if (tabLinkHrefToApiObject.get(tab.href)?.icon) {
+            <mat-icon>
+              {{tabLinkHrefToApiObject.get(tab.href)?.icon}}
+            </mat-icon>
+          }
+          {{tab.name}}
+          @if (tabLinkHrefToApiObject.get(tab.href)?.groupKey) {
+            <mat-icon>more_vert</mat-icon>
+          }
+        </span>
+      </a>
+    }
+  }
+  @if (tempTabLink != null) {
+    <a class="navigation-link temporary active" mat-button [routerLink]="templateTabRouterLink()"
+      queryParamsHandling="merge" routerLinkActive="active" [style]="{'anchor-name': '--' + (tempTabHelp.anchor|async)}">
+      <span class="link-label">
+        {{tempTabLink.name ?? 'temp'}}
+      </span>
+    </a>
+    <qhana-help-tooltip label="Show help for the temporary plugin tab." #tempTabHelp>
+      <p>
+        An ephemeral tab that displays the UI of a single plugin.
+        Disappears when navigated away from.
+      </p>
+    </qhana-help-tooltip>
+  }
+
+  <div class="toolbar-spacer"></div>
+
+  <div class="experiment-switcher" [hidden]="(currentExperiment|async) == null" [style]="{'anchor-name': '--' + (switcherHelp.anchor|async)}">
+    <span>{{currentExperiment|async}}</span>
+    <a class="navigation-link" mat-icon-button [hidden]="(currentExperiment|async) == null" [routerLink]="['/']"
+      aria-label="change experiment">
+      <mat-icon>swap_horiz</mat-icon>
+    </a>
+  </div>
+  <qhana-help-tooltip label="Show help for the experiment switcher." [hidden]="(currentExperiment|async) == null" #switcherHelp>
+    <p>
+      The experiment switcher shows the name of the current experiment and allows for switching to a different experiment.
+    </p>
+  </qhana-help-tooltip>
+  <button class="downloads-button" mat-icon-button [matMenuTriggerFor]="downloadList"
+    aria-label="Show downloads" [style]="{'anchor-name': '--' + (downloadHelp.anchor|async)}">
+    <mat-icon [matBadge]="downloadBadgeCounter | async" [matBadgeHidden]="!(downloadBadgeCounter | async)"
+    matBadgeColor="accent" matBadgeSize="small">download</mat-icon>
+  </button>
+  <qhana-help-tooltip label="Show help for the experiment download menu." #downloadHelp>
+    <p>
+      Exported experiments will show up here once they are ready to be downloaded.
+    </p>
+  </qhana-help-tooltip>
+  <mat-menu class="download" #downloadList="matMenu" yPosition="below">
+    <p class="download-heading">Available downloads:</p>
+    @for (export of exportList | async; track trackExport($index, export)) {
+      <mat-divider></mat-divider>
+      <div class="download-item">
+        <div class="download-container">
+          @if (export.status === 'SUCCESS') {
+            <a role="button" mat-icon-button aria-label="Download"
+              href="{{export.fileLink}}" target="_blank">
+              <mat-icon>download</mat-icon>
+            </a>
+          }
+          @if (export.status === 'PENDING') {
+            <mat-spinner [diameter]="24"></mat-spinner>
+          }
+          <span class="download-name">{{export.name}}</span>
+          @if (export.status === 'FAILURE') {
+            <mat-icon color="warn">error</mat-icon>
+          }
+          <button class="delete-button" mat-icon-button color="warn" aria-label="Delete"
+            (click)="deleteExport(export.experimentId, export.exportId); $event.stopPropagation()">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </div>
+    }
+  </mat-menu>
+  <qhana-help-toggle></qhana-help-toggle>
+  <a class="settings-link" [routerLink]="['/settings']" [style]="{'anchor-name': '--' + (settingsHelp.anchor|async)}">
+    <mat-icon aria-hidden="false" aria-label="Settings">settings</mat-icon>
+  </a>
+  <qhana-help-tooltip label="Show help for the settings page." #settingsHelp>
+    <p>
+      The settings page can be used to change various settings.
+      It contains the settings for connecting to the plugin registry.
+      It also allows editing services and environment variables stored in the plugin registry.
+    </p>
+  </qhana-help-tooltip>
 </mat-toolbar>

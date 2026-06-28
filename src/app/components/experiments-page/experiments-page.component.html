@@ -1,60 +1,64 @@
 <div class="big-content">
 
-    <div class="title">
-        <h1 class="t-page-headline  align-arrow">Experiments
-            <button mat-icon-button class="arrow-button" (click)="onSort()" aria-label="change sort order">
-                <mat-icon [inline]="true" class="arrow">{{sort>=0?"arrow_upward":"arrow_downward"}}</mat-icon>
-            </button>
-        </h1>
-        <div class="buttons">
-            <mat-button-toggle color="primary" class="dialog-button" [checked]="showImport"
-                (change)="showImport = !showImport">
-                <mat-icon aria-hidden="true">upload</mat-icon>
-                Import
-            </mat-button-toggle>
-            <button mat-raised-button color="primary" class="dialog-button" (click)="showCreateExperimentDialog()">
-                <mat-icon aria-hidden="true">add</mat-icon>
-                New Experiment
-            </button>
-        </div>
+  <div class="title">
+    <h1 class="t-page-headline  align-arrow">Experiments
+      <button mat-icon-button class="arrow-button" (click)="onSort()" aria-label="change sort order">
+        <mat-icon [inline]="true" class="arrow">{{sort>=0?"arrow_upward":"arrow_downward"}}</mat-icon>
+      </button>
+    </h1>
+    <div class="buttons">
+      <mat-button-toggle color="primary" class="dialog-button" [checked]="showImport"
+        (change)="showImport = !showImport">
+        <mat-icon aria-hidden="true">upload</mat-icon>
+        Import
+      </mat-button-toggle>
+      <button mat-raised-button color="primary" class="dialog-button" (click)="showCreateExperimentDialog()">
+        <mat-icon aria-hidden="true">add</mat-icon>
+        New Experiment
+      </button>
     </div>
+  </div>
 
-    <mat-card appearance="outlined" class="import-card card" [hidden]="!showImport">
+  <mat-card appearance="outlined" class="import-card card" [hidden]="!showImport">
+    <mat-card-title>
+      <span class="t-headline">Import Experiment</span>
+    </mat-card-title>
+    <mat-card-content>
+      <qhana-import-experiment></qhana-import-experiment>
+    </mat-card-content>
+  </mat-card>
+
+  <div class="filter">
+    <mat-form-field [style.width.%]="100">
+      <mat-label>Search experiments</mat-label>
+      <input [(ngModel)]="searchValue" matInput (keydown.enter)="updatePageContent()">
+      <button mat-icon-button matSuffix (click)="updatePageContent()" [attr.aria-label]="'search'">
+        <mat-icon>search</mat-icon>
+      </button>
+    </mat-form-field>
+  </div>
+  <div class="page-item-list">
+    @if (!(experiments | async)) {
+      <mat-card appearance="outlined" class="page-item card">
         <mat-card-title>
-            <span class="t-headline">Import Experiment</span>
+          <span class="t-headline">No experiments</span>
         </mat-card-title>
-        <mat-card-content>
-            <qhana-import-experiment></qhana-import-experiment>
-        </mat-card-content>
-    </mat-card>
+        <mat-card-content>Use the "new experiment" button above to create new experiments.</mat-card-content>
+      </mat-card>
+    }
+    @for (experiment of experiments | async; track experiment) {
+      <mat-card appearance="outlined" class="page-item card">
+        <mat-card-title>
+          <a class="t-headline title-link"
+          [routerLink]="['/experiments', experiment.experimentId, 'info']">{{experiment.name}}</a>
+        </mat-card-title>
+        <mat-card-content>{{experiment.description}}</mat-card-content>
+      </mat-card>
+    }
+  </div>
 
-    <div class="filter">
-        <mat-form-field [style.width.%]="100">
-            <mat-label>Search experiments</mat-label>
-            <input [(ngModel)]="searchValue" matInput (keydown.enter)="updatePageContent()">
-            <button mat-icon-button matSuffix (click)="updatePageContent()" [attr.aria-label]="'search'">
-                <mat-icon>search</mat-icon>
-            </button>
-        </mat-form-field>
-    </div>
-    <div class="page-item-list">
-        <mat-card appearance="outlined" class="page-item card" *ngIf="!(experiments | async)">
-            <mat-card-title>
-                <span class="t-headline">No experiments</span>
-            </mat-card-title>
-            <mat-card-content>Use the "new experiment" button above to create new experiments.</mat-card-content>
-        </mat-card>
-        <mat-card appearance="outlined" class="page-item card" *ngFor="let experiment of experiments | async">
-            <mat-card-title>
-                <a class="t-headline title-link"
-                    [routerLink]="['/experiments', experiment.experimentId, 'info']">{{experiment.name}}</a>
-            </mat-card-title>
-            <mat-card-content>{{experiment.description}}</mat-card-content>
-        </mat-card>
-    </div>
-
-    <mat-paginator class="paginator" (page)="onPageChange($event)" [length]="collectionSize" [pageSize]="10"
-        [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page">
-    </mat-paginator>
-    <div class="scroll-spacer"></div>
+  <mat-paginator class="paginator" (page)="onPageChange($event)" [length]="collectionSize" [pageSize]="10"
+    [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page">
+  </mat-paginator>
+  <div class="scroll-spacer"></div>
 </div>

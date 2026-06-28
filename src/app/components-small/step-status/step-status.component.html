@@ -1,8 +1,16 @@
 <div class="step-status">
-    <mat-spinner *ngIf="isPending && spinner > 1" color="primary" mode="indeterminate" [diameter]="spinner"
-        aria-hidden="true">
+  @if (isPending && spinner > 1) {
+    <mat-spinner color="primary" mode="indeterminate" [diameter]="spinner"
+      aria-hidden="true">
     </mat-spinner>
-    <mat-icon *ngIf="isSuccess" color="primary" inline="true" aria-hidden="true">done</mat-icon>
-    <mat-icon *ngIf="isError" inline="true" aria-hidden="true">error</mat-icon>
-    <span *ngIf="!noText">{{status}}</span>
+  }
+  @if (isSuccess) {
+    <mat-icon color="primary" inline="true" aria-hidden="true">done</mat-icon>
+  }
+  @if (isError) {
+    <mat-icon inline="true" aria-hidden="true">error</mat-icon>
+  }
+  @if (!noText) {
+    <span>{{status}}</span>
+  }
 </div>

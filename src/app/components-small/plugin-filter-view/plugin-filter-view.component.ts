@@ -1,5 +1,5 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 
 const ALLOWED_FILTER_KEYS: Set<'and' | 'or' | 'not' | 'id' | 'name' | 'tag' | 'version' | 'type'> = new Set(['and', 'or', 'not', 'id', 'name', 'tag', 'version', 'type']);
 

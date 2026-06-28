@@ -1,30 +1,30 @@
 <mat-card-content>
-    <dl class="substep-details">
-        <div>
-            <dt>Cleared</dt>
-            <dd>
-                {{substep?.cleared}}
-            </dd>
-        </div>
-        <div>
-            <dt>Substep Nr</dt>
-            <dd>{{substep?.substepNr}}</dd>
-        </div>
-        <div>
-            <dt>Processor Location</dt>
-            <dd>{{substep?.href}}</dd>
-        </div>
-        <details class="collapsible-item">
-            <summary class="summary-item">Parameters</summary>
-            <qhana-data-preview [data]="substep"
-                [context]="{experimentId: experimentId??undefined, stepId: substep?.stepId, location: 'timeline-step.substep.parameters.data-preview'}">
-            </qhana-data-preview>
-        </details>
-    </dl>
+  <dl class="substep-details">
+    <div>
+      <dt>Cleared</dt>
+      <dd>
+        {{substep?.cleared}}
+      </dd>
+    </div>
+    <div>
+      <dt>Substep Nr</dt>
+      <dd>{{substep?.substepNr}}</dd>
+    </div>
+    <div>
+      <dt>Processor Location</dt>
+      <dd>{{substep?.href}}</dd>
+    </div>
+    <details class="collapsible-item">
+      <summary class="summary-item">Parameters</summary>
+      <qhana-data-preview [data]="substep"
+        [context]="{experimentId: experimentId??undefined, stepId: substep?.stepId, location: 'timeline-step.substep.parameters.data-preview'}">
+      </qhana-data-preview>
+    </details>
+  </dl>
 </mat-card-content>
-<ng-container *ngIf="substep && substep.inputData != null && substep.inputData.length > 0">
-    <h2>Input</h2>
-    <qhana-preview-list [dataList]="substep.inputData"
-        [context]="{experimentId: experimentId??undefined, stepId: substep.stepId, location: 'timeline-step.substep.input.data-preview'}">
-    </qhana-preview-list>
-</ng-container>
+@if (substep && substep.inputData != null && substep.inputData.length > 0) {
+  <h2>Input</h2>
+  <qhana-preview-list [dataList]="substep.inputData"
+    [context]="{experimentId: experimentId??undefined, stepId: substep.stepId, location: 'timeline-step.substep.input.data-preview'}">
+  </qhana-preview-list>
+}

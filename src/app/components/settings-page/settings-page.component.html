@@ -1,140 +1,142 @@
 <div class="big-content">
 
-    <h1 class="t-page-headline">Settings</h1>
+  <h1 class="t-page-headline">Settings</h1>
 
-    <mat-card appearance="outlined" class="card">
-        <mat-card-title>
-            <h3>Plugin Registry URL</h3>
-        </mat-card-title>
-        <mat-card-content>
-            <p><span style="font-weight: 700;">Current Value:</span> {{registryUrl}}</p>
-            <div class="url-form-group">
-                <mat-form-field class="form-field short-field">
-                    <mat-label>Protocol</mat-label>
-                    <input matInput autocomplete="false" [(ngModel)]="protocol">
-                </mat-form-field>
-                <mat-form-field class="form-field long-field">
-                    <mat-label>Hostname</mat-label>
-                    <input matInput autocomplete="false" [(ngModel)]="hostname">
-                </mat-form-field>
-                <mat-form-field class="form-field short-field">
-                    <mat-label>Port</mat-label>
-                    <input matInput autocomplete="false" type="number" [(ngModel)]="port">
-                </mat-form-field>
-                <mat-form-field class="form-field long-field">
-                    <mat-label>Path</mat-label>
-                    <input matInput autocomplete="false" [(ngModel)]="path">
-                </mat-form-field>
-            </div>
-            <button mat-flat-button color="primary" (click)="updateRegistryUrl()">Update Registry URL</button>
-        </mat-card-content>
-    </mat-card>
+  <mat-card appearance="outlined" class="card">
+    <mat-card-title>
+      <h3>Plugin Registry URL</h3>
+    </mat-card-title>
+    <mat-card-content>
+      <p><span style="font-weight: 700;">Current Value:</span> {{registryUrl}}</p>
+      <div class="url-form-group">
+        <mat-form-field class="form-field short-field">
+          <mat-label>Protocol</mat-label>
+          <input matInput autocomplete="false" [(ngModel)]="protocol">
+        </mat-form-field>
+        <mat-form-field class="form-field long-field">
+          <mat-label>Hostname</mat-label>
+          <input matInput autocomplete="false" [(ngModel)]="hostname">
+        </mat-form-field>
+        <mat-form-field class="form-field short-field">
+          <mat-label>Port</mat-label>
+          <input matInput autocomplete="false" type="number" [(ngModel)]="port">
+        </mat-form-field>
+        <mat-form-field class="form-field long-field">
+          <mat-label>Path</mat-label>
+          <input matInput autocomplete="false" [(ngModel)]="path">
+        </mat-form-field>
+      </div>
+      <button mat-flat-button color="primary" (click)="updateRegistryUrl()">Update Registry URL</button>
+    </mat-card-content>
+  </mat-card>
 
-    <mat-card appearance="outlined" class="card mt-2">
-        <mat-card-title class="flex-title">
-            <h3 class="mt-0 mb-0">Services</h3>
-            <button mat-icon-button aria-label="Refresh services" (click)="services.reloadAll()">
-                <mat-icon>refresh</mat-icon>
-            </button>
-        </mat-card-title>
-        <mat-card-content>
-            <dl>
-                <div class="inline-def">
-                    <dt><strong>QHAna Backend:</strong></dt>
-                    <dd><a href="{{backendUrl}}" target="_blank" rel="noreferrer">{{backendUrl ?? '–'}}</a></dd>
-                </div>
-                <div class="inline-def">
-                    <dt><strong>LaTeX Renderer:</strong></dt>
-                    <dd><a href="{{latexUrl}}" target="_blank" rel="noreferrer">{{latexUrl ?? '–'}}</a></dd>
-                </div>
-            </dl>
+  <mat-card appearance="outlined" class="card mt-2">
+    <mat-card-title class="flex-title">
+      <h3 class="mt-0 mb-0">Services</h3>
+      <button mat-icon-button aria-label="Refresh services" (click)="services.reloadAll()">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </mat-card-title>
+    <mat-card-content>
+      <dl>
+        <div class="inline-def">
+          <dt><strong>QHAna Backend:</strong></dt>
+          <dd><a href="{{backendUrl}}" target="_blank" rel="noreferrer">{{backendUrl ?? '–'}}</a></dd>
+        </div>
+        <div class="inline-def">
+          <dt><strong>LaTeX Renderer:</strong></dt>
+          <dd><a href="{{latexUrl}}" target="_blank" rel="noreferrer">{{latexUrl ?? '–'}}</a></dd>
+        </div>
+      </dl>
 
-            <details>
-                <summary>All services:</summary>
+      <details>
+        <summary>All services:</summary>
 
-                <qhana-growing-list [rels]="[['collection', 'service']]" [newItemRels]="['service']"
-                    [deleteButton]="true" [highlighted]="highlightedServices" (clickItem)="selectService($event)"
-                    #services>
-                </qhana-growing-list>
+        <qhana-growing-list [rels]="[['collection', 'service']]" [newItemRels]="['service']"
+          [deleteButton]="true" [highlighted]="highlightedServices" (clickItem)="selectService($event)"
+          #services>
+        </qhana-growing-list>
 
-                <div class="service-form-group mt-1">
-                    <mat-form-field class="form-field long-field">
-                        <mat-label>Service Identifier</mat-label>
-                        <input matInput type="text" autocomplete="false" required [(ngModel)]="serviceIdentifier">
-                    </mat-form-field>
-                    <mat-form-field class="form-field long-field">
-                        <mat-label>Service URL</mat-label>
-                        <input matInput type="url" autocomplete="false" required [(ngModel)]="serviceUrl">
-                    </mat-form-field>
-                    <mat-form-field class="form-field long-field">
-                        <mat-label>Service Name</mat-label>
-                        <input matInput type="text" autocomplete="false" required [(ngModel)]="serviceName">
-                    </mat-form-field>
-                    <qhana-markdown class="description" [markdown]="serviceDescriptionInput"
-                        (markdownChanges)="serviceDescription = $event" [editable]="true">
-                    </qhana-markdown>
-                </div>
-                <button mat-flat-button color="primary" (click)="addService()"
-                    [hidden]="currentServiceUpdateLink!=null">Add new Service</button>
-                <button mat-flat-button color="primary" (click)="updateService()"
-                    [hidden]="currentServiceUpdateLink==null">Update Service</button>
-            </details>
-        </mat-card-content>
-    </mat-card>
+        <div class="service-form-group mt-1">
+          <mat-form-field class="form-field long-field">
+            <mat-label>Service Identifier</mat-label>
+            <input matInput type="text" autocomplete="false" required [(ngModel)]="serviceIdentifier">
+          </mat-form-field>
+          <mat-form-field class="form-field long-field">
+            <mat-label>Service URL</mat-label>
+            <input matInput type="url" autocomplete="false" required [(ngModel)]="serviceUrl">
+          </mat-form-field>
+          <mat-form-field class="form-field long-field">
+            <mat-label>Service Name</mat-label>
+            <input matInput type="text" autocomplete="false" required [(ngModel)]="serviceName">
+          </mat-form-field>
+          <qhana-markdown class="description" [markdown]="serviceDescriptionInput"
+            (markdownChanges)="serviceDescription = $event" [editable]="true">
+          </qhana-markdown>
+        </div>
+        <button mat-flat-button color="primary" (click)="addService()"
+        [hidden]="currentServiceUpdateLink!=null">Add new Service</button>
+        <button mat-flat-button color="primary" (click)="updateService()"
+        [hidden]="currentServiceUpdateLink==null">Update Service</button>
+      </details>
+    </mat-card-content>
+  </mat-card>
 
-    <mat-card appearance="outlined" class="card mt-2">
-        <mat-card-title class="flex-title">
-            <h3 class="mt-0 mb-0">Plugin Seed URLs</h3>
-            <button mat-icon-button aria-label="Refresh seed URLs" (click)="seeds.reloadAll()">
-                <mat-icon>refresh</mat-icon>
-            </button>
-        </mat-card-title>
-        <mat-card-content>
-            <qhana-growing-list [rels]="[['collection', 'seed']]" [newItemRels]="['seed']" [deleteButton]="true" #seeds>
-            </qhana-growing-list>
+  <mat-card appearance="outlined" class="card mt-2">
+    <mat-card-title class="flex-title">
+      <h3 class="mt-0 mb-0">Plugin Seed URLs</h3>
+      <button mat-icon-button aria-label="Refresh seed URLs" (click)="seeds.reloadAll()">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </mat-card-title>
+    <mat-card-content>
+      <qhana-growing-list [rels]="[['collection', 'seed']]" [newItemRels]="['seed']" [deleteButton]="true" #seeds>
+      </qhana-growing-list>
 
-            <details class="mt-1" *ngIf="createSeedLink">
-                <summary class="mt-1">Add new seed URLs</summary>
-                <div class="url-form-group mt-1">
-                    <mat-form-field class="form-field long-field">
-                        <mat-label>Endpoint URL</mat-label>
-                        <input matInput type="url" autocomplete="false" required [(ngModel)]="newSeedUrl">
-                    </mat-form-field>
-                </div>
-                <button mat-flat-button color="primary" (click)="addSeedUrl()">Add new Seed URL</button>
-            </details>
-        </mat-card-content>
-    </mat-card>
+      @if (createSeedLink) {
+        <details class="mt-1">
+          <summary class="mt-1">Add new seed URLs</summary>
+          <div class="url-form-group mt-1">
+            <mat-form-field class="form-field long-field">
+              <mat-label>Endpoint URL</mat-label>
+              <input matInput type="url" autocomplete="false" required [(ngModel)]="newSeedUrl">
+            </mat-form-field>
+          </div>
+          <button mat-flat-button color="primary" (click)="addSeedUrl()">Add new Seed URL</button>
+        </details>
+      }
+    </mat-card-content>
+  </mat-card>
 
-    <mat-card appearance="outlined" class="card mt-2">
-        <mat-card-title class="flex-title">
-            <h3 class="mt-0 mb-0">Environment</h3>
-            <button mat-icon-button aria-label="Refresh Environment Variables" (click)="env.reloadAll()">
-                <mat-icon>refresh</mat-icon>
-            </button>
-        </mat-card-title>
-        <mat-card-content>
-            <qhana-growing-list [rels]="[['collection', 'env']]" [newItemRels]="['env']" [deleteButton]="true"
-                [highlighted]="highlightedEnvVars" (clickItem)="selectEnvVar($event)" #env>
-            </qhana-growing-list>
+  <mat-card appearance="outlined" class="card mt-2">
+    <mat-card-title class="flex-title">
+      <h3 class="mt-0 mb-0">Environment</h3>
+      <button mat-icon-button aria-label="Refresh Environment Variables" (click)="env.reloadAll()">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </mat-card-title>
+    <mat-card-content>
+      <qhana-growing-list [rels]="[['collection', 'env']]" [newItemRels]="['env']" [deleteButton]="true"
+        [highlighted]="highlightedEnvVars" (clickItem)="selectEnvVar($event)" #env>
+      </qhana-growing-list>
 
-            <div class="url-form-group mt-1">
-                <mat-form-field class="form-field">
-                    <mat-label>Environment Variable Name</mat-label>
-                    <input matInput type="text" autocomplete="false" required [(ngModel)]="envVarName">
-                </mat-form-field>
-                <mat-form-field class="form-field long-field">
-                    <mat-label>Environment Variable Value</mat-label>
-                    <textarea matInput required [(ngModel)]="envVarValue"></textarea>
-                </mat-form-field>
-            </div>
-            <button mat-flat-button color="primary" (click)="addEnvVar()" [hidden]="currentEnvVarUpdateLink!=null">
-                Add Environment Variable
-            </button>
-            <button mat-flat-button color="primary" (click)="updateEnvVar()" [hidden]="currentEnvVarUpdateLink==null">
-                Update Environment Variable
-            </button>
-        </mat-card-content>
-    </mat-card>
-    <div class="scroll-spacer"></div>
+      <div class="url-form-group mt-1">
+        <mat-form-field class="form-field">
+          <mat-label>Environment Variable Name</mat-label>
+          <input matInput type="text" autocomplete="false" required [(ngModel)]="envVarName">
+        </mat-form-field>
+        <mat-form-field class="form-field long-field">
+          <mat-label>Environment Variable Value</mat-label>
+          <textarea matInput required [(ngModel)]="envVarValue"></textarea>
+        </mat-form-field>
+      </div>
+      <button mat-flat-button color="primary" (click)="addEnvVar()" [hidden]="currentEnvVarUpdateLink!=null">
+        Add Environment Variable
+      </button>
+      <button mat-flat-button color="primary" (click)="updateEnvVar()" [hidden]="currentEnvVarUpdateLink==null">
+        Update Environment Variable
+      </button>
+    </mat-card-content>
+  </mat-card>
+  <div class="scroll-spacer"></div>
 </div>

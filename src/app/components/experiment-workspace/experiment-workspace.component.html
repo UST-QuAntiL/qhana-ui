@@ -1,67 +1,74 @@
 <div class="workspace-content">
-    <qhana-plugin-sidebar class="sidebar"></qhana-plugin-sidebar>
-    <div class="content-container">
-        <div class="main-content">
-            <ng-container *ngIf="!detailAreaActive">
-                <div class="title">
-                    <h1 class="t-page-headline">Experiment Workspace</h1>
-                    <!-- a mat-icon-button aria-label="unselect plugin"
-                        [routerLink]="['/experiments', experimentId, 'workspace']" *ngIf="activePlugin != null">
-                        <mat-icon>arrow_back</mat-icon>
-                    </a -->
-                </div>
-                <div *ngIf="activePlugin == null">
-                    <p>Choose a plugin.</p>
-                </div>
-                <div *ngIf="activePlugin != null">
-                    <mat-card appearance="outlined" class="plugin-details card">
-                        <mat-card-title>
-                            <h2 class="plugin-header" role="button" tabindex="0" aria-controls="plugin-description"
-                                aria-expanded="expandedPluginDescription" (keydown)="onKeyDown($event)"
-                                (click)="expandedPluginDescription = !expandedPluginDescription">
-                                <mat-icon aria-hidden="false" aria-label="expand description"
-                                    [hidden]="expandedPluginDescription">chevron_right</mat-icon>
-                                <mat-icon aria-hidden="false" aria-label="expand description"
-                                    [hidden]="!expandedPluginDescription">expand_more</mat-icon>
-                                <span class="t-title">{{activePlugin.title}}
-                                    (&#64;{{activePlugin.version}})</span>
-                                <span class="t-title plugin-identifier">{{activePlugin.identifier}}</span>
-                                <div class="spacer"></div>
-                                <qhana-plugin-last-used class="plugin-status" [plugin]="activePlugin" [spinner]="20">
-                                </qhana-plugin-last-used>
-                            </h2>
-                        </mat-card-title>
-                        <mat-card-content id="plugin-description"
-                            class="plugin-description-container {{expandedPluginDescription ? 'open' : 'closed'}}">
-                            <div class="scroll-container">
-                                <mat-chip-listbox>
-                                    <mat-chip *ngFor="let tag of (activePlugin.tags ?? [])">{{tag}}</mat-chip>
-                                </mat-chip-listbox>
-                                <qhana-markdown class="plugin-description" [markdown]="activePlugin.description"
-                                    [editable]="false">
-                                </qhana-markdown>
-                            </div>
-                        </mat-card-content>
-                    </mat-card>
-                    <mat-card appearance="outlined" class="card no-padding">
-                        <qhana-plugin-uiframe [url]="frontendUrl" [plugin]="activePlugin.self"
-                            [context]="{experimentId: experimentId??undefined, location: 'workspace'}"
-                            (formDataSubmit)="onPluginUiFormSubmit($event)"
-                            (requestDataPreview)="previewData = $event">
-                        </qhana-plugin-uiframe>
-                    </mat-card>
-
-                    <qhana-data-preview class="data-preview" [data]="previewData"
-                        [context]="{experimentId: experimentId??undefined, location: 'workspace.data-preview'}"
-                        *ngIf="previewData">
-                        <h3 class="t-headline">Preview "{{previewData.name}}"</h3>
-                    </qhana-data-preview>
-                </div>
-            </ng-container>
-            <ng-container *ngIf="detailAreaActive">
-                <qhana-experiment-workspace-detail></qhana-experiment-workspace-detail>
-            </ng-container>
-            <div class="scroll-spacer"></div>
+  <qhana-plugin-sidebar class="sidebar"></qhana-plugin-sidebar>
+  <div class="content-container">
+    <div class="main-content">
+      @if (!detailAreaActive) {
+        <div class="title">
+          <h1 class="t-page-headline">Experiment Workspace</h1>
+          <!-- a mat-icon-button aria-label="unselect plugin"
+          [routerLink]="['/experiments', experimentId, 'workspace']" *ngIf="activePlugin != null">
+          <mat-icon>arrow_back</mat-icon>
+          </a -->
         </div>
+        @if (activePlugin == null) {
+          <div>
+            <p>Choose a plugin.</p>
+          </div>
+        }
+        @if (activePlugin != null) {
+          <div>
+            <mat-card appearance="outlined" class="plugin-details card">
+              <mat-card-title>
+                <h2 class="plugin-header" role="button" tabindex="0" aria-controls="plugin-description"
+                  aria-expanded="expandedPluginDescription" (keydown)="onKeyDown($event)"
+                  (click)="expandedPluginDescription = !expandedPluginDescription">
+                  <mat-icon aria-hidden="false" aria-label="expand description"
+                  [hidden]="expandedPluginDescription">chevron_right</mat-icon>
+                  <mat-icon aria-hidden="false" aria-label="expand description"
+                  [hidden]="!expandedPluginDescription">expand_more</mat-icon>
+                  <span class="t-title">{{activePlugin.title}}
+                  (&#64;{{activePlugin.version}})</span>
+                  <span class="t-title plugin-identifier">{{activePlugin.identifier}}</span>
+                  <div class="spacer"></div>
+                  <qhana-plugin-last-used class="plugin-status" [plugin]="activePlugin" [spinner]="20">
+                  </qhana-plugin-last-used>
+                </h2>
+              </mat-card-title>
+              <mat-card-content id="plugin-description"
+                class="plugin-description-container {{expandedPluginDescription ? 'open' : 'closed'}}">
+                <div class="scroll-container">
+                  <mat-chip-listbox>
+                    @for (tag of (activePlugin.tags ?? []); track tag) {
+                      <mat-chip>{{tag}}</mat-chip>
+                    }
+                  </mat-chip-listbox>
+                  <qhana-markdown class="plugin-description" [markdown]="activePlugin.description"
+                    [editable]="false">
+                  </qhana-markdown>
+                </div>
+              </mat-card-content>
+            </mat-card>
+            <mat-card appearance="outlined" class="card no-padding">
+              <qhana-plugin-uiframe [url]="frontendUrl" [plugin]="activePlugin.self"
+                [context]="{experimentId: experimentId??undefined, location: 'workspace'}"
+                (formDataSubmit)="onPluginUiFormSubmit($event)"
+                (requestDataPreview)="previewData = $event">
+              </qhana-plugin-uiframe>
+            </mat-card>
+            @if (previewData) {
+              <qhana-data-preview class="data-preview" [data]="previewData"
+                [context]="{experimentId: experimentId??undefined, location: 'workspace.data-preview'}"
+                >
+                <h3 class="t-headline">Preview "{{previewData.name}}"</h3>
+              </qhana-data-preview>
+            }
+          </div>
+        }
+      }
+      @if (detailAreaActive) {
+        <qhana-experiment-workspace-detail></qhana-experiment-workspace-detail>
+      }
+      <div class="scroll-spacer"></div>
     </div>
+  </div>
 </div>

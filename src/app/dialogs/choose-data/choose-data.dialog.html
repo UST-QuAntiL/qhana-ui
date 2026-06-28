@@ -1,51 +1,55 @@
 <div class="flex-header">
-    <h1 mat-dialog-title align-arrow>Choose data
-        <button mat-icon-button class="arrow-button" (click)="onSort()" aria-label="change sort order">
-            <mat-icon [inline]="true" class="arrow">{{sort>=0?"arrow_upward":"arrow_downward"}}</mat-icon>
-        </button>
-    </h1>
+  <h1 mat-dialog-title align-arrow>Choose data
+    <button mat-icon-button class="arrow-button" (click)="onSort()" aria-label="change sort order">
+      <mat-icon [inline]="true" class="arrow">{{sort>=0?"arrow_upward":"arrow_downward"}}</mat-icon>
+    </button>
+  </h1>
 </div>
 <div mat-dialog-content>
-    <div>
-        <p>Accepts: {{data.acceptedDataType}} –
-            <span *ngFor="let contentType of data.acceptedContentTypes; let last=last;">
-                {{contentType}}{{last ? "" : " | "}}
-            </span>
-        </p>
-        <mat-paginator (page)="onPageChange($event)" [length]="collectionSize" [pageSize]="pageSize"
-            [pageIndex]="currentPage" [pageSizeOptions]="[10, 5, 25, 100]" aria-label="Select page">
-        </mat-paginator>
-        <div class="filter">
-            <mat-form-field class="search-field no-padding">
-                <mat-label>Search data</mat-label>
-                <input [(ngModel)]="searchValue" matInput (keydown.enter)="loadData()">
-                <button mat-icon-button matSuffix class="search-button" (click)="loadData()">
-                    <mat-icon>search</mat-icon>
-                </button>
-            </mat-form-field>
-            <mat-checkbox color="primary" labelPosition="before" checked="true" (change)="onCheckAllVersions()">
-                Show all versions
-            </mat-checkbox>
-        </div>
-        <mat-selection-list [multiple]="false" color="primary" #selection>
-            <mat-list-option *ngFor="let data of dataList" [disabled]="!matching.has(data['@self'])" [value]="data">
-                <span class="bold break-words" matListItemTitle>
-                        {{data.name}}
-                </span>
-                <span matListItemLine>
-                    (v{{data.version}})
-                    <span class="italic ml2">
-                        {{data.type}} – {{data.contentType}}
-                    </span>
-                </span>
-            </mat-list-option>
-        </mat-selection-list>
+  <div>
+    <p>Accepts: {{data.acceptedDataType}} –
+      @for (contentType of data.acceptedContentTypes; track contentType; let last = $last) {
+        <span>
+          {{contentType}}{{last ? "" : " | "}}
+        </span>
+      }
+    </p>
+    <mat-paginator (page)="onPageChange($event)" [length]="collectionSize" [pageSize]="pageSize"
+      [pageIndex]="currentPage" [pageSizeOptions]="[10, 5, 25, 100]" aria-label="Select page">
+    </mat-paginator>
+    <div class="filter">
+      <mat-form-field class="search-field no-padding">
+        <mat-label>Search data</mat-label>
+        <input [(ngModel)]="searchValue" matInput (keydown.enter)="loadData()">
+        <button mat-icon-button matSuffix class="search-button" (click)="loadData()">
+          <mat-icon>search</mat-icon>
+        </button>
+      </mat-form-field>
+      <mat-checkbox color="primary" labelPosition="before" checked="true" (change)="onCheckAllVersions()">
+        Show all versions
+      </mat-checkbox>
     </div>
+    <mat-selection-list [multiple]="false" color="primary" #selection>
+      @for (data of dataList; track data) {
+        <mat-list-option [disabled]="!matching.has(data['@self'])" [value]="data">
+          <span class="bold break-words" matListItemTitle>
+            {{data.name}}
+          </span>
+          <span matListItemLine>
+            (v{{data.version}})
+            <span class="italic ml2">
+              {{data.type}} – {{data.contentType}}
+            </span>
+          </span>
+        </mat-list-option>
+      }
+    </mat-selection-list>
+  </div>
 </div>
 <div class="dialog-actions" mat-dialog-actions>
-    <button mat-button (click)="onCancel()">Cancel</button>
-    <button mat-button [mat-dialog-close]="selection.selectedOptions.selected[0]?.value"
-        [disabled]="selection.selectedOptions.isEmpty()">
-        Choose
-    </button>
+  <button mat-button (click)="onCancel()">Cancel</button>
+  <button mat-button [mat-dialog-close]="selection.selectedOptions.selected[0]?.value"
+    [disabled]="selection.selectedOptions.isEmpty()">
+    Choose
+  </button>
 </div>

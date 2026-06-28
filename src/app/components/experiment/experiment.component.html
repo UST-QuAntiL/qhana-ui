@@ -1,65 +1,75 @@
-<div class="big-content" *ngIf="experiment != null">
+@if (experiment != null) {
+  <div class="big-content">
     <div class="title">
-        <h1 class="t-page-headline">Experiment</h1>
-        <div class="buttons">
-            <button class="dialog-button" mat-raised-button color="primary" (click)="cloneExperiment()">
-                Clone
-                <mat-icon aria-hidden="true">content_copy</mat-icon>
-            </button>
-            <button class="dialog-button" mat-raised-button color="primary" (click)="showExportExperimentDialog()">
-                Export
-                <mat-icon aria-hidden="true">download</mat-icon>
-            </button>
-        </div>
+      <h1 class="t-page-headline">Experiment</h1>
+      <div class="buttons">
+        <button class="dialog-button" mat-raised-button color="primary" (click)="cloneExperiment()">
+          Clone
+          <mat-icon aria-hidden="true">content_copy</mat-icon>
+        </button>
+        <button class="dialog-button" mat-raised-button color="primary" (click)="showExportExperimentDialog()">
+          Export
+          <mat-icon aria-hidden="true">download</mat-icon>
+        </button>
+      </div>
     </div>
     <mat-card appearance="outlined" class="experiment-card card">
-        <mat-card-title class="t-headline experiment-title">
-            <span [hidden]="experimentName != null">
-                {{experiment.name}}
-            </span>
-            <mat-form-field class="form-field experiment-title-input" *ngIf="experimentName != null">
-                <mat-label>Experiment Name</mat-label>
-                <input matInput [(ngModel)]="experimentName" (ngModelChange)="updateTitle($event)" required
-                    minlength="1">
+      <mat-card-title class="t-headline experiment-title">
+        <span [hidden]="experimentName != null">
+          {{experiment.name}}
+        </span>
+        @if (experimentName != null) {
+          <mat-form-field class="form-field experiment-title-input">
+            <mat-label>Experiment Name</mat-label>
+            <input matInput [(ngModel)]="experimentName" (ngModelChange)="updateTitle($event)" required
+              minlength="1">
             </mat-form-field>
-            <button class="edit-title-button" mat-icon-button aria-label="Edit the experiment title."
-                (click)="editExperimentName()" [hidden]="experimentName != null">
-                <mat-icon>edit</mat-icon>
-            </button>
-            <button class="cancel-edit-title-button" mat-icon-button aria-label="Stop editing the experiment title."
-                (click)="cancelEditExperimentName()" [hidden]="experimentName == null">
-                <mat-icon>cancel</mat-icon>
-            </button>
+          }
+          <button class="edit-title-button" mat-icon-button aria-label="Edit the experiment title."
+            (click)="editExperimentName()" [hidden]="experimentName != null">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button class="cancel-edit-title-button" mat-icon-button aria-label="Stop editing the experiment title."
+            (click)="cancelEditExperimentName()" [hidden]="experimentName == null">
+            <mat-icon>cancel</mat-icon>
+          </button>
         </mat-card-title>
         <mat-card-content class="experiment-settings">
-            <div class="default-template-selection t-subheading">
-                <span>
-                    Default Template:
-                </span>
-                <a [routerLink]="['/experiments', experimentId, 'workspace']" [queryParams]="{ template: uiTemplate?.self?.resourceKey?.uiTemplateId ?? 'all-plugins' }">
-                    {{uiTemplate?.name ?? 'All Plugins'}}
-                </a>
-                <button mat-raised-button color="primary" (click)="showSelectDefaultTemplateDialog()">
-                    Change Template
-                </button>
-                <button mat-raised-button color="primary" *ngIf="uiTemplate != null" (click)="updateExperimentDefaultTemplate(null)">
-                    Remove Template
-                </button>
-            </div>
-            <qhana-markdown class="description" [markdown]="experimentDescription"
-                (markdownChanges)="updateDescription($event)" [editable]="true">
-            </qhana-markdown>
+          <div class="default-template-selection t-subheading">
+            <span>
+              Default Template:
+            </span>
+            <a [routerLink]="['/experiments', experimentId, 'workspace']" [queryParams]="{ template: uiTemplate?.self?.resourceKey?.uiTemplateId ?? 'all-plugins' }">
+              {{uiTemplate?.name ?? 'All Plugins'}}
+            </a>
+            <button mat-raised-button color="primary" (click)="showSelectDefaultTemplateDialog()">
+              Change Template
+            </button>
+            @if (uiTemplate != null) {
+              <button mat-raised-button color="primary" (click)="updateExperimentDefaultTemplate(null)">
+                Remove Template
+              </button>
+            }
+          </div>
+          <qhana-markdown class="description" [markdown]="experimentDescription"
+            (markdownChanges)="updateDescription($event)" [editable]="true">
+          </qhana-markdown>
         </mat-card-content>
-    </mat-card>
-    <div class="updates">
-        <div class="update-status" *ngIf="updateStatus === 'changed'">
+      </mat-card>
+      <div class="updates">
+        @if (updateStatus === 'changed') {
+          <div class="update-status">
             <span>pending changes</span>
             <mat-spinner mode="indeterminate" diameter="30" color="primary"></mat-spinner>
-        </div>
-        <div class="update-status" *ngIf="updateStatus === 'saved'">
+          </div>
+        }
+        @if (updateStatus === 'saved') {
+          <div class="update-status">
             <span>saved</span>
             <mat-icon aria-hidden="true">checkmark</mat-icon>
-        </div>
+          </div>
+        }
+      </div>
+      <div class="scroll-spacer"></div>
     </div>
-    <div class="scroll-spacer"></div>
-</div>
+  }

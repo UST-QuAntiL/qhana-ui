@@ -1,45 +1,51 @@
 <h1 mat-dialog-title>{{data.template ? 'Update' : 'Create'}} UI Template</h1>
 <div mat-dialog-content class="dialog-content">
-    <div>
-        <mat-form-field class="form-field">
-            <mat-label>Name</mat-label>
-            <input matInput [(ngModel)]="templateName" required minlength="1">
-        </mat-form-field>
-    </div>
-    <div>
-        <mat-form-field class="form-field">
-            <mat-label>Description</mat-label>
-            <textarea matInput class="description-textarea" [(ngModel)]="templateDescription"></textarea>
-        </mat-form-field>
-    </div>
-    <div>
-        <mat-form-field class="form-field">
-            <input matInput (keyup.enter)="addTag()" placeholder="Tag name" [(ngModel)]="tagName" minlength="1">
-        </mat-form-field>
-        
-        <mat-error *ngIf="templateTags.includes(tagName.trim())">
-            Tag already added.
-        </mat-error><br>
+  <div>
+    <mat-form-field class="form-field">
+      <mat-label>Name</mat-label>
+      <input matInput [(ngModel)]="templateName" required minlength="1">
+    </mat-form-field>
+  </div>
+  <div>
+    <mat-form-field class="form-field">
+      <mat-label>Description</mat-label>
+      <textarea matInput class="description-textarea" [(ngModel)]="templateDescription"></textarea>
+    </mat-form-field>
+  </div>
+  <div>
+    <mat-form-field class="form-field">
+      <input matInput (keyup.enter)="addTag()" placeholder="Tag name" [(ngModel)]="tagName" minlength="1">
+    </mat-form-field>
 
-        <button mat-raised-button class="add-tag-button" (click)="addTag()" color="primary">
-            Add Tag
-            <mat-icon aria-label="Enter Key">keyboard_return</mat-icon>
-        </button>
+    @if (templateTags.includes(tagName.trim())) {
+      <mat-error>
+        Tag already added.
+      </mat-error>
+      }<br>
 
-        <div *ngIf="templateTags.length > 0">
-            <h3>Tags:</h3>
-            <mat-chip-listbox>
-                <mat-chip *ngFor="let tag of templateTags" [removable]="true" (removed)="removeTag(tag)">
-                    {{tag}}
+      <button mat-raised-button class="add-tag-button" (click)="addTag()" color="primary">
+        Add Tag
+        <mat-icon aria-label="Enter Key">keyboard_return</mat-icon>
+      </button>
+
+      @if (templateTags.length > 0) {
+        <div>
+          <h3>Tags:</h3>
+          <mat-chip-listbox>
+            @for (tag of templateTags; track tag) {
+              <mat-chip [removable]="true" (removed)="removeTag(tag)">
+                {{tag}}
                 <mat-icon matChipRemove>cancel</mat-icon>
-                </mat-chip>
-            </mat-chip-listbox>
+              </mat-chip>
+            }
+          </mat-chip-listbox>
         </div>
+      }
     </div>
-</div>
-<div class="dialog-actions" mat-dialog-actions>
+  </div>
+  <div class="dialog-actions" mat-dialog-actions>
     <button mat-button (click)="onCancel()">Cancel</button>
     <button mat-button [mat-dialog-close]="{name: templateName, description: templateDescription, tags: templateTags}">
-        {{data.template ? 'Update' : 'Create'}} Template
+      {{data.template ? 'Update' : 'Create'}} Template
     </button>
-</div>
+  </div>

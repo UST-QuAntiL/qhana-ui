@@ -1,49 +1,63 @@
-<ng-container *ngFor="let navTabBar of navigationTabs">
-    <nav mat-tab-nav-bar class="big-nav-tabs" [tabPanel]="tabContentPanel">
-        <a mat-tab-link
-            [routerLink]="navTabLinkPrefix.concat(navTab.link)"
-            [queryParams]="(templateParam != null) ? {'template': templateParam} : {}"
-            [active]="navTab.tabId === currentTabId || (navTab.groupPath && currentPath?.startsWith(navTab.groupPath))"
-            *ngFor="let navTab of navTabBar">
-            <span class="link-label">
-                <mat-icon *ngIf="navTab.icon">
-                    {{navTab.icon}}
-                </mat-icon>
-                {{navTab.name}}
-                <mat-icon *ngIf="navTab.isGroup">more_vert</mat-icon>
-            </span>
-        </a>
-    </nav>
-</ng-container>
-<ng-container *ngIf="navigationTabs.length === 0 && (currentPluginGroup?.collectionSize ?? 0) > 1 && (currentPluginGroup?.collectionSize ?? 0) < 6">
-    <nav mat-tab-nav-bar class="big-nav-tabs" [tabPanel]="tabContentPanel">
-        <a mat-tab-link
-            [routerLink]="navTabLinkPrefix.concat(currentPath ? [currentPath] : []).concat([currentTabId ?? '-1', 'plugin', plugin.resourceKey?.pluginId ?? '-1'])"
-            [queryParams]="(templateParam != null) ? {'template': templateParam} : {}"
-            [active]="plugin.resourceKey?.pluginId === currentPluginId || plugin.resourceKey?.pluginId === activePlugin?.resourceKey?.pluginId"
-            *ngFor="let plugin of currentPluginGroup?.items">
-            {{plugin.name}}
-        </a>
-    </nav>
-</ng-container>
+@for (navTabBar of navigationTabs; track navTabBar) {
+  <nav mat-tab-nav-bar class="big-nav-tabs" [tabPanel]="tabContentPanel">
+    @for (navTab of navTabBar; track navTab) {
+      <a mat-tab-link
+        [routerLink]="navTabLinkPrefix.concat(navTab.link)"
+        [queryParams]="(templateParam != null) ? {'template': templateParam} : {}"
+        [active]="navTab.tabId === currentTabId || (navTab.groupPath && currentPath?.startsWith(navTab.groupPath))"
+        >
+        <span class="link-label">
+          @if (navTab.icon) {
+            <mat-icon>
+              {{navTab.icon}}
+            </mat-icon>
+          }
+          {{navTab.name}}
+          @if (navTab.isGroup) {
+            <mat-icon>more_vert</mat-icon>
+          }
+        </span>
+      </a>
+    }
+  </nav>
+}
+@if (navigationTabs.length === 0 && (currentPluginGroup?.collectionSize ?? 0) > 1 && (currentPluginGroup?.collectionSize ?? 0) < 6) {
+  <nav mat-tab-nav-bar class="big-nav-tabs" [tabPanel]="tabContentPanel">
+    @for (plugin of currentPluginGroup?.items; track plugin) {
+      <a mat-tab-link
+        [routerLink]="navTabLinkPrefix.concat(currentPath ? [currentPath] : []).concat([currentTabId ?? '-1', 'plugin', plugin.resourceKey?.pluginId ?? '-1'])"
+        [queryParams]="(templateParam != null) ? {'template': templateParam} : {}"
+        [active]="plugin.resourceKey?.pluginId === currentPluginId || plugin.resourceKey?.pluginId === activePlugin?.resourceKey?.pluginId"
+        >
+        {{plugin.name}}
+      </a>
+    }
+  </nav>
+}
 <mat-tab-nav-panel class="main-content" #tabContentPanel>
-    <mat-card class="sidebar" *ngIf="currentPluginGroup && ((currentPluginGroup?.collectionSize ?? 0) >= 6 || (navigationTabs.length > 0 && (currentPluginGroup?.collectionSize ?? 0) > 1))">
-        <mat-card-header class="sidebar-header t-title">Plugins</mat-card-header>
-        <mat-card-content class="sidebar-content-wrapper">
-            <qhana-growing-list class="sidebar-content scrollable" [apiLink]="currentPluginGroup.self"
-                [highlighted]="highlightedPlugin" [highlightByKey]="'pluginId'"
-                (clickItem)="selectPlugin($event)"></qhana-growing-list>
-        </mat-card-content>
+  @if (currentPluginGroup && ((currentPluginGroup?.collectionSize ?? 0) >= 6 || (navigationTabs.length > 0 && (currentPluginGroup?.collectionSize ?? 0) > 1))) {
+    <mat-card class="sidebar">
+      <mat-card-header class="sidebar-header t-title">Plugins</mat-card-header>
+      <mat-card-content class="sidebar-content-wrapper">
+        <qhana-growing-list class="sidebar-content scrollable" [apiLink]="currentPluginGroup.self"
+          [highlighted]="highlightedPlugin" [highlightByKey]="'pluginId'"
+        (clickItem)="selectPlugin($event)"></qhana-growing-list>
+      </mat-card-content>
     </mat-card>
+  }
+  @if (activePluginFrontendUrl != null) {
     <qhana-plugin-uiframe class="plugin-frame" [url]="activePluginFrontendUrl"
-        [context]="{experimentId: currentExperimentId??undefined, location: currentLocation??undefined}"
-        (formDataSubmit)="onPluginUiFormSubmit($event)" (requestDataPreview)="previewData = $event"
-        *ngIf="activePluginFrontendUrl != null">
+      [context]="{experimentId: currentExperimentId??undefined, location: currentLocation??undefined}"
+      (formDataSubmit)="onPluginUiFormSubmit($event)" (requestDataPreview)="previewData = $event"
+      >
     </qhana-plugin-uiframe>
+  }
 
+  @if (previewData) {
     <qhana-data-preview class="data-preview" [data]="previewData"
-        [context]="{experimentId: currentExperimentId??undefined, location: currentLocation ? currentLocation + '.data-preview' : undefined}"
-        *ngIf="previewData">
-        <h3 class="t-headline">Preview "{{previewData.name}}"</h3>
+      [context]="{experimentId: currentExperimentId??undefined, location: currentLocation ? currentLocation + '.data-preview' : undefined}"
+      >
+      <h3 class="t-headline">Preview "{{previewData.name}}"</h3>
     </qhana-data-preview>
+  }
 </mat-tab-nav-panel>

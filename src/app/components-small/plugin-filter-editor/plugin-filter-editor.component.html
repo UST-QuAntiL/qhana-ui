@@ -1,66 +1,69 @@
 <div class="filter-editor mat-elevation-z0">
-    <h3 class="editor-description">Filter Editor</h3>
-    <div class="editor-header">
-        <mat-slide-toggle [(ngModel)]="showEditor">
-            Editor Mode {{ showEditor ? '(UI)' : '(JSON)' }}
-        </mat-slide-toggle>
-        <button mat-raised-button type="button" (click)="ngOnInit()">
-            <mat-icon aria-hidden="true">refresh</mat-icon>
-            Revert Changes
-        </button>
-    </div>
-    <qhana-plugin-filter-node *ngIf="filterObject && showEditor" [filterIn]="filterObject" (filterOut)="updateFilter($event)" (delete)="deleteFilter()"></qhana-plugin-filter-node>
-    <ng-container *ngIf="!showEditor">
-        <mat-form-field class="form-field">
-            <mat-label>Filter String:</mat-label>
-            <textarea matInput [formControl]="filterControl" cdkTextareaAutosize #autosize="cdkTextareaAutosize"
-                cdkAutosizeMinRows="1" cdkAutosizeMaxRows="20" (focusout)="updateFilterEditor()">
-            </textarea>
-            <button mat-raised-button class="copy-button" type="button" (click)="copyFilterString()">
-                <mat-icon>content_copy</mat-icon>
-            </button>
-            <mat-error *ngIf="filterControl.hasError('invalidJSON')">Invalid JSON</mat-error>
-        </mat-form-field>
-        <details>
-            <summary>Filter String Info</summary>
-            
-            <i>Enter a filter string as JSON object. Filter strings have the following keys:</i>
-            <dl>
-                <dt>id</dt> <dd>Filters for a plugin id (<code>&#64;&lt;version&gt;</code> not required).</dd>
-                <dt>name</dt> <dd>Filters for a plugin name.</dd>
-                <dt>tag</dt> <dd>Allows filtering elements by their assigned tags.</dd>
-                <dt>version</dt> <dd>Uses PEP 440 version specifier to filter elements based on specific versions or version ranges.</dd>
-                <dt>type</dt> <dd>Filters for plugin types (e.g. processing, visualization, ...)</dd>
-                <dt>not</dt> <dd>Specifies a filter string to exclude certain elements.</dd>
-                <dt>and</dt> <dd>Includes multiple filter strings, with elements passing all conditions included in the filtered results (intersection).</dd>
-                <dt>or</dt> <dd>Includes multiple filter strings, with elements meeting at least one condition included in the filtered results (union).</dd>
-            </dl>
-            <mat-divider></mat-divider>
-            <p>Examples:</p>
-            <mat-form-field class="form-field">
-                <textarea class="filter-example" matInput disabled rows="3">
-{ 
-"name": "hello-world" 
+  <h3 class="editor-description">Filter Editor</h3>
+  <div class="editor-header">
+    <mat-slide-toggle [(ngModel)]="showEditor">
+      Editor Mode {{ showEditor ? '(UI)' : '(JSON)' }}
+    </mat-slide-toggle>
+    <button mat-raised-button type="button" (click)="ngOnInit()">
+      <mat-icon aria-hidden="true">refresh</mat-icon>
+      Revert Changes
+    </button>
+  </div>
+  @if (filterObject && showEditor) {
+    <qhana-plugin-filter-node [filterIn]="filterObject" (filterOut)="updateFilter($event)" (delete)="deleteFilter()"></qhana-plugin-filter-node>
+  }
+  @if (!showEditor) {
+    <mat-form-field class="form-field">
+      <mat-label>Filter String:</mat-label>
+      <textarea matInput [formControl]="filterControl" cdkTextareaAutosize #autosize="cdkTextareaAutosize"
+        cdkAutosizeMinRows="1" cdkAutosizeMaxRows="20" (focusout)="updateFilterEditor()">
+      </textarea>
+      <button mat-raised-button class="copy-button" type="button" (click)="copyFilterString()">
+        <mat-icon>content_copy</mat-icon>
+      </button>
+      @if (filterControl.hasError('invalidJSON')) {
+        <mat-error>Invalid JSON</mat-error>
+      }
+    </mat-form-field>
+    <details>
+      <summary>Filter String Info</summary>
+      <i>Enter a filter string as JSON object. Filter strings have the following keys:</i>
+      <dl>
+        <dt>id</dt> <dd>Filters for a plugin id (<code>&#64;&lt;version&gt;</code> not required).</dd>
+        <dt>name</dt> <dd>Filters for a plugin name.</dd>
+        <dt>tag</dt> <dd>Allows filtering elements by their assigned tags.</dd>
+        <dt>version</dt> <dd>Uses PEP 440 version specifier to filter elements based on specific versions or version ranges.</dd>
+        <dt>type</dt> <dd>Filters for plugin types (e.g. processing, visualization, ...)</dd>
+        <dt>not</dt> <dd>Specifies a filter string to exclude certain elements.</dd>
+        <dt>and</dt> <dd>Includes multiple filter strings, with elements passing all conditions included in the filtered results (intersection).</dd>
+        <dt>or</dt> <dd>Includes multiple filter strings, with elements meeting at least one condition included in the filtered results (union).</dd>
+      </dl>
+      <mat-divider></mat-divider>
+      <p>Examples:</p>
+      <mat-form-field class="form-field">
+        <textarea class="filter-example" matInput disabled rows="3">
+          {
+          "name": "hello-world"
+        }
+      </textarea>
+    </mat-form-field>
+    <mat-form-field class="form-field">
+      <textarea class="filter-example" matInput disabled rows="3">
+        {
+        "not": { "name": "hello-world" }
+      }
+    </textarea>
+  </mat-form-field>
+  <mat-form-field class="form-field">
+    <textarea class="filter-example" matInput disabled rows="6">
+      {
+      "and": [
+      { "tag": "data-loading" },
+      { "version": ">=0.2.0" }
+      ]
+    }
+  </textarea>
+</mat-form-field>
+</details>
 }
-                </textarea>
-            </mat-form-field>
-            <mat-form-field class="form-field">
-                <textarea class="filter-example" matInput disabled rows="3">
-{ 
-"not": { "name": "hello-world" } 
-}
-                </textarea>
-            </mat-form-field>
-            <mat-form-field class="form-field">
-                <textarea class="filter-example" matInput disabled rows="6">
-{ 
-"and": [
-    { "tag": "data-loading" },
-    { "version": ">=0.2.0" }
-]
-}
-                </textarea>
-            </mat-form-field>
-        </details>
-    </ng-container>
 </div>

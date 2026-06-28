@@ -1,32 +1,42 @@
 <ul class="list">
-    <ng-container [ngSwitch]="link.resourceType" *ngFor="let link of items; index as index trackBy: trackBy">
-
-        <li class="list-item {{isHighlighted(link) ? 'highlighted' : ''}}" *ngSwitchCase="'plugin'"
-            (click)="onItemClick(link)" [hidden]="!(pluginItem.isInSearch|async)">
-            <qhana-plugin-list-item class="default-content" [link]="link" [search]="normalizedSearch"
-                (isInSearch)="itemsInSearch[index] = $event; onItemsInSearchChanged()" #pluginItem>
-            </qhana-plugin-list-item>
+  @for (link of items; track link; let index trackBy: trackBy = $index) {
+    @switch (link.resourceType) {
+      @case ('plugin') {
+        <li class="list-item {{isHighlighted(link) ? 'highlighted' : ''}}"
+          (click)="onItemClick(link)" [hidden]="!(pluginItem.isInSearch|async)">
+          <qhana-plugin-list-item class="default-content" [link]="link" [search]="normalizedSearch"
+            (isInSearch)="itemsInSearch[$index] = $event; onItemsInSearchChanged()" #pluginItem>
+          </qhana-plugin-list-item>
         </li>
-
-        <li class="list-item {{isHighlighted(link) ? 'highlighted' : ''}}" *ngSwitchDefault (click)="onItemClick(link)"
-            [hidden]="!isInSearch(link)">
-            <div class="default-content">
-                <span aria-role="button" class="list-item-title">
-                    {{link.name ?? link.href}}
-                </span>
-                <button mat-icon-button aria-label="Edit item" (click)="onItemEditClick(link); $event.stopPropagation()"
-                    *ngIf="editButton">
-                    <mat-icon>edit</mat-icon>
-                </button>
-                <button mat-icon-button aria-label="Delete item"
-                    (click)="onItemDeleteClick(link); $event.stopPropagation()" *ngIf="deleteButton">
-                    <mat-icon>delete</mat-icon>
-                </button>
-            </div>
+      }
+      @default {
+        <li class="list-item {{isHighlighted(link) ? 'highlighted' : ''}}" (click)="onItemClick(link)"
+          [hidden]="!isInSearch(link)">
+          <div class="default-content">
+            <span aria-role="button" class="list-item-title">
+              {{link.name ?? link.href}}
+            </span>
+            @if (editButton) {
+              <button mat-icon-button aria-label="Edit item" (click)="onItemEditClick(link); $event.stopPropagation()"
+                >
+                <mat-icon>edit</mat-icon>
+              </button>
+            }
+            @if (deleteButton) {
+              <button mat-icon-button aria-label="Delete item"
+                (click)="onItemDeleteClick(link); $event.stopPropagation()">
+                <mat-icon>delete</mat-icon>
+              </button>
+            }
+          </div>
         </li>
-    </ng-container>
+      }
+    }
+  }
 </ul>
-<button mat-raised-button class="more-button" (click)="loadMore()" *ngIf="loadMoreApiLink != null"
+@if (loadMoreApiLink != null) {
+  <button mat-raised-button class="more-button" (click)="loadMore()"
     [disabled]="isLoading || loadMoreClicked">
     load more
-</button>
+  </button>
+}
