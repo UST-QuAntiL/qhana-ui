@@ -1,65 +1,37 @@
 <div class="preview-header">
-  <div>
-    <ng-content></ng-content>
-  </div>
-  <mat-form-field appearance="outline" class="preview-picker">
-    <mat-label>Preview With:</mat-label>
-    <mat-select [(ngModel)]="chosenPreview">
-      <mat-optgroup label="Builtin Previews">
-        @for (option of builtinPreviewOptions; track option) {
-          <mat-option [value]="option">{{option.name}}</mat-option>
-        }
-      </mat-optgroup>
-      @if ((pluginPreviewOptions?.length ?? 0) > 0) {
-        <mat-optgroup label="Plugin Previews">
-          @for (option of pluginPreviewOptions; track option) {
-            <mat-option [value]="option">{{option.name}}</mat-option>
-          }
-        </mat-optgroup>
-      }
-    </mat-select>
-  </mat-form-field>
+    <div>
+        <ng-content></ng-content>
+    </div>
+    <mat-form-field appearance="outline" class="preview-picker">
+        <mat-label>Preview With:</mat-label>
+        <mat-select [(ngModel)]="chosenPreview">
+            <mat-optgroup label="Builtin Previews">
+                <mat-option *ngFor="let option of builtinPreviewOptions" [value]="option">{{option.name}}</mat-option>
+            </mat-optgroup>
+            <mat-optgroup label="Plugin Previews" *ngIf="(pluginPreviewOptions?.length ?? 0) > 0">
+                <mat-option *ngFor="let option of pluginPreviewOptions" [value]="option">{{option.name}}</mat-option>
+            </mat-optgroup>
+        </mat-select>
+    </mat-form-field>
 </div>
-@if (chosenPreview != null && chosenPreview.type === 'plugin') {
-  <qhana-plugin-preview  [src]="downloadUrl"
+<qhana-plugin-preview  [src]="downloadUrl"
     [dataType]="previewData?.dataType ?? null" [contentType]="previewData?.contentType ?? null"
     [plugin]="chosenPreview.plugin" [context]="context"
-  ></qhana-plugin-preview>
-}
-@if (chosenPreview?.type !== 'plugin') {
-  <mat-card appearance="outlined" class="data-preview card">
+    *ngIf="chosenPreview != null && chosenPreview.type === 'plugin'"></qhana-plugin-preview>
+<mat-card appearance="outlined" class="data-preview card" *ngIf="chosenPreview?.type !== 'plugin'">
     <mat-card-content>
-      @if (chosenPreview != null && chosenPreview.type === 'internal') {
-        @switch (chosenPreview.previewType) {
-          @case ('raw-text') {
-            <qhana-raw-text-preview [src]="downloadUrl"></qhana-raw-text-preview>
-          }
-          @case ('text-iframe') {
-            <qhana-iframe-preview [src]="downloadUrl"></qhana-iframe-preview>
-          }
-          @case ('html-iframe') {
-            <qhana-iframe-preview [src]="downloadUrl" [isHtml]="true"></qhana-iframe-preview>
-          }
-          @case ('markdown') {
-            <qhana-markdown-preview [src]="downloadUrl"></qhana-markdown-preview>
-          }
-          @case ('query-params') {
-            <qhana-query-param-preview [src]="downloadUrl"></qhana-query-param-preview>
-          }
-          @case ('image') {
-            <qhana-image-preview [src]="downloadUrl"></qhana-image-preview>
-          }
-          @default {
-            <p class="preview-hint">No Preview</p>
-          }
-        }
-      }
-      @if (builtinPreviewOptions.length === 0 && pluginPreviewOptions.length === 0) {
-        <p class="preview-hint">No Preview Available</p>
-      }
-      @if ((builtinPreviewOptions.length > 0 || pluginPreviewOptions.length > 0) && chosenPreview == null) {
-        <p class="preview-hint">Select a Preview Option</p>
-      }
+        <ng-container *ngIf="chosenPreview != null && chosenPreview.type === 'internal'">
+            <ng-container [ngSwitch]="chosenPreview.previewType">
+                <qhana-raw-text-preview [src]="downloadUrl" *ngSwitchCase="'raw-text'"></qhana-raw-text-preview>
+                <qhana-iframe-preview [src]="downloadUrl" *ngSwitchCase="'text-iframe'"></qhana-iframe-preview>
+                <qhana-iframe-preview [src]="downloadUrl" [isHtml]="true" *ngSwitchCase="'html-iframe'"></qhana-iframe-preview>
+                <qhana-markdown-preview [src]="downloadUrl" *ngSwitchCase="'markdown'"></qhana-markdown-preview>
+                <qhana-query-param-preview [src]="downloadUrl" *ngSwitchCase="'query-params'"></qhana-query-param-preview>
+                <qhana-image-preview [src]="downloadUrl" *ngSwitchCase="'image'"></qhana-image-preview>
+                <p class="preview-hint" *ngSwitchDefault>No Preview</p>
+            </ng-container>
+        </ng-container>
+        <p class="preview-hint" *ngIf="builtinPreviewOptions.length === 0 && pluginPreviewOptions.length === 0">No Preview Available</p>
+        <p class="preview-hint" *ngIf="(builtinPreviewOptions.length > 0 || pluginPreviewOptions.length > 0) && chosenPreview == null">Select a Preview Option</p>
     </mat-card-content>
-  </mat-card>
-}
+</mat-card>

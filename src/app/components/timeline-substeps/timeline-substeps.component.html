@@ -1,34 +1,26 @@
 <mat-accordion multi="true">
-  @for (step of substeps; track trackByFunction($index, step)) {
-    <mat-expansion-panel togglePosition="before"
-      [expanded]="!parentFinished && !step.cleared">
-      <mat-expansion-panel-header>
-        <mat-panel-title>
-          Substep {{step.substepNr}} {{step.substepId ? '- ' + step.substepId : ''}} {{step.cleared ? '(cleared)'
-          : ''}}
-        </mat-panel-title>
-      </mat-expansion-panel-header>
-      @if (!parentFinished && !step.cleared && step.hrefUi) {
-        <div>
-          <!-- TODO -->
-          <qhana-plugin-uiframe [url]="step.hrefUi"
-            [context]="{experimentId: experimentId??undefined, stepId: step?.stepId??undefined, location: 'timeline-step.substep'}"
-            (formDataSubmit)="onPluginUiFormSubmit($event, step)"
-            (requestDataPreview)="requestDataPreview.emit($event)">
-          </qhana-plugin-uiframe>
+    <mat-expansion-panel *ngFor="let step of substeps; trackBy: trackByFunction" togglePosition="before"
+        [expanded]="!parentFinished && !step.cleared">
+        <mat-expansion-panel-header>
+            <mat-panel-title>
+                Substep {{step.substepNr}} {{step.substepId ? '- ' + step.substepId : ''}} {{step.cleared ? '(cleared)'
+                : ''}}
+            </mat-panel-title>
+        </mat-expansion-panel-header>
+        <div *ngIf="!parentFinished && !step.cleared && step.hrefUi">
+            <!-- TODO -->
+            <qhana-plugin-uiframe [url]="step.hrefUi"
+                [context]="{experimentId: experimentId??undefined, stepId: step?.stepId??undefined, location: 'timeline-step.substep'}"
+                (formDataSubmit)="onPluginUiFormSubmit($event, step)"
+                (requestDataPreview)="requestDataPreview.emit($event)">
+            </qhana-plugin-uiframe>
         </div>
-      }
-      @if (!parentFinished && !step.cleared && !step.hrefUi) {
-        <p>
-          Substep is not cleared but does not provide a microfrontend.
-          (href: {{step.href}})
+        <p *ngIf="!parentFinished && !step.cleared && !step.hrefUi">
+            Substep is not cleared but does not provide a microfrontend.
+            (href: {{step.href}})
         </p>
-      }
-      @if (parentFinished || step.cleared) {
-        <div>
-          <qhana-substeps-details [experimentId]="experimentId" [substepRef]="step"></qhana-substeps-details>
+        <div *ngIf="parentFinished || step.cleared">
+            <qhana-substeps-details [experimentId]="experimentId" [substepRef]="step"></qhana-substeps-details>
         </div>
-      }
     </mat-expansion-panel>
-  }
 </mat-accordion>

@@ -1,17 +1,13 @@
 <div class="tab-content {{previewData ? 'with-preview' : ''}}">
-  @if (activePluginFrontendUrl != null) {
-    <qhana-plugin-uiframe class="plugin-frame" [url]="activePluginFrontendUrl"
-      [context]="{experimentId: currentExperimentId??undefined, location: 'temp'}"
-      (formDataSubmit)="onPluginUiFormSubmit($event)" (requestDataPreview)="previewData = $event"
-      >
-    </qhana-plugin-uiframe>
-  }
+<qhana-plugin-uiframe class="plugin-frame" [url]="activePluginFrontendUrl"
+    [context]="{experimentId: currentExperimentId??undefined, location: 'temp'}"
+    (formDataSubmit)="onPluginUiFormSubmit($event)" (requestDataPreview)="previewData = $event"
+    *ngIf="activePluginFrontendUrl != null">
+</qhana-plugin-uiframe>
 
-  @if (previewData) {
-    <qhana-data-preview class="data-preview" [data]="previewData"
-      [context]="{experimentId: currentExperimentId??undefined, location: 'temp.data-preview'}"
-      >
-      <h3 class="t-headline">Preview "{{previewData.name}}"</h3>
-    </qhana-data-preview>
-  }
+<qhana-data-preview class="data-preview" [data]="previewData"
+    [context]="{experimentId: currentExperimentId??undefined, location: 'temp.data-preview'}"
+    *ngIf="previewData">
+    <h3 class="t-headline">Preview "{{previewData.name}}"</h3>
+</qhana-data-preview>
 </div>

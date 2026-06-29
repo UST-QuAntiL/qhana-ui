@@ -1,206 +1,174 @@
-@if (timelineStep != null) {
-  <div class="big-content">
+<div class="big-content" *ngIf="timelineStep != null">
     <div class="title">
-      <h1 class="t-page-headline">Timeline Step {{stepId}}</h1>
-      <a mat-icon-button aria-label="back to timeline step list"
-        [routerLink]="['/experiments', experimentId, 'timeline']" queryParamsHandling="merge">
-        <mat-icon>arrow_back</mat-icon>
-      </a>
+        <h1 class="t-page-headline">Timeline Step {{stepId}}</h1>
+        <a mat-icon-button aria-label="back to timeline step list"
+            [routerLink]="['/experiments', experimentId, 'timeline']" queryParamsHandling="merge">
+            <mat-icon>arrow_back</mat-icon>
+        </a>
     </div>
+
     <qhana-timeline-step-nav class="step-nav" [experimentId]="experimentId" [timelineStep]="stepId ?? '1'" [tabs]="tabs"
-      [active]="stepTabId" [tabPanel]="tabOutputPanel">
+        [active]="stepTabId" [tabPanel]="tabOutputPanel">
     </qhana-timeline-step-nav>
+
     <mat-tab-nav-panel #tabOutputPanel>
-      @if (stepTabId === 'overview') {
-        <mat-card appearance="outlined" class="step-card card">
-          <mat-card-title class="t-headline flex-title">
+    <mat-card appearance="outlined" class="step-card card" *ngIf="stepTabId === 'overview'">
+        <mat-card-title class="t-headline flex-title">
             Step {{timelineStep.sequence}} ({{timelineStep.processorName}}&#64;{{timelineStep.processorVersion}})
             <qhana-step-status [step]="timelineStep" [noText]="true"></qhana-step-status>
             <div class="spacer"></div>
-            @if (timelineStep?.end == null) {
-              <span class="t-subheading clickable" (click)="restartWatching()">
+            <span class="t-subheading clickable" (click)="restartWatching()" *ngIf="timelineStep?.end == null">
                 {{watching}}
-              </span>
-            }
-            @if (timelineStep?.end == null && watching === 'error' || watching === 'paused') {
-              <button mat-button color="primary" (click)="restartWatching()"
-                >
+            </span>
+            <button mat-button color="primary" (click)="restartWatching()"
+                *ngIf="timelineStep?.end == null && watching === 'error' || watching === 'paused'">
                 restart
-              </button>
-            }
-          </mat-card-title>
-          <mat-card-content>
+            </button>
+        </mat-card-title>
+        <mat-card-content>
             <dl class="step-details">
-              <div>
-                <dt>Status</dt>
-                <dd>
-                  <qhana-step-status [step]="timelineStep" [spinner]="16"></qhana-step-status>
-                </dd>
-              </div>
-              @if (stepProgress != null) {
                 <div>
-                  <dt>Progress</dt>
-                  <dd>
-                    <div class="step-progress">
-                      <mat-progress-bar class="progress-meter" mode="determinate" color="primary"
-                        [value]="((stepProgress.value-stepProgress.start) / (stepProgress.target-stepProgress.start)) * 100">
-                      </mat-progress-bar>
-                      <span [hidden]="stepProgress.unit == null">
-                        {{stepProgress.value}}/{{stepProgress.target}} {{stepProgress.unit}}
-                      </span>
-                    </div>
-                  </dd>
+                    <dt>Status</dt>
+                    <dd>
+                        <qhana-step-status [step]="timelineStep" [spinner]="16"></qhana-step-status>
+                    </dd>
                 </div>
-              }
-              @if (timelineStep.status !== 'PENDING') {
+                <div *ngIf="stepProgress != null">
+                    <dt>Progress</dt>
+                    <dd>
+                        <div class="step-progress">
+                            <mat-progress-bar class="progress-meter" mode="determinate" color="primary"
+                                [value]="((stepProgress.value-stepProgress.start) / (stepProgress.target-stepProgress.start)) * 100">
+                            </mat-progress-bar>
+                            <span [hidden]="stepProgress.unit == null">
+                                {{stepProgress.value}}/{{stepProgress.target}} {{stepProgress.unit}}
+                            </span>
+                        </div>
+                    </dd>
+                </div>
+                <div *ngIf="timelineStep.status !== 'PENDING'">
+                    <dt>Result Quality</dt>
+                    <dd>
+                        <mat-form-field appearance="fill">
+                            <mat-label>Result Quality</mat-label>
+                            <mat-select [value]="resultQuality" (valueChange)="saveResultQuality($event)">
+                                <mat-option [value]="'UNKNOWN'">unknown</mat-option>
+                                <mat-option [value]="'NEUTRAL'">neutral</mat-option>
+                                <mat-option [value]="'GOOD'">good</mat-option>
+                                <mat-option [value]="'BAD'">bad</mat-option>
+                                <mat-option [value]="'ERROR'">error</mat-option>
+                                <mat-option [value]="'UNUSABLE'">unusable</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </dd>
+                </div>
+                <div *ngIf="timelineStep.status === 'PENDING'">
+                    <dt>Started at</dt>
+                    <dd>{{timelineStep.start | date:'HH:mm:ss (dd MMMM YYYY)'}}</dd>
+                </div>
+                <div *ngIf="timelineStep.status !== 'PENDING'">
+                    <dt>Timing</dt>
+                    <dd>
+                        {{timelineStep.start | date:'HH:mm:ss (dd MMMM YYYY)'}}
+                        – {{timelineStep.end | date:'HH:mm:ss (dd MMMM YYYY)'}}
+                    </dd>
+                </div>
                 <div>
-                  <dt>Result Quality</dt>
-                  <dd>
-                    <mat-form-field appearance="fill">
-                      <mat-label>Result Quality</mat-label>
-                      <mat-select [value]="resultQuality" (valueChange)="saveResultQuality($event)">
-                        <mat-option [value]="'UNKNOWN'">unknown</mat-option>
-                        <mat-option [value]="'NEUTRAL'">neutral</mat-option>
-                        <mat-option [value]="'GOOD'">good</mat-option>
-                        <mat-option [value]="'BAD'">bad</mat-option>
-                        <mat-option [value]="'ERROR'">error</mat-option>
-                        <mat-option [value]="'UNUSABLE'">unusable</mat-option>
-                      </mat-select>
-                    </mat-form-field>
-                  </dd>
+                    <dt>Processor</dt>
+                    <dd>
+                        <span *ngIf="stepProcessor == null || (stepProcessor|async) == null; else processorLink">
+                            {{timelineStep.processorName}} (version {{timelineStep.processorVersion}})
+                        </span>
+                        <ng-template #processorLink>
+                            <a [routerLink]="['/experiments', experimentId, 'workspace']"
+                                [queryParams]="{'plugin': stepProcessor|async}">
+                                {{timelineStep.processorName}} (version {{timelineStep.processorVersion}})
+                            </a>
+                        </ng-template>
+                    </dd>
                 </div>
-              }
-              @if (timelineStep.status === 'PENDING') {
                 <div>
-                  <dt>Started at</dt>
-                  <dd>{{timelineStep.start | date:'HH:mm:ss (dd MMMM YYYY)'}}</dd>
+                    <dt>Processor Location</dt>
+                    <dd>{{timelineStep.processorLocation}}</dd>
                 </div>
-              }
-              @if (timelineStep.status !== 'PENDING') {
-                <div>
-                  <dt>Timing</dt>
-                  <dd>
-                    {{timelineStep.start | date:'HH:mm:ss (dd MMMM YYYY)'}}
-                    – {{timelineStep.end | date:'HH:mm:ss (dd MMMM YYYY)'}}
-                  </dd>
-                </div>
-              }
-              <div>
-                <dt>Processor</dt>
-                <dd>
-                  @if (stepProcessor == null || (stepProcessor|async) == null) {
-                    <span>
-                      {{timelineStep.processorName}} (version {{timelineStep.processorVersion}})
-                    </span>
-                  } @else {
-                    <a [routerLink]="['/experiments', experimentId, 'workspace']"
-                      [queryParams]="{'plugin': stepProcessor|async}">
-                      {{timelineStep.processorName}} (version {{timelineStep.processorVersion}})
-                    </a>
-                  }
-                </dd>
-              </div>
-              <div>
-                <dt>Processor Location</dt>
-                <dd>{{timelineStep.processorLocation}}</dd>
-              </div>
             </dl>
-          </mat-card-content>
-        </mat-card>
-      }
-      @if (stepTabId === 'overview') {
-        <mat-expansion-panel class="result-log" [expanded]="timelineStep.status === 'PENDING'"
-          >
-          <mat-expansion-panel-header>
+        </mat-card-content>
+    </mat-card>
+
+    <mat-expansion-panel class="result-log" [expanded]="timelineStep.status === 'PENDING'"
+        *ngIf="stepTabId === 'overview'">
+        <mat-expansion-panel-header>
             <mat-panel-title>
-              Result Log
+                Result Log
             </mat-panel-title>
-          </mat-expansion-panel-header>
-          <pre class="log-text">{{timelineStep.resultLog}}</pre>
-        </mat-expansion-panel>
-      }
-      @if (stepTabId === 'overview' && timelineStep.status !== 'PENDING') {
-        <div class="notes-title">
-          <h2>Notes</h2>
-          @if (notesStatus === 'changed') {
-            <div class="notes-status">
-              <span>pending changes</span>
-              <mat-spinner mode="indeterminate" diameter="30" color="primary"></mat-spinner>
-            </div>
-          }
-          @if (notesStatus === 'saved') {
-            <div class="notes-status">
-              <span>saved</span>
-              <mat-icon aria-hidden="true">checkmark</mat-icon>
-            </div>
-          }
+        </mat-expansion-panel-header>
+        <pre class="log-text">{{timelineStep.resultLog}}</pre>
+    </mat-expansion-panel>
+
+    <div class="notes-title" *ngIf="stepTabId === 'overview' && timelineStep.status !== 'PENDING'">
+        <h2>Notes</h2>
+        <div class="notes-status" *ngIf="notesStatus === 'changed'">
+            <span>pending changes</span>
+            <mat-spinner mode="indeterminate" diameter="30" color="primary"></mat-spinner>
         </div>
-      }
-      @if (stepTabId === 'overview' && timelineStep.status !== 'PENDING') {
-        <mat-card appearance="outlined" class="notes-card card"
-          >
-          <mat-card-content>
-            @if (stepNotes != null) {
-              <qhana-markdown [markdown]="stepNotes" (markdownChanges)="triggerNoteAutosave($event)" [editable]="true"
-                [hidden]="timelineStep == null || timelineStep.status === 'PENDING'">
-              </qhana-markdown>
-            }
-            @if (stepNotes == null) {
-              <mat-spinner class="notes-content-spinner" mode="indeterminate" strokeWidth="5" color="primary"
-                >
-              </mat-spinner>
-            }
-          </mat-card-content>
-        </mat-card>
-      }
-      @if (stepTabId === 'overview' && timelineStep.status !== 'PENDING' && pluginRecommendations.length != 0) {
-        <mat-card appearance="outlined" class="recommendation-card card"
-          >
-          <mat-card-title class="t-headline">Plugin Recommendations</mat-card-title>
-          <mat-card-content>
-            @for (plugin of pluginRecommendations; track plugin) {
-              <a [routerLink]="['/experiments', experimentId, 'workspace']"
+        <div class="notes-status" *ngIf="notesStatus === 'saved'">
+            <span>saved</span>
+            <mat-icon aria-hidden="true">checkmark</mat-icon>
+        </div>
+    </div>
+    <mat-card appearance="outlined" class="notes-card card"
+        *ngIf="stepTabId === 'overview' && timelineStep.status !== 'PENDING'">
+        <mat-card-content>
+            <qhana-markdown [markdown]="stepNotes" (markdownChanges)="triggerNoteAutosave($event)" [editable]="true"
+                [hidden]="timelineStep == null || timelineStep.status === 'PENDING'" *ngIf="stepNotes != null">
+            </qhana-markdown>
+            <mat-spinner class="notes-content-spinner" mode="indeterminate" strokeWidth="5" color="primary"
+                *ngIf="stepNotes == null">
+            </mat-spinner>
+        </mat-card-content>
+    </mat-card>
+    <mat-card appearance="outlined" class="recommendation-card card"
+        *ngIf="stepTabId === 'overview' && timelineStep.status !== 'PENDING' && pluginRecommendations.length != 0">
+        <mat-card-title class="t-headline">Plugin Recommendations</mat-card-title>
+        <mat-card-content>
+            <a *ngFor="let plugin of pluginRecommendations" [routerLink]="['/experiments', experimentId, 'workspace']"
                 [queryParams]="{'plugin': plugin.resourceKey?.pluginId}">
                 <qhana-plugin-list-item [link]="plugin"></qhana-plugin-list-item>
-              </a>
-            }
-          </mat-card-content>
-        </mat-card>
-      }
-      @if (stepTabId === 'outputs' && timelineStep.outputData != null && timelineStep.outputData.length > 0) {
+            </a>
+        </mat-card-content>
+    </mat-card>
+    <ng-container
+        *ngIf="stepTabId === 'outputs' && timelineStep.outputData != null && timelineStep.outputData.length > 0">
         <h2>Output</h2>
         <qhana-preview-list class="data-preview-list" [dataList]="timelineStep.outputData"
-          [context]="{experimentId: experimentId, stepId: stepId??undefined, location: 'timeline-step.output.data-preview'}">
+            [context]="{experimentId: experimentId, stepId: stepId??undefined, location: 'timeline-step.output.data-preview'}">
         </qhana-preview-list>
-      }
-      @if (stepTabId === 'inputs') {
+    </ng-container>
+    <ng-container *ngIf="stepTabId === 'inputs'">
         <h2>Parameters</h2>
         <qhana-data-preview [data]="timelineStep"
-          [context]="{experimentId: experimentId, stepId: stepId??undefined, location: 'timeline-step.parameters.data-preview'}">
+            [context]="{experimentId: experimentId, stepId: stepId??undefined, location: 'timeline-step.parameters.data-preview'}">
         </qhana-data-preview>
-        @if ((timelineStep.inputData) && timelineStep.inputData.length > 0) {
-          <h2>Data Input</h2>
-          <qhana-preview-list class="data-preview-list" [dataList]="timelineStep.inputData"
-            [context]="{experimentId: experimentId, stepId: stepId??undefined, location: 'timeline-step.input.data-preview'}">
-          </qhana-preview-list>
-        }
-      }
-      @if (stepTabId === 'steps' || (stepTabId === 'overview' && timelineStep.status === 'PENDING')) {
-        @if (substeps != null && substeps.length > 0) {
-          <qhana-timeline-substeps class="timeline-substeps" [substeps]="substeps" [experimentId]="experimentId"
-            [parentFinished]="timelineStep.status !== 'PENDING'"
+        <ng-container *ngIf="(timelineStep.inputData) && timelineStep.inputData.length > 0">
+            <h2>Data Input</h2>
+            <qhana-preview-list class="data-preview-list" [dataList]="timelineStep.inputData"
+                [context]="{experimentId: experimentId, stepId: stepId??undefined, location: 'timeline-step.input.data-preview'}">
+            </qhana-preview-list>
+        </ng-container>
+    </ng-container>
+
+    <ng-container *ngIf="stepTabId === 'steps' || (stepTabId === 'overview' && timelineStep.status === 'PENDING')">
+        <qhana-timeline-substeps class="timeline-substeps" [substeps]="substeps" [experimentId]="experimentId"
+            [parentFinished]="timelineStep.status !== 'PENDING'" *ngIf="substeps != null && substeps.length > 0"
             (requestDataPreview)="previewData = $event">
-          </qhana-timeline-substeps>
-        }
-        @if (previewData) {
-          <qhana-data-preview class="data-preview" [data]="previewData"
+        </qhana-timeline-substeps>
+
+        <qhana-data-preview class="data-preview" [data]="previewData"
             [context]="{experimentId: experimentId, stepId: stepId??undefined, location: 'timeline-step.substep.data-preview'}"
-            >
+            *ngIf="previewData">
             <h3 class="t-headline">Preview "{{previewData.name}}"</h3>
-          </qhana-data-preview>
-        }
-      }
-      <div class="scroll-spacer"></div>
+        </qhana-data-preview>
+    </ng-container>
+    <div class="scroll-spacer"></div>
     </mat-tab-nav-panel>
-  </div>
-}
+</div>

@@ -1,97 +1,87 @@
 <div class="sidebar-container">
-  <div class="nav-icons" [attr.data-open]="sidebarOpen ? 'yes' : 'no'">
-    <button mat-ripple class="sidebar-button {{(activeArea === 'templates') ? 'active' : ''}}"
-      matTooltip="Choose Template" matTooltipPosition="after" aria-label="choose template"
-      (click)="switchActiveArea('templates')">
-      <mat-icon>menu_open</mat-icon>
-    </button>
-    @if (selectedTemplate) {
-      <button mat-ripple class="sidebar-button {{(activeArea === 'detail') ? 'active' : ''}}"
-        matTooltip="Template Details" matTooltipPosition="after" aria-label="template details"
-        (click)="switchActiveArea('detail')">
-        <mat-icon>info</mat-icon>
-      </button>
-    }
-    <button mat-ripple class="sidebar-button {{(activeArea === 'search') ? 'active' : ''}}" matTooltip="Search"
-      matTooltipPosition="after" aria-label="search plugins" (click)="switchActiveArea('search')">
-      <mat-icon>search</mat-icon>
-    </button>
-    @for (group of pluginGroups; track group) {
-      <button mat-ripple class="sidebar-button {{(activeArea === 'plugins' && activeGroup == group) ? 'active' : ''}}"
-        [matTooltip]="group.name" matTooltipPosition="after" [attr.aria-label]="group.name"
-        (click)="switchActiveArea('plugins', group)">
-        <mat-icon>{{group.icon ?? 'extension'}}</mat-icon>
-      </button>
-    }
-  </div>
-  <div class="sidebar-expander color-scheme-card scrollable" [attr.data-open]="sidebarOpen ? 'yes' : 'no'" #sidebar>
-    <div class="expander-head">
-      <details [open]="activeArea === 'templates'">
-        <summary class="no-decoration" (click)="toggleTemplateHeader($event)">
-          <h2 class="template-header">
-            {{selectedTemplateName}}
-            <mat-icon matSuffix [hidden]="activeArea === 'templates'">expand_more</mat-icon>
-            <mat-icon matSuffix [hidden]="activeArea !== 'templates'">expand_less</mat-icon>
-          </h2>
-        </summary>
-        <mat-divider></mat-divider>
-        @if (defaultTemplate) {
-          <button mat-button
-            class="w-100 builtin-template-button {{(templateId==null && useExternalDefaultTemplate) ? 'active' : ''}}"
-            (click)="selectTemplate(null)">
-            use default template
-          </button>
-        }
-        @if (defaultTemplate) {
-          <mat-divider></mat-divider>
-        }
-        <button mat-button
-          class="w-100 builtin-template-button {{(templateId==null && !useExternalDefaultTemplate) ? 'active' : ''}}"
-          (click)="selectTemplate(null, 'all-plugins')">
-          show all plugins
+    <div class="nav-icons" [attr.data-open]="sidebarOpen ? 'yes' : 'no'">
+        <button mat-ripple class="sidebar-button {{(activeArea === 'templates') ? 'active' : ''}}"
+            matTooltip="Choose Template" matTooltipPosition="after" aria-label="choose template"
+            (click)="switchActiveArea('templates')">
+            <mat-icon>menu_open</mat-icon>
         </button>
-        <mat-divider></mat-divider>
-        <qhana-growing-list [rels]="['ui-template', 'collection']" [newItemRels]="['ui-template']"
-          [highlighted]="highlightedTemplates" [highlightByKey]="'uiTemplateId'"
-        (clickItem)="selectTemplate($event)"></qhana-growing-list>
-        <mat-divider></mat-divider>
-        <button class="new-template-button" mat-stroked-button (click)="createTemplate()">
-          Create Template
+        <button mat-ripple class="sidebar-button {{(activeArea === 'detail') ? 'active' : ''}}" *ngIf="selectedTemplate"
+            matTooltip="Template Details" matTooltipPosition="after" aria-label="template details"
+            (click)="switchActiveArea('detail')">
+            <mat-icon>info</mat-icon>
         </button>
-      </details>
-      <mat-form-field class="full-width" color="primary"
-        [hidden]="activeArea == 'detail' || activeArea == 'templates'">
-        <mat-label>Search plugins</mat-label>
-        <input matInput placeholder="search" (focus)="activeArea = 'search'" autocomplete="off" #searchInput>
-        <mat-icon matSuffix>search</mat-icon>
-      </mat-form-field>
+        <button mat-ripple class="sidebar-button {{(activeArea === 'search') ? 'active' : ''}}" matTooltip="Search"
+            matTooltipPosition="after" aria-label="search plugins" (click)="switchActiveArea('search')">
+            <mat-icon>search</mat-icon>
+        </button>
+        <button mat-ripple class="sidebar-button {{(activeArea === 'plugins' && activeGroup == group) ? 'active' : ''}}"
+            [matTooltip]="group.name" matTooltipPosition="after" [attr.aria-label]="group.name"
+            (click)="switchActiveArea('plugins', group)" *ngFor="let group of pluginGroups">
+            <mat-icon>{{group.icon ?? 'extension'}}</mat-icon>
+        </button>
     </div>
-    <div class="template-tab-sidebar" [hidden]="activeArea != 'detail'">
-      <mat-divider></mat-divider>
-      <qhana-tab-group-list [templateId]="templateId ?? defaultTemplateId" [selectedTab]="tabId"
-      (clickedOnTab)="selectTab($event)"></qhana-tab-group-list>
+    <div class="sidebar-expander color-scheme-card scrollable" [attr.data-open]="sidebarOpen ? 'yes' : 'no'" #sidebar>
+        <div class="expander-head">
+            <details [open]="activeArea === 'templates'">
+                <summary class="no-decoration" (click)="toggleTemplateHeader($event)">
+                    <h2 class="template-header">
+                        {{selectedTemplateName}}
+                        <mat-icon matSuffix [hidden]="activeArea === 'templates'">expand_more</mat-icon>
+                        <mat-icon matSuffix [hidden]="activeArea !== 'templates'">expand_less</mat-icon>
+                    </h2>
+                </summary>
+                <mat-divider></mat-divider>
+                <button mat-button
+                    class="w-100 builtin-template-button {{(templateId==null && useExternalDefaultTemplate) ? 'active' : ''}}"
+                    (click)="selectTemplate(null)" *ngIf="defaultTemplate">
+                    use default template
+                </button>
+                <mat-divider *ngIf="defaultTemplate"></mat-divider>
+                <button mat-button
+                    class="w-100 builtin-template-button {{(templateId==null && !useExternalDefaultTemplate) ? 'active' : ''}}"
+                    (click)="selectTemplate(null, 'all-plugins')">
+                    show all plugins
+                </button>
+                <mat-divider></mat-divider>
+                <qhana-growing-list [rels]="['ui-template', 'collection']" [newItemRels]="['ui-template']"
+                    [highlighted]="highlightedTemplates" [highlightByKey]="'uiTemplateId'"
+                    (clickItem)="selectTemplate($event)"></qhana-growing-list>
+                <mat-divider></mat-divider>
+                <button class="new-template-button" mat-stroked-button (click)="createTemplate()">
+                    Create Template
+                </button>
+            </details>
+            <mat-form-field class="full-width" color="primary"
+                [hidden]="activeArea == 'detail' || activeArea == 'templates'">
+                <mat-label>Search plugins</mat-label>
+                <input matInput placeholder="search" (focus)="activeArea = 'search'" autocomplete="off" #searchInput>
+                <mat-icon matSuffix>search</mat-icon>
+            </mat-form-field>
+        </div>
+        <div class="template-tab-sidebar" [hidden]="activeArea != 'detail'">
+            <mat-divider></mat-divider>
+            <qhana-tab-group-list [templateId]="templateId ?? defaultTemplateId" [selectedTab]="tabId"
+                (clickedOnTab)="selectTab($event)"></qhana-tab-group-list>
+        </div>
+        <details class="plugin-group" attr.data-group="{{group.key}}" [open]="group.open" *ngFor="let group of pluginGroups"
+            [hidden]="activeArea == 'detail' || activeArea == 'templates'">
+            <summary class="no-decoration" (click)="togglePluginGroup(group, $event)">
+                <mat-divider></mat-divider>
+                <h3 class="plugin-group-header">
+                    <span class="plugin-group-header-text">
+                        <mat-icon>{{group.icon ?? 'extension'}}</mat-icon>
+                        {{group.name}}
+                        ({{pluginList.visibleCollectionSize|async}}/{{pluginList.collectionSize|async}})
+                    </span>
+                    <mat-icon matSuffix [hidden]="group.open">expand_more</mat-icon>
+                    <mat-icon matSuffix [hidden]="!group.open">expand_less</mat-icon>
+                </h3>
+                <mat-divider></mat-divider>
+            </summary>
+            <qhana-growing-list [apiLink]="group.link" [query]="group?.query ?? null" [search]="searchInput.value"
+                [autoloadOnSearch]="true" [highlighted]="highlightedPlugins" [highlightByKey]="'pluginId'"
+                (clickItem)="selectPlugin($event)" #pluginList></qhana-growing-list>
+            <mat-divider></mat-divider>
+        </details>
     </div>
-    @for (group of pluginGroups; track group) {
-      <details class="plugin-group" attr.data-group="{{group.key}}" [open]="group.open"
-        [hidden]="activeArea == 'detail' || activeArea == 'templates'">
-        <summary class="no-decoration" (click)="togglePluginGroup(group, $event)">
-          <mat-divider></mat-divider>
-          <h3 class="plugin-group-header">
-            <span class="plugin-group-header-text">
-              <mat-icon>{{group.icon ?? 'extension'}}</mat-icon>
-              {{group.name}}
-              ({{pluginList.visibleCollectionSize|async}}/{{pluginList.collectionSize|async}})
-            </span>
-            <mat-icon matSuffix [hidden]="group.open">expand_more</mat-icon>
-            <mat-icon matSuffix [hidden]="!group.open">expand_less</mat-icon>
-          </h3>
-          <mat-divider></mat-divider>
-        </summary>
-        <qhana-growing-list [apiLink]="group.link" [query]="group?.query ?? null" [search]="searchInput.value"
-          [autoloadOnSearch]="true" [highlighted]="highlightedPlugins" [highlightByKey]="'pluginId'"
-        (clickItem)="selectPlugin($event)" #pluginList></qhana-growing-list>
-        <mat-divider></mat-divider>
-      </details>
-    }
-  </div>
 </div>

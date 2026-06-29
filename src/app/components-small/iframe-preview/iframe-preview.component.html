@@ -1,6 +1,2 @@
-@if (!isHtml) {
-  <iframe class="preview-frame" [src]="previewUrl" frameborder="0" sandbox></iframe>
-}
-@if (isHtml) {
-  <iframe class="preview-frame large-content" [src]="previewUrl" frameborder="0" sandbox="allow-forms allow-scripts" allow="fullscreen"></iframe>
-}
+<iframe class="preview-frame" [src]="previewUrl" frameborder="0" sandbox *ngIf="!isHtml"></iframe>
+<iframe class="preview-frame large-content" [src]="previewUrl" frameborder="0" sandbox="allow-forms allow-scripts" allow="fullscreen" *ngIf="isHtml"></iframe>

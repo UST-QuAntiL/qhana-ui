@@ -1,18 +1,10 @@
-@if (lastStatus != null) {
-  <span class="plugin-status">
-    @if (lastStatus === 'PENDING') {
-      <mat-spinner [color]="isOld ? '' : color" mode="indeterminate" [diameter]="spinner"
+<span class="plugin-status" *ngIf="lastStatus != null">
+    <mat-spinner *ngIf="lastStatus === 'PENDING'" [color]="isOld ? '' : color" mode="indeterminate" [diameter]="spinner"
         aria-hidden="true">
-      </mat-spinner>
-    }
-    @if (lastStatus === 'SUCCESS') {
-      <mat-icon [color]="isOld ? '' : color" inline="true" aria-hidden="true">done
-      </mat-icon>
-    }
-    @if (lastStatus === 'FAILURE') {
-      <mat-icon [color]="isOld ? '' : 'warn'" inline="true" aria-hidden="true">error
-      </mat-icon>
-    }
+    </mat-spinner>
+    <mat-icon *ngIf="lastStatus === 'SUCCESS'" [color]="isOld ? '' : color" inline="true" aria-hidden="true">done
+    </mat-icon>
+    <mat-icon *ngIf="lastStatus === 'FAILURE'" [color]="isOld ? '' : 'warn'" inline="true" aria-hidden="true">error
+    </mat-icon>
     {{lastUsedTimeHuman | async}}
-  </span>
-}
+</span>

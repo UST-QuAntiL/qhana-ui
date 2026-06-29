@@ -1,50 +1,32 @@
 <div class="microfrontend-container" [ngClass]="fullscreen ? 'fullscreen' : ''" [hidden]="frontendUrl === blank">
-  <div class="floating-buttons" [ngClass]="buttonsLeft ? 'left' : ''">
-    <button mat-icon-button (click)="buttonsLeft = !buttonsLeft">
-      @if (buttonsLeft) {
-        <mat-icon inline="false" aria-hidden="true">chevron_right</mat-icon>
-      }
-      @if (!buttonsLeft) {
-        <mat-icon inline="false" aria-hidden="true">chevron_left</mat-icon>
-      }
-    </button>
-    <mat-divider [vertical]="true"></mat-divider>
-    <button mat-icon-button style="text-align: left;" (click)="autofillLatest()" [disabled]="autofillData == null">
-      <mat-icon inline="true" aria-hidden="true">rocket_launch</mat-icon>
-    </button>
-    <button mat-icon-button (click)="fullscreen=!fullscreen">
-      @if (fullscreen) {
-        <mat-icon inline="false" aria-hidden="true">fullscreen_exit</mat-icon>
-      }
-      @if (!fullscreen) {
-        <mat-icon inline="false" aria-hidden="true">fullscreen</mat-icon>
-      }
-    </button>
-  </div>
-  <iframe seamless class="frontend-frame" [src]="frontendUrl" frameborder="0" scroll="no" [height]="frontendHeight"
-  sandbox="allow-forms allow-downloads allow-scripts allow-same-origin" allow="fullscreen" #uiframe></iframe>
-  @if (loading) {
-    <div class="ui-loading-blend">
-      <mat-spinner class="notes-content-spinner" mode="indeterminate" strokeWidth="5" color="primary">
-      </mat-spinner>
+    <div class="floating-buttons" [ngClass]="buttonsLeft ? 'left' : ''">
+        <button mat-icon-button (click)="buttonsLeft = !buttonsLeft">
+            <mat-icon *ngIf="buttonsLeft" inline="false" aria-hidden="true">chevron_right</mat-icon>
+            <mat-icon *ngIf="!buttonsLeft" inline="false" aria-hidden="true">chevron_left</mat-icon>
+        </button>
+        <mat-divider [vertical]="true"></mat-divider>
+        <button mat-icon-button style="text-align: left;" (click)="autofillLatest()" [disabled]="autofillData == null">
+            <mat-icon inline="true" aria-hidden="true">rocket_launch</mat-icon>
+        </button>
+        <button mat-icon-button (click)="fullscreen=!fullscreen">
+            <mat-icon *ngIf="fullscreen" inline="false" aria-hidden="true">fullscreen_exit</mat-icon>
+            <mat-icon *ngIf="!fullscreen" inline="false" aria-hidden="true">fullscreen</mat-icon>
+        </button>
     </div>
-  }
-  @if (error != null) {
-    <div class="ui-error-blend">
-      <h3>Error</h3>
-      <p>{{error.status}}</p>
-      <button mat-stroked-button color="warn" (click)="error=null">dismiss</button>
+    <iframe seamless class="frontend-frame" [src]="frontendUrl" frameborder="0" scroll="no" [height]="frontendHeight"
+        sandbox="allow-forms allow-downloads allow-scripts allow-same-origin" allow="fullscreen" #uiframe></iframe>
+    <div class="ui-loading-blend" *ngIf="loading">
+        <mat-spinner class="notes-content-spinner" mode="indeterminate" strokeWidth="5" color="primary">
+        </mat-spinner>
     </div>
-  }
-  @if (hasFullscreenMode) {
-    <button mat-icon-button class="fsbutton mat-raised-button mat-primary"
-      (click)="fullscreen=!fullscreen">
-      @if (fullscreen) {
-        <mat-icon inline="false" aria-hidden="true">fullscreen_exit</mat-icon>
-      }
-      @if (!fullscreen) {
-        <mat-icon inline="false" aria-hidden="true">fullscreen</mat-icon>
-      }
+    <div class="ui-error-blend" *ngIf="error != null">
+        <h3>Error</h3>
+        <p>{{error.status}}</p>
+        <button mat-stroked-button color="warn" (click)="error=null">dismiss</button>
+    </div>
+    <button mat-icon-button *ngIf="hasFullscreenMode" class="fsbutton mat-raised-button mat-primary"
+        (click)="fullscreen=!fullscreen">
+        <mat-icon *ngIf="fullscreen" inline="false" aria-hidden="true">fullscreen_exit</mat-icon>
+        <mat-icon *ngIf="!fullscreen" inline="false" aria-hidden="true">fullscreen</mat-icon>
     </button>
-  }
 </div>

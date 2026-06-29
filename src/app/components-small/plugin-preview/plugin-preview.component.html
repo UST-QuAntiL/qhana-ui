@@ -1,5 +1,3 @@
 <mat-card appearance="outlined" class="card no-padding">
-  @if (previewUrl != null) {
-    <qhana-plugin-uiframe [url]="previewUrl" [context]="context"></qhana-plugin-uiframe>
-  }
+    <qhana-plugin-uiframe [url]="previewUrl" [context]="context" *ngIf="previewUrl != null"></qhana-plugin-uiframe>
 </mat-card>

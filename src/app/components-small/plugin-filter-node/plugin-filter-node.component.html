@@ -1,119 +1,95 @@
 <div>
-  @if (isEmpty) {
-    <div class="set-buttons">
-      <button mat-raised-button type="button" (click)="setFilter('and')" color="primary">
-        <mat-icon>add</mat-icon>
-        AND
-      </button>
-      <button mat-raised-button type="button" (click)="setFilter('or')" color="primary">
-        <mat-icon>add</mat-icon>
-        OR
-      </button>
-      <button mat-raised-button type="button" (click)="setFilter('name')" color="primary">
-        <mat-icon>add</mat-icon>
-        Filter
-      </button>
+    <div *ngIf="isEmpty" class="set-buttons">
+        <button mat-raised-button type="button" (click)="setFilter('and')" color="primary">
+            <mat-icon>add</mat-icon>
+            AND
+        </button>
+        <button mat-raised-button type="button" (click)="setFilter('or')" color="primary">
+            <mat-icon>add</mat-icon>
+            OR
+        </button>
+        <button mat-raised-button type="button" (click)="setFilter('name')" color="primary">
+            <mat-icon>add</mat-icon>
+            Filter
+        </button>
     </div>
-  }
-  @if (!isEmpty) {
-    <mat-card appearance="outlined" class="filter-node mat-elevation-z0"
-      [ngClass]="{'filter-leaf' : type !== 'and' && type !== 'or'}">
-      <mat-card-header>
-        @if (children != null) {
-          <div class="config-header">
-            <mat-button-toggle-group [value]="type" (valueChange)="changeType($event)">
-              <mat-button-toggle value="and">AND</mat-button-toggle>
-              <mat-button-toggle value="or">OR</mat-button-toggle>
-            </mat-button-toggle-group>
-            <div class="config-header-buttons">
-              @if (depth < 2) {
-                <button mat-raised-button type="button" (click)="addFilter('and')"
-                  color="primary">
-                  <mat-icon>add</mat-icon>
-                  AND
+    <mat-card appearance="outlined" *ngIf="!isEmpty" class="filter-node mat-elevation-z0"
+        [ngClass]="{'filter-leaf' : type !== 'and' && type !== 'or'}">
+        <mat-card-header>
+            <ng-container *ngIf="children != null">
+                <div class="config-header">
+                    <mat-button-toggle-group [value]="type" (valueChange)="changeType($event)">
+                        <mat-button-toggle value="and">AND</mat-button-toggle>
+                        <mat-button-toggle value="or">OR</mat-button-toggle>
+                    </mat-button-toggle-group>
+                    <div class="config-header-buttons">
+                        <button mat-raised-button *ngIf="depth < 2" type="button" (click)="addFilter('and')"
+                            color="primary">
+                            <mat-icon>add</mat-icon>
+                            AND
+                        </button>
+                        <button mat-raised-button *ngIf="depth < 2" type="button" (click)="addFilter('or')"
+                            color="primary">
+                            <mat-icon>add</mat-icon>
+                            OR
+                        </button>
+                        <button mat-raised-button type="button" (click)="addFilter('name')" color="primary">
+                            <mat-icon>add</mat-icon>
+                            Filter
+                        </button>
+                        <button mat-raised-button type="button" (click)="delete.emit()">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </div>
+                </div>
+            </ng-container>
+        </mat-card-header>
+        <mat-card-content>
+            <ng-container *ngIf="children != null">
+                <span *ngIf="inverted" class="t-subheading">Not:</span>
+                <qhana-plugin-filter-node *ngFor="let child of children; let i = index" [filterIn]="children[i]"
+                    [depth]="depth + 1" (filterOut)="updateChild($event, i)"
+                    (delete)="deleteChild(i)"></qhana-plugin-filter-node>
+            </ng-container>
+            <div class="config-filter" *ngIf="value != null">
+                <span *ngIf="inverted" class="t-subheading">Not:</span>
+                <mat-form-field class="inner-form-field">
+                    <mat-label>Filter Type:</mat-label>
+                    <mat-select [value]="type" (valueChange)="changeType($event)">
+                        <mat-option value="id">Plugin ID</mat-option>
+                        <mat-option value="name">Name</mat-option>
+                        <mat-option value="tag">Tag</mat-option>
+                        <mat-option value="version">Version</mat-option>
+                        <mat-option value="type">Type</mat-option>
+                    </mat-select>
+                </mat-form-field>
+                <mat-form-field class="form-field">
+                    <mat-label>Filter String:</mat-label>
+                    <input matInput [value]="value" (focusout)="updateFilterString($event)" [attr.list]="type === 'type' ? 'plugin-types' : null">
+                    <datalist *ngIf="type === 'type'" id="plugin-types">
+                        <option value="processing"></option>
+                        <option value="visualization"></option>
+                        <option value="conversion"></option>
+                        <option value="dataloader"></option>
+                        <option value="interaction"></option>
+                    </datalist>
+                    <mat-hint *ngIf="type === 'version'">
+                        Examples: ">= 0.1.0", "== 1.0.2", "< 2.0.0", ">= 1.0.0, < 2.0.0" , "!= 1.0.14"
+                    </mat-hint>
+                    <mat-hint *ngIf="type === 'type'">
+                        Examples: "processing", "conversion", "dataloader", "visualization", "interaction"
+                    </mat-hint>
+                </mat-form-field>
+                <button mat-raised-button class="config-filter-button" (click)="openPluginChooser()" *ngIf="type === 'name' || type === 'id'">
+                    choose
                 </button>
-              }
-              @if (depth < 2) {
-                <button mat-raised-button type="button" (click)="addFilter('or')"
-                  color="primary">
-                  <mat-icon>add</mat-icon>
-                  OR
+                <button mat-raised-button class="config-filter-button" (click)="delete.emit()">
+                    <mat-icon>delete</mat-icon>
                 </button>
-              }
-              <button mat-raised-button type="button" (click)="addFilter('name')" color="primary">
-                <mat-icon>add</mat-icon>
-                Filter
-              </button>
-              <button mat-raised-button type="button" (click)="delete.emit()">
-                <mat-icon>delete</mat-icon>
-              </button>
             </div>
-          </div>
-        }
-      </mat-card-header>
-      <mat-card-content>
-        @if (children != null) {
-          @if (inverted) {
-            <span class="t-subheading">Not:</span>
-          }
-          @for (child of children; track child; let i = $index) {
-            <qhana-plugin-filter-node [filterIn]="children[i]"
-              [depth]="depth + 1" (filterOut)="updateChild($event, i)"
-            (delete)="deleteChild(i)"></qhana-plugin-filter-node>
-          }
-        }
-        @if (value != null) {
-          <div class="config-filter">
-            @if (inverted) {
-              <span class="t-subheading">Not:</span>
-            }
-            <mat-form-field class="inner-form-field">
-              <mat-label>Filter Type:</mat-label>
-              <mat-select [value]="type" (valueChange)="changeType($event)">
-                <mat-option value="id">Plugin ID</mat-option>
-                <mat-option value="name">Name</mat-option>
-                <mat-option value="tag">Tag</mat-option>
-                <mat-option value="version">Version</mat-option>
-                <mat-option value="type">Type</mat-option>
-              </mat-select>
-            </mat-form-field>
-            <mat-form-field class="form-field">
-              <mat-label>Filter String:</mat-label>
-              <input matInput [value]="value" (focusout)="updateFilterString($event)" [attr.list]="type === 'type' ? 'plugin-types' : null">
-              @if (type === 'type') {
-                <datalist id="plugin-types">
-                  <option value="processing"></option>
-                  <option value="visualization"></option>
-                  <option value="conversion"></option>
-                  <option value="dataloader"></option>
-                  <option value="interaction"></option>
-                </datalist>
-              }
-              @if (type === 'version') {
-                <mat-hint>
-                  Examples: ">= 0.1.0", "== 1.0.2", "< 2.0.0", ">= 1.0.0, < 2.0.0" , "!= 1.0.14"
-                </mat-hint>
-              }
-              @if (type === 'type') {
-                <mat-hint>
-                  Examples: "processing", "conversion", "dataloader", "visualization", "interaction"
-                </mat-hint>
-              }
-            </mat-form-field>
-            @if (type === 'name' || type === 'id') {
-              <button mat-raised-button class="config-filter-button" (click)="openPluginChooser()">
-                choose
-              </button>
-            }
-            <button mat-raised-button class="config-filter-button" (click)="delete.emit()">
-              <mat-icon>delete</mat-icon>
-            </button>
-          </div>
-        }
-        <mat-checkbox [checked]="inverted" (change)="invertFilter($event)">
-          Invert - <i>Negate this filter</i>
-        </mat-checkbox>
-      </mat-card-content>
+            <mat-checkbox [checked]="inverted" (change)="invertFilter($event)">
+                Invert - <i>Negate this filter</i>
+            </mat-checkbox>
+        </mat-card-content>
     </mat-card>
-  }
 </div>

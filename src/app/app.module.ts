@@ -98,7 +98,8 @@ import { PluginFilterFormComponent } from './components-small/plugin-filter-form
 import { HelpTooltipComponent } from "src/app/components-small/help-tooltip/help-tooltip.component";
 import { HelpToggleComponent } from "src/app/components-small/help-toggle/help-toggle.component";
 
-@NgModule({ declarations: [
+@NgModule({
+    declarations: [
         AppComponent,
         NavbarComponent,
         ExperimentsPageComponent,
@@ -182,8 +183,11 @@ import { HelpToggleComponent } from "src/app/components-small/help-toggle/help-t
         MatBadgeModule,
         MatRadioModule,
         HelpTooltipComponent,
-        HelpToggleComponent], providers: [
+        HelpToggleComponent
+    ],
+    providers: [
         { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: "outline" } },
-        provideHttpClient(withInterceptorsFromDi())
-    ] })
+        provideHttpClient(withInterceptorsFromDi()),
+    ],
+})
 export class AppModule { }

@@ -1,13 +1,11 @@
 <nav mat-tab-nav-bar [tabPanel]="tabPanel" class="big-nav-tabs">
-  <a mat-tab-link [routerLink]="['/experiments', experimentId, 'timeline', timelineStep, 'overview']" queryParamsHandling="merge"
-    [active]="active === 'overview'">
-    Overview
-  </a>
-  @for (tab of tabs; track tab) {
-    <a mat-tab-link
-      [routerLink]="['/experiments', experimentId, 'timeline', timelineStep, tab.tabId]" queryParamsHandling="merge"
-      [active]="active === tab.tabId">
-      {{tab.name}}
+    <a mat-tab-link [routerLink]="['/experiments', experimentId, 'timeline', timelineStep, 'overview']" queryParamsHandling="merge"
+        [active]="active === 'overview'">
+        Overview
     </a>
-  }
+    <a mat-tab-link *ngFor="let tab of tabs"
+        [routerLink]="['/experiments', experimentId, 'timeline', timelineStep, tab.tabId]" queryParamsHandling="merge"
+        [active]="active === tab.tabId">
+        {{tab.name}}
+    </a>
 </nav>

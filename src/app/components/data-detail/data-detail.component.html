@@ -1,80 +1,68 @@
-@if (data != null) {
-  <div class="big-content">
+<div class="big-content" *ngIf="data != null">
     <div class="title">
-      <h1 class="t-page-headline">Data</h1>
-      <a mat-icon-button aria-label="back to data list" [routerLink]="['/experiments', experimentId, 'data']" queryParamsHandling="merge">
-        <mat-icon>arrow_back</mat-icon>
-      </a>
+        <h1 class="t-page-headline">Data</h1>
+        <a mat-icon-button aria-label="back to data list" [routerLink]="['/experiments', experimentId, 'data']" queryParamsHandling="merge">
+            <mat-icon>arrow_back</mat-icon>
+        </a>
     </div>
     <mat-card appearance="outlined" class="data-card card">
-      <mat-card-title class="t-headline break-words">{{data.name}}</mat-card-title>
-      <mat-card-content>
-        <dl class="data-details">
-          <div>
-            <dt>Version</dt>
-            <dd>{{data.version}}</dd>
-          </div>
-          <div>
-            <dt>Data Type</dt>
-            <dd>{{data.type}}</dd>
-          </div>
-          <div>
-            <dt>Content Type (mimetype)</dt>
-            <dd>{{data.contentType}}</dd>
-          </div>
-          <div>
-            <dt>Dowload link</dt>
-            <dd>
-              <a class="download-button" [href]="downloadUrl" target="_blank" rel="noopener noreferrer"
-                mat-flat-button>
-                Dowload as File
-              </a>
-            </dd>
-          </div>
-          @if (data?.producedBy != null) {
-            <div>
-              <dt>Created in</dt>
-              <dd>
-                <a [routerLink]="['/experiments', experimentId, 'timeline', data.producedBy]" queryParamsHandling="merge">
-                  Step {{data.producedBy}}
-                </a>
-              </dd>
-            </div>
-          }
-          @if (data.usedBy != null) {
-            <div>
-              <dt>Used in</dt>
-              <dd>
-                <ul>
-                  @for (step of data.usedBy; track step) {
-                    <li>
-                      <a [routerLink]="['/experiments', experimentId, 'timeline', step]">
-                        Step {{step}}
-                      </a>
-                    </li>
-                  }
-                </ul>
-              </dd>
-            </div>
-          }
-        </dl>
-      </mat-card-content>
+        <mat-card-title class="t-headline break-words">{{data.name}}</mat-card-title>
+        <mat-card-content>
+            <dl class="data-details">
+                <div>
+                    <dt>Version</dt>
+                    <dd>{{data.version}}</dd>
+                </div>
+                <div>
+                    <dt>Data Type</dt>
+                    <dd>{{data.type}}</dd>
+                </div>
+                <div>
+                    <dt>Content Type (mimetype)</dt>
+                    <dd>{{data.contentType}}</dd>
+                </div>
+                <div>
+                    <dt>Dowload link</dt>
+                    <dd>
+                        <a class="download-button" [href]="downloadUrl" target="_blank" rel="noopener noreferrer"
+                            mat-flat-button>
+                            Dowload as File
+                        </a>
+                    </dd>
+                </div>
+                <div *ngIf="data?.producedBy != null">
+                    <dt>Created in</dt>
+                    <dd>
+                        <a [routerLink]="['/experiments', experimentId, 'timeline', data.producedBy]" queryParamsHandling="merge">
+                            Step {{data.producedBy}}
+                        </a>
+                    </dd>
+                </div>
+                <div *ngIf="data.usedBy != null">
+                    <dt>Used in</dt>
+                    <dd>
+                        <ul>
+                            <li *ngFor="let step of data.usedBy">
+                                <a [routerLink]="['/experiments', experimentId, 'timeline', step]">
+                                    Step {{step}}
+                                </a>
+                            </li>
+                        </ul>
+                    </dd>
+                </div>
+            </dl>
+        </mat-card-content>
     </mat-card>
-    @if (pluginRecommendations.length != 0) {
-      <mat-card appearance="outlined" class="recommendation-card card">
+    <mat-card appearance="outlined" class="recommendation-card card" *ngIf="pluginRecommendations.length != 0">
         <mat-card-title class="t-headline">Plugin Recommendations</mat-card-title>
         <mat-card-content>
-          @for (plugin of pluginRecommendations; track plugin) {
-            <a [routerLink]="['/experiments', experimentId, 'workspace']" [queryParams]="{'plugin': plugin.resourceKey?.pluginId}">
-              <qhana-plugin-list-item [link]="plugin"></qhana-plugin-list-item>
+            <a *ngFor="let plugin of pluginRecommendations" [routerLink]="['/experiments', experimentId, 'workspace']" [queryParams]="{'plugin': plugin.resourceKey?.pluginId}">
+                <qhana-plugin-list-item [link]="plugin"></qhana-plugin-list-item>
             </a>
-          }
         </mat-card-content>
-      </mat-card>
-    }
+    </mat-card>
     <qhana-data-preview [data]="data" [context]="{experimentId: experimentId, location: 'data-preview'}">
-      <h3 class="t-headline">Preview</h3>
+        <h3 class="t-headline">Preview</h3>
     </qhana-data-preview>
     <div class="scroll-spacer"></div>
-  </div>
-}
+</div>

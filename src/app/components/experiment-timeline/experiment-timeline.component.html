@@ -1,140 +1,124 @@
 <div class="big-content">
-  <div class="flex-header">
-    <h1 class="t-page-headline align-arrow">Experiment Timeline</h1>
-    <button mat-icon-button class="arrow-button" (click)="onSort()" aria-label="change sort order">
-      <mat-icon>{{sort>=0?"arrow_upward":"arrow_downward"}}</mat-icon>
-    </button>
-    <div class="flex-space"></div>
+    <div class="flex-header">
+        <h1 class="t-page-headline align-arrow">Experiment Timeline</h1>
+        <button mat-icon-button class="arrow-button" (click)="onSort()" aria-label="change sort order">
+            <mat-icon>{{sort>=0?"arrow_upward":"arrow_downward"}}</mat-icon>
+        </button>
+        <div class="flex-space"></div>
 
-    <mat-paginator #paginatorTop class="paginator"
-      (page)="paginatorBottom.pageSize = $event.pageSize; paginatorBottom.pageIndex = $event.pageIndex; onPageChange($event)"
-      [length]="collectionSize" [pageSize]="10" [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page">
-    </mat-paginator>
-  </div>
-
-  <mat-expansion-panel class="filter">
-    <mat-expansion-panel-header>
-      <mat-panel-title>
-        <mat-icon class="heading-icon" aria-hidden="true">filter_alt</mat-icon>
-        Filter timeline steps
-      </mat-panel-title>
-    </mat-expansion-panel-header>
-    <mat-form-field class="search-field">
-      <mat-label>Search plugin name</mat-label>
-      <input [(ngModel)]="pluginName" matInput (keydown.enter)="updatePageContent()">
-      <button mat-icon-button matSuffix (click)="updatePageContent()"
-        [attr.aria-label]="'search plugins by name'">
-        <mat-icon>search</mat-icon>
-      </button>
-    </mat-form-field>
-
-    <mat-form-field class="search-field">
-      <mat-label>Search version</mat-label>
-      <input [(ngModel)]="version" matInput (keydown.enter)="updatePageContent()">
-      <button mat-icon-button matSuffix (click)="updatePageContent()"
-        [attr.aria-label]="'search plugins by version'">
-        <mat-icon>search</mat-icon>
-      </button>
-    </mat-form-field>
-
-    <div class="radio-label">
-      <mat-label>Status</mat-label><br>
+        <mat-paginator #paginatorTop class="paginator"
+            (page)="paginatorBottom.pageSize = $event.pageSize; paginatorBottom.pageIndex = $event.pageIndex; onPageChange($event)"
+            [length]="collectionSize" [pageSize]="10" [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page">
+        </mat-paginator>
     </div>
-    <mat-radio-group [(ngModel)]="stepStatus" name="status" (ngModelChange)="updatePageContent()">
-      @for (status of statusValues; track status) {
-        <mat-radio-button [value]="status.value">{{status.viewValue}}
-        </mat-radio-button>
-      }
-    </mat-radio-group><br>
 
-    <div class="radio-label">
-      <mat-label>Cleared/uncleared substeps</mat-label><br>
-    </div>
-    <mat-radio-group [(ngModel)]="unclearedSubstep" (ngModelChange)="updatePageContent()">
-      @for (unclearedSubstepValue of unclearedSubstepValues; track unclearedSubstepValue) {
-        <mat-radio-button
-          [value]="unclearedSubstepValue.value">{{unclearedSubstepValue.viewValue}}
-        </mat-radio-button>
-      }
-    </mat-radio-group>
-    <br>
-      <mat-form-field>
-        <mat-label>Result quality</mat-label>
-        <mat-select [(ngModel)]="resultQuality" (ngModelChange)="updatePageContent()">
-          <mat-option [value]="''">Not Selected</mat-option>
-          @for (resultQualityValue of resultQualityValues; track resultQualityValue) {
-            <mat-option
-              [value]="resultQualityValue">{{resultQualityValue.charAt(0).toUpperCase() + resultQualityValue.slice(1).toLowerCase()}}
-            </mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
+    <mat-expansion-panel class="filter">
+        <mat-expansion-panel-header>
+            <mat-panel-title>
+                <mat-icon class="heading-icon" aria-hidden="true">filter_alt</mat-icon>
+                Filter timeline steps
+            </mat-panel-title>
+        </mat-expansion-panel-header>
+        <mat-form-field class="search-field">
+            <mat-label>Search plugin name</mat-label>
+            <input [(ngModel)]="pluginName" matInput (keydown.enter)="updatePageContent()">
+            <button mat-icon-button matSuffix (click)="updatePageContent()"
+                [attr.aria-label]="'search plugins by name'">
+                <mat-icon>search</mat-icon>
+            </button>
+        </mat-form-field>
+
+        <mat-form-field class="search-field">
+            <mat-label>Search version</mat-label>
+            <input [(ngModel)]="version" matInput (keydown.enter)="updatePageContent()">
+            <button mat-icon-button matSuffix (click)="updatePageContent()"
+                [attr.aria-label]="'search plugins by version'">
+                <mat-icon>search</mat-icon>
+            </button>
+        </mat-form-field>
+
+        <div class="radio-label">
+            <mat-label>Status</mat-label><br>
+        </div>
+        <mat-radio-group [(ngModel)]="stepStatus" name="status" (ngModelChange)="updatePageContent()">
+            <mat-radio-button *ngFor="let status of statusValues" [value]="status.value">{{status.viewValue}}
+            </mat-radio-button>
+        </mat-radio-group><br>
+
+        <div class="radio-label">
+            <mat-label>Cleared/uncleared substeps</mat-label><br>
+        </div>
+        <mat-radio-group [(ngModel)]="unclearedSubstep" (ngModelChange)="updatePageContent()">
+            <mat-radio-button *ngFor="let unclearedSubstepValue of unclearedSubstepValues"
+                [value]="unclearedSubstepValue.value">{{unclearedSubstepValue.viewValue}}
+            </mat-radio-button>
+        </mat-radio-group>
+        <br>
+        <mat-form-field>
+            <mat-label>Result quality</mat-label>
+            <mat-select [(ngModel)]="resultQuality" (ngModelChange)="updatePageContent()">
+                <mat-option [value]="''">Not Selected</mat-option>
+                <mat-option *ngFor="let resultQualityValue of resultQualityValues"
+                    [value]="resultQualityValue">{{resultQualityValue.charAt(0).toUpperCase() + resultQualityValue.slice(1).toLowerCase()}}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
     </mat-expansion-panel>
 
     <div class="page-item-list">
-      @if (!(timelineSteps | async)) {
-        <mat-card appearance="outlined" class="page-item card">
-          <mat-card-title>
-            <span class="t-headline">no timeline steps</span>
-          </mat-card-title>
-          <mat-card-content>
-            Use the plugins in the experiment workspace to add timeline step entries to the experiment.
-          </mat-card-content>
+        <mat-card appearance="outlined" class="page-item card" *ngIf="!(timelineSteps | async)">
+            <mat-card-title>
+                <span class="t-headline">no timeline steps</span>
+            </mat-card-title>
+            <mat-card-content>
+                Use the plugins in the experiment workspace to add timeline step entries to the experiment.
+            </mat-card-content>
         </mat-card>
-      }
-      @for (step of timelineSteps | async; track step) {
-        <mat-card appearance="outlined" class="page-item card">
-          <mat-card-title>
-            <a class="t-headline title-link"
-              [routerLink]="['/experiments', experimentId, 'timeline', step.sequence]" queryParamsHandling="merge">
-              Step {{step.sequence}} ({{step.processorName}}&#64;{{step.processorVersion}})
-            </a>
-            <qhana-step-status [step]="step" [noText]="step.status !== 'PENDING'" [spinner]="0"></qhana-step-status>
-          </mat-card-title>
-          <mat-card-content>
-            <dl class="step-details">
-              <div>
-                <dt>Status</dt>
-                <dd>
-                  <qhana-step-status [step]="step"></qhana-step-status>
-                </dd>
-              </div>
-              @if (step.status !== 'PENDING') {
-                <div>
-                  <dt>Result Quality</dt>
-                  <dd>
-                    {{step.resultQuality}}
-                  </dd>
-                </div>
-              }
-              <div>
-                <dt>Processor</dt>
-                <dd>{{step.processorName}} (version {{step.processorVersion}})</dd>
-              </div>
-              @if (step.status === 'PENDING') {
-                <div>
-                  <dt>Started at</dt>
-                  <dd>{{step.start | date:'HH:mm:ss (dd MMMM YYYY)'}}</dd>
-                </div>
-              }
-              @if (step.status !== 'PENDING') {
-                <div>
-                  <dt>Timing</dt>
-                  <dd>
-                    {{step.start | date:'HH:mm:ss (dd MMMM YYYY)'}}
-                    – {{step.end | date:'HH:mm:ss (dd MMMM YYYY)'}}
-                  </dd>
-                </div>
-              }
-            </dl>
-          </mat-card-content>
+        <mat-card appearance="outlined" class="page-item card" *ngFor="let step of timelineSteps | async">
+            <mat-card-title>
+                <a class="t-headline title-link"
+                    [routerLink]="['/experiments', experimentId, 'timeline', step.sequence]" queryParamsHandling="merge">
+                    Step {{step.sequence}} ({{step.processorName}}&#64;{{step.processorVersion}})
+                </a>
+                <qhana-step-status [step]="step" [noText]="step.status !== 'PENDING'" [spinner]="0"></qhana-step-status>
+            </mat-card-title>
+            <mat-card-content>
+                <dl class="step-details">
+                    <div>
+                        <dt>Status</dt>
+                        <dd>
+                            <qhana-step-status [step]="step"></qhana-step-status>
+                        </dd>
+                    </div>
+                    <div *ngIf="step.status !== 'PENDING'">
+                        <dt>Result Quality</dt>
+                        <dd>
+                            {{step.resultQuality}}
+                        </dd>
+                    </div>
+                    <div>
+                        <dt>Processor</dt>
+                        <dd>{{step.processorName}} (version {{step.processorVersion}})</dd>
+                    </div>
+                    <div *ngIf="step.status === 'PENDING'">
+                        <dt>Started at</dt>
+                        <dd>{{step.start | date:'HH:mm:ss (dd MMMM YYYY)'}}</dd>
+                    </div>
+                    <div *ngIf="step.status !== 'PENDING'">
+                        <dt>Timing</dt>
+                        <dd>
+                            {{step.start | date:'HH:mm:ss (dd MMMM YYYY)'}}
+                            – {{step.end | date:'HH:mm:ss (dd MMMM YYYY)'}}
+                        </dd>
+                    </div>
+                </dl>
+            </mat-card-content>
         </mat-card>
-      }
     </div>
 
     <mat-paginator #paginatorBottom class="paginator"
-      (page)="paginatorTop.pageSize = $event.pageSize; paginatorTop.pageIndex = $event.pageIndex; onPageChange($event)"
-      [length]="collectionSize" [pageSize]="10" [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page">
+        (page)="paginatorTop.pageSize = $event.pageSize; paginatorTop.pageIndex = $event.pageIndex; onPageChange($event)"
+        [length]="collectionSize" [pageSize]="10" [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page">
     </mat-paginator>
     <div class="scroll-spacer"></div>
-  </div>
+</div>
