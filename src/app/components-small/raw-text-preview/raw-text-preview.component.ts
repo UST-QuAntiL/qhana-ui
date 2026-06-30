@@ -4,7 +4,8 @@ import { QhanaBackendService } from 'src/app/services/qhana-backend.service';
 @Component({
     selector: 'qhana-raw-text-preview',
     templateUrl: './raw-text-preview.component.html',
-    styleUrls: ['./raw-text-preview.component.sass']
+    styleUrls: ['./raw-text-preview.component.sass'],
+    standalone: false
 })
 export class RawTextPreviewComponent implements OnChanges {
 

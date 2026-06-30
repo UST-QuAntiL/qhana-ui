@@ -6,6 +6,7 @@ import { TemplateApiObject } from 'src/app/services/templates.service';
     selector: 'qhana-change-ui-template',
     templateUrl: './change-ui-template.dialog.html',
     styleUrls: ['./change-ui-template.dialog.sass'],
+    standalone: false
 })
 export class ChangeUiTemplateDialog implements OnInit {
 

@@ -4,7 +4,8 @@ import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 @Component({
     selector: 'qhana-image-preview',
     templateUrl: './image-preview.component.html',
-    styleUrls: ['./image-preview.component.sass']
+    styleUrls: ['./image-preview.component.sass'],
+    standalone: false
 })
 export class ImagePreviewComponent implements OnChanges {
 

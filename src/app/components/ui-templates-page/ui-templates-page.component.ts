@@ -10,7 +10,8 @@ import { TemplateApiObject, TemplatesService } from 'src/app/services/templates.
 @Component({
     selector: 'qhana-ui-templates-page',
     templateUrl: './ui-templates-page.component.html',
-    styleUrl: './ui-templates-page.component.sass'
+    styleUrl: './ui-templates-page.component.sass',
+    standalone: false
 })
 export class UiTemplatesPageComponent implements OnInit, OnDestroy {
     selectedTemplate: ApiLink | null = null;

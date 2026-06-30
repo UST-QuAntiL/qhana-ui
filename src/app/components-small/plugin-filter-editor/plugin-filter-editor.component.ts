@@ -18,7 +18,8 @@ export function isJSONValidator(): ValidatorFn {
 @Component({
     selector: 'qhana-plugin-filter-editor',
     templateUrl: './plugin-filter-editor.component.html',
-    styleUrls: ['./plugin-filter-editor.component.sass']
+    styleUrls: ['./plugin-filter-editor.component.sass'],
+    standalone: false
 })
 export class PluginFilterEditorComponent implements OnInit {
     @Input() tabLink: ApiLink | null = null;

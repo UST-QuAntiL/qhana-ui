@@ -10,7 +10,8 @@ import { UiTemplateTabFormComponent } from '../ui-template-tab-form/ui-template-
 @Component({
     selector: 'qhana-ui-template-tab',
     templateUrl: './ui-template-tab.component.html',
-    styleUrl: './ui-template-tab.component.sass'
+    styleUrl: './ui-template-tab.component.sass',
+    standalone: false
 })
 export class UiTemplateTabComponent implements OnChanges, OnInit, OnDestroy {
 

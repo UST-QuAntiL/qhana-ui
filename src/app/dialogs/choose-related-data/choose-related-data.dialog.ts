@@ -17,7 +17,8 @@ export interface RelatedDataChooserData {
 @Component({
     selector: 'qhana-choose-related-data',
     templateUrl: './choose-related-data.dialog.html',
-    styleUrls: []
+    styleUrls: [],
+    standalone: false
 })
 export class ChooseRelatedDataDialog implements OnInit {
 

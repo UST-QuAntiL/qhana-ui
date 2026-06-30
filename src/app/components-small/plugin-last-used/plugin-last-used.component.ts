@@ -9,7 +9,8 @@ import { QhanaBackendService, TimelineStepApiObject } from 'src/app/services/qha
 @Component({
     selector: 'qhana-plugin-last-used',
     templateUrl: './plugin-last-used.component.html',
-    styleUrls: ['./plugin-last-used.component.sass']
+    styleUrls: ['./plugin-last-used.component.sass'],
+    standalone: false
 })
 export class PluginLastUsedComponent implements OnInit, OnChanges, OnDestroy {
 

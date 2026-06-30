@@ -12,7 +12,8 @@ import { ALL_PLUGINS_TEMPLATE_ID, TemplateApiObject, TemplatesService } from 'sr
 @Component({
     selector: 'qhana-experiment',
     templateUrl: './experiment.component.html',
-    styleUrls: ['./experiment.component.sass']
+    styleUrls: ['./experiment.component.sass'],
+    standalone: false
 })
 export class ExperimentComponent implements OnInit, OnDestroy {
     private routeSubscription: Subscription | null = null;

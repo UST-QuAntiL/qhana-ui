@@ -23,7 +23,8 @@ import { TAB_GROUP_NAME_OVERRIDES, TAB_GROUP_SORT_KEYS } from 'src/app/services/
 @Component({
     selector: 'qhana-tab-group-list',
     templateUrl: './tab-group-list.component.html',
-    styleUrls: ['./tab-group-list.component.sass']
+    styleUrls: ['./tab-group-list.component.sass'],
+    standalone: false
 })
 export class TabGroupListComponent implements OnChanges, OnInit, OnDestroy {
 

@@ -18,7 +18,8 @@ interface Progress {
 @Component({
     selector: 'qhana-timeline-step',
     templateUrl: './timeline-step.component.html',
-    styleUrls: ['./timeline-step.component.sass']
+    styleUrls: ['./timeline-step.component.sass'],
+    standalone: false
 })
 export class TimelineStepComponent implements OnInit, OnDestroy {
 

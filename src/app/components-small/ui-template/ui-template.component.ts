@@ -11,7 +11,8 @@ import { EnvService } from 'src/app/services/env.service';
 @Component({
     selector: 'qhana-ui-template',
     templateUrl: './ui-template.component.html',
-    styleUrl: './ui-template.component.sass'
+    styleUrl: './ui-template.component.sass',
+    standalone: false
 })
 export class UiTemplateComponent implements OnChanges, OnInit, OnDestroy {
 

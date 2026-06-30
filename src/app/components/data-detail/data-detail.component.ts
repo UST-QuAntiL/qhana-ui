@@ -11,7 +11,8 @@ import { PluginRegistryBaseService } from 'src/app/services/registry.service';
 @Component({
     selector: 'qhana-data-detail',
     templateUrl: './data-detail.component.html',
-    styleUrls: ['./data-detail.component.sass']
+    styleUrls: ['./data-detail.component.sass'],
+    standalone: false
 })
 export class DataDetailComponent implements OnInit, OnDestroy {
 

@@ -4,7 +4,8 @@ import { QhanaBackendService, TimelineSubStepApiObject } from 'src/app/services/
 @Component({
     selector: 'qhana-substeps-details',
     templateUrl: './substeps-details.component.html',
-    styleUrls: ['./substeps-details.component.sass']
+    styleUrls: ['./substeps-details.component.sass'],
+    standalone: false
 })
 export class SubstepsDetailsComponent implements OnChanges {
 

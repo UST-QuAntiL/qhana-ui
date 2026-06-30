@@ -13,7 +13,8 @@ const RESOURCE_TYPE_TO_TEXT: { [props: string]: string } = {
 @Component({
     selector: 'qhana-delete-dialog',
     templateUrl: './delete-dialog.dialog.html',
-    styleUrls: ['./delete-dialog.dialog.sass']
+    styleUrls: ['./delete-dialog.dialog.sass'],
+    standalone: false
 })
 export class DeleteDialog {
 

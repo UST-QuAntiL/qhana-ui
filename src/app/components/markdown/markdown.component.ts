@@ -38,7 +38,8 @@ const toggleEditableCmd = createCmdKey("ToggleEditable");
 @Component({
     selector: 'qhana-markdown',
     templateUrl: './markdown.component.html',
-    styleUrls: ['./markdown.component.sass']
+    styleUrls: ['./markdown.component.sass'],
+    standalone: false
 })
 export class MarkdownComponent implements OnChanges {
 

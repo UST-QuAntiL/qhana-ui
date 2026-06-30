@@ -4,7 +4,8 @@ import { QhanaBackendService } from 'src/app/services/qhana-backend.service';
 @Component({
     selector: 'qhana-markdown-preview',
     templateUrl: './markdown-preview.component.html',
-    styleUrls: ['./markdown-preview.component.sass']
+    styleUrls: ['./markdown-preview.component.sass'],
+    standalone: false
 })
 export class MarkdownPreviewComponent implements OnChanges {
 

@@ -11,7 +11,8 @@ import { ExperimentApiObject, QhanaBackendService } from 'src/app/services/qhana
 @Component({
     selector: 'qhana-experiments-page',
     templateUrl: './experiments-page.component.html',
-    styleUrls: ['./experiments-page.component.sass']
+    styleUrls: ['./experiments-page.component.sass'],
+    standalone: false
 })
 export class ExperimentsPageComponent implements OnInit {
 

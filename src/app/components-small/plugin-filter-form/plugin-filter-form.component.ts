@@ -6,7 +6,8 @@ import { PluginApiObject } from 'src/app/services/qhana-api-data-types';
 @Component({
     selector: 'qhana-plugin-filter-form',
     templateUrl: './plugin-filter-form.component.html',
-    styleUrl: './plugin-filter-form.component.sass'
+    styleUrl: './plugin-filter-form.component.sass',
+    standalone: false
 })
 export class PluginFilterFormComponent {
     @Input() filterIn: any;

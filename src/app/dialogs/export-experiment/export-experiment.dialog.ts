@@ -10,7 +10,8 @@ interface SelectValue {
 @Component({
     selector: 'qhana-export-experiment',
     templateUrl: './export-experiment.dialog.html',
-    styleUrls: ['./export-experiment.dialog.sass']
+    styleUrls: ['./export-experiment.dialog.sass'],
+    standalone: false
 })
 export class ExportExperimentDialog implements OnInit {
 

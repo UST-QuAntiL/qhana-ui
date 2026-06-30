@@ -13,7 +13,8 @@ import { FormSubmitData } from '../plugin-uiframe/plugin-uiframe.component';
 @Component({
     selector: 'qhana-experiment-workspace',
     templateUrl: './experiment-workspace.component.html',
-    styleUrls: ['./experiment-workspace.component.sass']
+    styleUrls: ['./experiment-workspace.component.sass'],
+    standalone: false
 })
 export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
 

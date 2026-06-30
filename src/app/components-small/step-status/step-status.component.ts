@@ -4,7 +4,8 @@ import { TimelineStepApiObject } from 'src/app/services/qhana-backend.service';
 @Component({
     selector: 'qhana-step-status',
     templateUrl: './step-status.component.html',
-    styleUrls: ['./step-status.component.sass']
+    styleUrls: ['./step-status.component.sass'],
+    standalone: false
 })
 export class StepStatusComponent implements OnChanges {
 
