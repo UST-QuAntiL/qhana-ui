@@ -30,7 +30,7 @@
                         </a>
                     </dd>
                 </div>
-                <div *ngIf="data?.producedBy != null">
+                <div *ngIf="data.producedBy != null">
                     <dt>Created in</dt>
                     <dd>
                         <a [routerLink]="['/experiments', experimentId, 'timeline', data.producedBy]" queryParamsHandling="merge">

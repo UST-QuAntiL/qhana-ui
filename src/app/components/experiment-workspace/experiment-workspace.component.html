@@ -35,7 +35,7 @@
                             class="plugin-description-container {{expandedPluginDescription ? 'open' : 'closed'}}">
                             <div class="scroll-container">
                                 <mat-chip-listbox>
-                                    <mat-chip *ngFor="let tag of (activePlugin.tags ?? [])">{{tag}}</mat-chip>
+                                    <mat-chip *ngFor="let tag of activePlugin.tags">{{tag}}</mat-chip>
                                 </mat-chip-listbox>
                                 <qhana-markdown class="plugin-description" [markdown]="activePlugin.description"
                                     [editable]="false">

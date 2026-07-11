@@ -36,12 +36,19 @@
                             "./node_modules/prosemirror-tables/style/tables.css",
                             "./node_modules/prosemirror-gapcursor/style/gapcursor.css",
                             "./node_modules/katex/dist/katex.min.css",
+                            "./node_modules/material-icons/iconfont/material-icons.css",
                             "src/styles.sass"
                         ],
                         "allowedCommonJsDependencies": [
                             "debug",
                             "remark",
-                            "remark-inline-links"
+                            "remark-inline-links",
+                            "katex",
+                            "extend",
+                            "is-buffer",
+                            "@braintree/sanitize-url",
+                            "dayjs",
+                            "dompurify"
                         ],
                         "scripts": []
                     },
@@ -50,12 +57,12 @@
                             "budgets": [
                                 {
                                     "type": "initial",
-                                    "maximumWarning": "2mb",
-                                    "maximumError": "4mb"
+                                    "maximumWarning": "4mb",
+                                    "maximumError": "5mb"
                                 },
                                 {
                                     "type": "anyComponentStyle",
-                                    "maximumWarning": "2kb",
+                                    "maximumWarning": "3kb",
                                     "maximumError": "4kb"
                                 }
                             ],
@@ -82,10 +89,10 @@
                     "builder": "@angular-devkit/build-angular:dev-server",
                     "configurations": {
                         "production": {
-                          "buildTarget": "qhana-ui:build:production"
+                            "buildTarget": "qhana-ui:build:production"
                         },
                         "development": {
-                          "buildTarget": "qhana-ui:build:development"
+                            "buildTarget": "qhana-ui:build:development"
                         }
                     },
                     "defaultConfiguration": "development"
@@ -93,7 +100,7 @@
                 "extract-i18n": {
                     "builder": "@angular-devkit/build-angular:extract-i18n",
                     "options": {
-                      "buildTarget": "qhana-ui:build"
+                        "buildTarget": "qhana-ui:build"
                     }
                 },
                 "test": {
@@ -118,6 +125,6 @@
         }
     },
     "cli": {
-      "analytics": false
+        "analytics": false
     }
 }

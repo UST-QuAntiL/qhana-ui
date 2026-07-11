@@ -10,7 +10,6 @@
   },
   "private": true,
   "dependencies": {
-    "@angular/animations": "~21.2.17",
     "@angular/cdk": "^21.2.14",
     "@angular/common": "~21.2.17",
     "@angular/compiler": "~21.2.17",
@@ -18,7 +17,6 @@
     "@angular/forms": "~21.2.17",
     "@angular/material": "^21.2.14",
     "@angular/platform-browser": "~21.2.17",
-    "@angular/platform-browser-dynamic": "~21.2.17",
     "@angular/router": "~21.2.17",
     "@fontsource/roboto": "^4.5.7",
     "@milkdown/core": "^6.0.0",
@@ -51,11 +49,24 @@
     "@types/jasmine": "~3.8.2",
     "@types/node": "^14.0.0",
     "jasmine-core": "~3.8.0",
-    "karma": "~6.3.4",
+    "karma": "~6.4.4",
     "karma-chrome-launcher": "~3.1.0",
     "karma-coverage": "~2.0.3",
     "karma-jasmine": "~4.0.1",
     "karma-jasmine-html-reporter": "~1.7.0",
     "typescript": "~5.9.3"
+  },
+  "overrides": {
+    "cytoscape": "3.32.2",
+    "mermaid": {
+      "uuid": "11.1.1"
+    }
+  },
+  "allowScripts": {
+    "esbuild@0.27.7": true,
+    "esbuild@0.28.1": true,
+    "@parcel/watcher@2.5.6": true,
+    "lmdb@3.5.1": true,
+    "msgpackr-extract@3.0.4": true
   }
 }

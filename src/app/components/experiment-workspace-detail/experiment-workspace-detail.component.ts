@@ -22,7 +22,7 @@ export class ExperimentWorkspaceDetailComponent implements OnInit {
 
     readonly separatorKeysCodes = [ENTER, COMMA] as const;
 
-    tabGroupNameOverrides = { ...TAB_GROUP_NAME_OVERRIDES };
+    tabGroupNameOverrides: Partial<Record<string, string>> = { ...TAB_GROUP_NAME_OVERRIDES };
 
     routeTemplateId: string | null = null;
     defaultTemplateId: string | null = null;
