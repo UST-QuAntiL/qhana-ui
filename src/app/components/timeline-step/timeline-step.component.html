@@ -17,11 +17,11 @@
             Step {{timelineStep.sequence}} ({{timelineStep.processorName}}&#64;{{timelineStep.processorVersion}})
             <qhana-step-status [step]="timelineStep" [noText]="true"></qhana-step-status>
             <div class="spacer"></div>
-            <span class="t-subheading clickable" (click)="restartWatching()" *ngIf="timelineStep?.end == null">
+            <span class="t-subheading clickable" (click)="restartWatching()" *ngIf="timelineStep.end == null">
                 {{watching}}
             </span>
             <button mat-button color="primary" (click)="restartWatching()"
-                *ngIf="timelineStep?.end == null && watching === 'error' || watching === 'paused'">
+                *ngIf="timelineStep.end == null && watching === 'error' || watching === 'paused'">
                 restart
             </button>
         </mat-card-title>
