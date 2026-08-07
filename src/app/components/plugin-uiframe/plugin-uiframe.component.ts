@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, Input, NgZone, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, NgZone, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
@@ -210,6 +210,7 @@ interface ImplementationInfo {
     selector: 'qhana-plugin-uiframe',
     templateUrl: './plugin-uiframe.component.html',
     styleUrls: ['./plugin-uiframe.component.sass'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class PluginUiframeComponent implements OnChanges, OnDestroy {

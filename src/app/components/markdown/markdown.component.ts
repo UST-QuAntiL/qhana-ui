@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { commandsCtx, CommandsReady, createCmdKey, defaultValueCtx, Editor, editorViewOptionsCtx, MilkdownPlugin, rootCtx, schemaCtx, themeManagerCtx } from '@milkdown/core';
 import { clipboard } from '@milkdown/plugin-clipboard';
@@ -39,6 +39,7 @@ const toggleEditableCmd = createCmdKey("ToggleEditable");
     selector: 'qhana-markdown',
     templateUrl: './markdown.component.html',
     styleUrls: ['./markdown.component.sass'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class MarkdownComponent implements OnChanges {

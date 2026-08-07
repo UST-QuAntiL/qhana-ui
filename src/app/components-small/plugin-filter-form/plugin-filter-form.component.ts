@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, Output, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ChoosePluginDialog } from 'src/app/dialogs/choose-plugin/choose-plugin.dialog';
 import { PluginApiObject } from 'src/app/services/qhana-api-data-types';
@@ -7,6 +7,7 @@ import { PluginApiObject } from 'src/app/services/qhana-api-data-types';
     selector: 'qhana-plugin-filter-form',
     templateUrl: './plugin-filter-form.component.html',
     styleUrl: './plugin-filter-form.component.sass',
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class PluginFilterFormComponent {

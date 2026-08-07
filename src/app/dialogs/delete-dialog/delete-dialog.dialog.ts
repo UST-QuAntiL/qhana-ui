@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { ApiLink, isApiLinkBase } from 'src/app/services/api-data-types';
 
@@ -14,6 +14,7 @@ const RESOURCE_TYPE_TO_TEXT: { [props: string]: string } = {
     selector: 'qhana-delete-dialog',
     templateUrl: './delete-dialog.dialog.html',
     styleUrls: ['./delete-dialog.dialog.sass'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class DeleteDialog {

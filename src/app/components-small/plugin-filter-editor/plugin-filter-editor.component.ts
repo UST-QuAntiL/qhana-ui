@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy } from '@angular/core';
 import { AbstractControl, FormControl, Validators, ValidatorFn } from '@angular/forms';
 import { ApiLink } from 'src/app/services/api-data-types';
 import { PluginRegistryBaseService } from 'src/app/services/registry.service';
@@ -19,6 +19,7 @@ export function isJSONValidator(): ValidatorFn {
     selector: 'qhana-plugin-filter-editor',
     templateUrl: './plugin-filter-editor.component.html',
     styleUrls: ['./plugin-filter-editor.component.sass'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class PluginFilterEditorComponent implements OnInit {

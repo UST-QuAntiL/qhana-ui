@@ -1,10 +1,11 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { QhanaBackendService } from 'src/app/services/qhana-backend.service';
 
 @Component({
     selector: 'qhana-raw-text-preview',
     templateUrl: './raw-text-preview.component.html',
     styleUrls: ['./raw-text-preview.component.sass'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class RawTextPreviewComponent implements OnChanges {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { ApiLink } from 'src/app/services/api-data-types';
 import { EnvApiObject, isEnvApiObject } from 'src/app/services/env.service';
@@ -25,6 +25,7 @@ import { isServiceApiObject, ServiceApiObject, ServiceRegistryService } from 'sr
     selector: 'qhana-settings-page',
     templateUrl: './settings-page.component.html',
     styleUrls: ['./settings-page.component.sass'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class SettingsPageComponent implements OnInit, OnDestroy {

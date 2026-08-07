@@ -4,7 +4,7 @@
 
 import 'zone.js/testing';
 
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { getTestBed, TestBed } from '@angular/core/testing';
@@ -38,7 +38,7 @@ beforeEach(() => {
             RouterTestingModule
         ],
         providers: [
-            provideHttpClient(withInterceptorsFromDi()),
+            provideHttpClient(withXhr(), withInterceptorsFromDi()),
             provideHttpClientTesting(),
             {
                 provide: MatDialog,

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, SimpleChanges, TrackByFunction } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, SimpleChanges, TrackByFunction, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Observable, Subject, Subscription, from, isObservable } from 'rxjs';
 import { concatMap, filter } from 'rxjs/operators';
@@ -11,6 +11,7 @@ import { PluginRegistryBaseService } from 'src/app/services/registry.service';
     selector: 'qhana-growing-list',
     templateUrl: './growing-list.component.html',
     styleUrls: ['./growing-list.component.sass'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class GrowingListComponent implements OnInit, OnDestroy {

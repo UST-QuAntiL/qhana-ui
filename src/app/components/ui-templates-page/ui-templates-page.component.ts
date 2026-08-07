@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -11,6 +11,7 @@ import { TemplateApiObject, TemplatesService } from 'src/app/services/templates.
     selector: 'qhana-ui-templates-page',
     templateUrl: './ui-templates-page.component.html',
     styleUrl: './ui-templates-page.component.sass',
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class UiTemplatesPageComponent implements OnInit, OnDestroy {

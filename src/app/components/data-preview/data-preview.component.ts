@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges } from '@angular/core';
+import { Component, Input, OnChanges, ChangeDetectionStrategy } from '@angular/core';
 import { ApiLink, CollectionApiObject } from 'src/app/services/api-data-types';
 import { EnvService } from 'src/app/services/env.service';
 import { PluginApiObject } from 'src/app/services/qhana-api-data-types';
@@ -141,6 +141,7 @@ const INTERNAL_PREVIEWS: InternalPreviewOption[] = [
     selector: 'qhana-data-preview',
     templateUrl: './data-preview.component.html',
     styleUrls: ['./data-preview.component.sass'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class DataPreviewComponent implements OnChanges {

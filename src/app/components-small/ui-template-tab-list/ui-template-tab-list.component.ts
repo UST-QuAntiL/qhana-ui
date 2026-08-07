@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { TemplateApiObject, TemplateTabApiObject } from 'src/app/services/templates.service';
 import { PluginRegistryBaseService } from 'src/app/services/registry.service';
 import { MatDialog } from '@angular/material/dialog';
@@ -17,6 +17,7 @@ interface NavTabGroup {
     selector: 'qhana-ui-template-tab-list',
     templateUrl: './ui-template-tab-list.component.html',
     styleUrl: './ui-template-tab-list.component.sass',
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class UiTemplateTabListComponent implements OnInit, OnChanges, OnDestroy {

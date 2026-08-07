@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { PageEvent } from '@angular/material/paginator';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, of, Subscription } from 'rxjs';
@@ -11,6 +11,7 @@ import { ServiceRegistryService } from 'src/app/services/service-registry.servic
     selector: 'qhana-experiment-data',
     templateUrl: './experiment-data.component.html',
     styleUrls: ['./experiment-data.component.sass'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ExperimentDataComponent implements OnInit, OnDestroy {
