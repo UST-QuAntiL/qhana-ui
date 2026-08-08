@@ -208,7 +208,7 @@ function isSwitchPluginRequest(data: any): data is SwitchPluginRequest {
     if (typeof data.pluginName !== "string" ) {
         return false;
     }
-    if (typeof data.parameters !== "object" ) {
+    if (data.parameters === null || typeof data.parameters !== "object") {
         return false;
     }
     if (Object.entries(data.parameters).some(([k,v]) => typeof k !== "string" || typeof v !== "string")) {
