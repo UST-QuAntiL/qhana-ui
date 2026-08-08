@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { MatTabNavPanel } from '@angular/material/tabs';
 
 export interface TabDefinition {
@@ -10,6 +10,7 @@ export interface TabDefinition {
     selector: 'qhana-timeline-step-nav',
     templateUrl: './timeline-step-nav.component.html',
     styleUrls: ['./timeline-step-nav.component.sass'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class TimelineStepNavComponent {

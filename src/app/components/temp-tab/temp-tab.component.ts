@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ApiLink, PageApiObject } from 'src/app/services/api-data-types';
@@ -13,6 +13,7 @@ import { FormSubmitData } from '../plugin-uiframe/plugin-uiframe.component';
     selector: 'qhana-temp-tab',
     templateUrl: './temp-tab.component.html',
     styleUrl: './temp-tab.component.sass',
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class TempTabComponent implements OnInit, OnDestroy {

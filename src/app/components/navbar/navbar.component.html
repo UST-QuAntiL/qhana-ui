@@ -75,7 +75,7 @@
             </p>
         </qhana-help-tooltip>
         <a class="navigation-link {{isActive(tab) ? 'active' : ''}}" mat-button
-            [routerLink]="['/experiments', (experimentId|async), 'extra', tab.resourceKey?.uiTemplateTabId]"
+            [routerLink]="['/experiments', (experimentId|async), 'extra', $safeNavigationMigration(tab.resourceKey?.uiTemplateTabId)]"
             queryParamsHandling="merge" routerLinkActive="active" *ngFor="let tab of experimentExtraTabs">
             <span class="link-label">
                 <mat-icon *ngIf="tabLinkHrefToApiObject.get(tab.href)?.icon">
@@ -87,7 +87,7 @@
         </a>
     </ng-container>
     <ng-container *ngIf="(currentExperiment|async) == null">
-        <a class="navigation-link {{isActive(tab) ? 'active' : ''}}" mat-button [routerLink]="['extra', tab.resourceKey?.uiTemplateTabId]"
+        <a class="navigation-link {{isActive(tab) ? 'active' : ''}}" mat-button [routerLink]="['extra', $safeNavigationMigration(tab.resourceKey?.uiTemplateTabId)]"
             queryParamsHandling="merge" routerLinkActive="active" *ngFor="let tab of generalExtraTabs">
             <span class="link-label">
                 <mat-icon *ngIf="tabLinkHrefToApiObject.get(tab.href)?.icon">

@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Subscription } from 'rxjs';
 import { take } from 'rxjs/operators';
@@ -10,6 +10,7 @@ import { getMimetypeLikeMatcher } from 'src/app/utils';
     selector: 'qhana-choose-data',
     templateUrl: './choose-data.dialog.html',
     styleUrls: ['./choose-data.dialog.sass'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ChooseDataDialog implements OnInit {

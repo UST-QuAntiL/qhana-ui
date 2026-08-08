@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ApiLink } from 'src/app/services/api-data-types';
 import { PluginRegistryBaseService } from 'src/app/services/registry.service';
@@ -8,6 +8,7 @@ import { TemplateApiObject } from 'src/app/services/templates.service';
     selector: 'qhana-choose-template',
     templateUrl: './choose-template.dialog.html',
     styleUrls: ['./choose-template.dialog.sass'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ChooseTemplateDialog implements OnInit {

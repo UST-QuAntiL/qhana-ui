@@ -19,7 +19,7 @@
 </div>
 <div class="dialog-actions" mat-dialog-actions>
     <button mat-button (click)="onCancel()">Cancel</button>
-    <button mat-button [mat-dialog-close]="selection.selectedOptions.selected[0]?.value"
+    <button mat-button [mat-dialog-close]="$safeNavigationMigration(selection.selectedOptions.selected[0]?.value)"
         [disabled]="selection.selectedOptions.isEmpty()">
         Choose
     </button>

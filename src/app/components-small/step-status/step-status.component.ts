@@ -1,10 +1,11 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { TimelineStepApiObject } from 'src/app/services/qhana-backend.service';
 
 @Component({
     selector: 'qhana-step-status',
     templateUrl: './step-status.component.html',
     styleUrls: ['./step-status.component.sass'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class StepStatusComponent implements OnChanges {

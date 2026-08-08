@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import TimeAgo from 'javascript-time-ago';
 import { Observable, Subscription, timer } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -10,6 +10,7 @@ import { QhanaBackendService, TimelineStepApiObject } from 'src/app/services/qha
     selector: 'qhana-plugin-last-used',
     templateUrl: './plugin-last-used.component.html',
     styleUrls: ['./plugin-last-used.component.sass'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class PluginLastUsedComponent implements OnInit, OnChanges, OnDestroy {

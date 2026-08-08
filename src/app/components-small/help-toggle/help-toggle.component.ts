@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 import { MatButtonModule } from "@angular/material/button";
 import { Subscription } from 'rxjs';
@@ -10,6 +10,7 @@ import { MatButtonToggleModule } from "@angular/material/button-toggle";
     selector: 'qhana-help-toggle',
     imports: [MatButtonModule, MatIconModule, MatButtonToggleModule],
     templateUrl: './help-toggle.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './help-toggle.component.sass'
 })
 export class HelpToggleComponent {

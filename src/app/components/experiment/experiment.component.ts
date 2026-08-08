@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BehaviorSubject, Subscription } from 'rxjs';
@@ -13,6 +13,7 @@ import { ALL_PLUGINS_TEMPLATE_ID, TemplateApiObject, TemplatesService } from 'sr
     selector: 'qhana-experiment',
     templateUrl: './experiment.component.html',
     styleUrls: ['./experiment.component.sass'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ExperimentComponent implements OnInit, OnDestroy {

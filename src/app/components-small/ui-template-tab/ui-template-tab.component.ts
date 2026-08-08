@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Subscription } from 'rxjs';
 import { DeleteDialog } from 'src/app/dialogs/delete-dialog/delete-dialog.dialog';
@@ -11,6 +11,7 @@ import { UiTemplateTabFormComponent } from '../ui-template-tab-form/ui-template-
     selector: 'qhana-ui-template-tab',
     templateUrl: './ui-template-tab.component.html',
     styleUrl: './ui-template-tab.component.sass',
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class UiTemplateTabComponent implements OnChanges, OnInit, OnDestroy {

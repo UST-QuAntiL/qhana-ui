@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { ApiLink, ApiResponse } from 'src/app/services/api-data-types';
 import { PluginApiObject } from 'src/app/services/qhana-api-data-types';
 import { PluginRegistryBaseService } from 'src/app/services/registry.service';
@@ -7,6 +7,7 @@ import { PluginRegistryBaseService } from 'src/app/services/registry.service';
     selector: 'qhana-plugin-list-item',
     templateUrl: './plugin-list-item.component.html',
     styleUrls: ['./plugin-list-item.component.sass'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class PluginListItemComponent implements OnChanges {

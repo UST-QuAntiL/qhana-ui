@@ -56,7 +56,7 @@
     <mat-card appearance="outlined" class="recommendation-card card" *ngIf="pluginRecommendations.length != 0">
         <mat-card-title class="t-headline">Plugin Recommendations</mat-card-title>
         <mat-card-content>
-            <a *ngFor="let plugin of pluginRecommendations" [routerLink]="['/experiments', experimentId, 'workspace']" [queryParams]="{'plugin': plugin.resourceKey?.pluginId}">
+            <a *ngFor="let plugin of pluginRecommendations" [routerLink]="['/experiments', experimentId, 'workspace']" [queryParams]="{'plugin': $safeNavigationMigration(plugin.resourceKey?.pluginId)}">
                 <qhana-plugin-list-item [link]="plugin"></qhana-plugin-list-item>
             </a>
         </mat-card-content>

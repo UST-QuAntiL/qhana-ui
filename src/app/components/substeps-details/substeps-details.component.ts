@@ -1,10 +1,11 @@
-import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, OnInit, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { QhanaBackendService, TimelineSubStepApiObject } from 'src/app/services/qhana-backend.service';
 
 @Component({
     selector: 'qhana-substeps-details',
     templateUrl: './substeps-details.component.html',
     styleUrls: ['./substeps-details.component.sass'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class SubstepsDetailsComponent implements OnChanges {

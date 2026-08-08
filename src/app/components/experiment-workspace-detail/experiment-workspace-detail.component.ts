@@ -1,6 +1,6 @@
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { KeyValue } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatChipInputEvent } from '@angular/material/chips';
 import { MatDialog } from '@angular/material/dialog';
@@ -16,6 +16,7 @@ import { ALL_PLUGINS_TEMPLATE_ID, TAB_GROUP_NAME_OVERRIDES, TAB_GROUP_SORT_KEYS,
     selector: 'qhana-experiment-workspace-detail',
     templateUrl: './experiment-workspace-detail.component.html',
     styleUrls: ['./experiment-workspace-detail.component.sass'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ExperimentWorkspaceDetailComponent implements OnInit {

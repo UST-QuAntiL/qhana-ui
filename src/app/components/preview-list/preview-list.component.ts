@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { Subscription, from } from 'rxjs';
 import { concatMap, toArray } from 'rxjs/operators';
 import { CurrentExperimentService } from 'src/app/services/current-experiment.service';
@@ -9,6 +9,7 @@ import { PluginUiContext } from '../plugin-uiframe/plugin-uiframe.component';
     selector: 'qhana-preview-list',
     templateUrl: './preview-list.component.html',
     styleUrls: ['./preview-list.component.sass'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class PreviewListComponent implements OnInit, OnChanges, OnDestroy {

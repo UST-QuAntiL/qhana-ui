@@ -1,5 +1,5 @@
 
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, ChangeDetectionStrategy } from '@angular/core';
 import { MatButtonModule } from "@angular/material/button";
 import { MatIconModule } from "@angular/material/icon";
 import { nanoid } from 'nanoid';
@@ -10,6 +10,7 @@ import { HelpServiceService } from 'src/app/services/help-service.service';
     selector: 'qhana-help-tooltip',
     imports: [MatButtonModule, MatIconModule],
     templateUrl: './help-tooltip.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './help-tooltip.component.sass'
 })
 export class HelpTooltipComponent implements OnInit, OnDestroy {
