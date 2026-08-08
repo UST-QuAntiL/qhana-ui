@@ -3,52 +3,49 @@
 
 @include mat.core()
 
-@import 'material-icons/iconfont/material-icons.scss'
-@import '@fontsource/roboto/scss/mixins.scss'
-
-$my-primary: mat.define-palette(mat.$deep-purple-palette)
-$my-accent: mat.define-palette(mat.$amber-palette, A200, A100, A400)
+$my-primary: mat.m2-define-palette(mat.$m2-deep-purple-palette)
+$my-accent: mat.m2-define-palette(mat.$m2-amber-palette, A200, A100, A400)
 
 // The "warn" palette is optional and defaults to red if not specified.
-$my-warn: mat.define-palette(mat.$red-palette)
+$my-warn: mat.m2-define-palette(mat.$m2-red-palette)
 
-$my-theme: mat.define-light-theme((color: (primary: $my-primary,accent: $my-accent,warn: $my-warn,)))
-$my-dark-theme: mat.define-dark-theme((color: (primary: $my-primary,accent: $my-accent,warn: $my-warn,)))
+$my-theme: mat.m2-define-light-theme((color: (primary: $my-primary,accent: $my-accent,warn: $my-warn,)))
+$my-dark-theme: mat.m2-define-dark-theme((color: (primary: $my-primary,accent: $my-accent,warn: $my-warn,)))
 
 @include mat.all-component-themes($my-theme)
 
 :root
-    --background: #{mat.get-color-from-palette(mat.$light-theme-background-palette, 'background')}
+    --background: #{mat.m2-get-color-from-palette(mat.$m2-light-theme-background-palette, 'background')}
     --background-card: #ddd
     --border-color: #aaa
-    --scroll-background: #{mat.get-color-from-palette(mat.$light-theme-background-palette, 'card')}
+    --scroll-background: #{mat.m2-get-color-from-palette(mat.$m2-light-theme-background-palette, 'card')}
     --scroll-color: #888
-    --text: #{mat.get-color-from-palette(mat.$light-theme-foreground-palette, 'text')}
-    --text-inv: #{mat.get-color-from-palette(mat.$dark-theme-foreground-palette, 'text')}
-    --text-washed: #{mat.get-color-from-palette(mat.$light-theme-foreground-palette, 'secondary-text')}
-    --text-disabled: #{mat.get-color-from-palette(mat.$light-theme-foreground-palette, 'disabled-text')}
-    --primary: #{mat.get-color-from-palette($my-primary, 'default')}
-    --primary-darker: #{mat.get-color-from-palette($my-primary, 'darker')}
-    --primary-lighter: #{mat.get-color-from-palette($my-primary, 'lighter')}
-    --primary-text: #{mat.get-color-from-palette($my-primary, 'text')}
-    --primary-text-visited: #{mat.get-color-from-palette($my-primary, 'darker')}
-    --accent: #{mat.get-color-from-palette($my-accent, 'default')}
-    --accent-darker: #{mat.get-color-from-palette($my-accent, 'darker')}
-    --accent-lighter: #{mat.get-color-from-palette($my-accent, 'lighter')}
-    --accent-text: #{mat.get-color-from-palette($my-accent, 'text')}
-    --warn: #{mat.get-color-from-palette($my-warn, 'default')}
-    --warn-darker: #{mat.get-color-from-palette($my-warn, 'darker')}
-    --warn-lighter: #{mat.get-color-from-palette($my-warn, 'lighter')}
-    --warn-text: #{mat.get-color-from-palette($my-warn, 'text')}
-    --text-primary: #{mat.get-color-from-palette($my-primary, 'default-contrast')}
+    --text: #{mat.m2-get-color-from-palette(mat.$m2-light-theme-foreground-palette, 'text')}
+    --text-inv: #{mat.m2-get-color-from-palette(mat.$m2-dark-theme-foreground-palette, 'text')}
+    --text-washed: #{mat.m2-get-color-from-palette(mat.$m2-light-theme-foreground-palette, 'secondary-text')}
+    --text-disabled: #{mat.m2-get-color-from-palette(mat.$m2-light-theme-foreground-palette, 'disabled-text')}
+    --primary: #{mat.m2-get-color-from-palette($my-primary, 'default')}
+    --primary-darker: #{mat.m2-get-color-from-palette($my-primary, 'darker')}
+    --primary-lighter: #{mat.m2-get-color-from-palette($my-primary, 'lighter')}
+    --primary-text: #{mat.m2-get-color-from-palette($my-primary, 'text')}
+    --primary-text-visited: #{mat.m2-get-color-from-palette($my-primary, 'darker')}
+    --accent: #{mat.m2-get-color-from-palette($my-accent, 'default')}
+    --accent-darker: #{mat.m2-get-color-from-palette($my-accent, 'darker')}
+    --accent-lighter: #{mat.m2-get-color-from-palette($my-accent, 'lighter')}
+    --accent-text: #{mat.m2-get-color-from-palette($my-accent, 'text')}
+    --warn: #{mat.m2-get-color-from-palette($my-warn, 'default')}
+    --warn-darker: #{mat.m2-get-color-from-palette($my-warn, 'darker')}
+    --warn-lighter: #{mat.m2-get-color-from-palette($my-warn, 'lighter')}
+    --warn-text: #{mat.m2-get-color-from-palette($my-warn, 'text')}
+    --text-primary: #{mat.m2-get-color-from-palette($my-primary, 'default-contrast')}
     --text-primary-lighter: var(--text, black)
     --text-primary-darker: var(--text-primary)
-    --text-accent: #{mat.get-color-from-palette($my-accent, 'default-contrast')}
-    //--text-accent-lighter: #{mat.get-color-from-palette($my-accent, 'lighter-contrast'}
-    //--text-accent-darker: #{mat.get-color-from-palette($my-accent, 'darker-contrast'}
-    --text-warn: #{mat.get-color-from-palette($my-warn, 'default-contrast')}
-    //--text-warn-lighter: #{mat.get-color-from-palette($my-warn, 'lighter-contrast'}
-    //--text-warn-darker: #{mat.get-color-from-palette($my-warn, 'darker-contrast'}
+    --text-accent: #{mat.m2-get-color-from-palette($my-accent, 'default-contrast')}
+    //--text-accent-lighter: #{mat.m2-get-color-from-palette($my-accent, 'lighter-contrast'}
+    //--text-accent-darker: #{mat.m2-get-color-from-palette($my-accent, 'darker-contrast'}
+    --text-warn: #{mat.m2-get-color-from-palette($my-warn, 'default-contrast')}
+    //--text-warn-lighter: #{mat.m2-get-color-from-palette($my-warn, 'lighter-contrast'}
+    //--text-warn-darker: #{mat.m2-get-color-from-palette($my-warn, 'darker-contrast'}
     // line is for milkdown
     --line: 150,150,150
 
@@ -61,14 +58,14 @@ $my-dark-theme: mat.define-dark-theme((color: (primary: $my-primary,accent: $my-
     margin-top: 5px !important
 
 .mat-mdc-card, .mat-expansion-panel, .color-scheme-card
-    --background: #{mat.get-color-from-palette(mat.$light-theme-background-palette, 'card')}
+    --background: #{mat.m2-get-color-from-palette(mat.$m2-light-theme-background-palette, 'card')}
     --background-card: #bbb
     --border-color: #ddd
     --scroll-background: #bbb
-    --scroll-color: #{mat.get-color-from-palette(mat.$light-theme-background-palette, 'card')}
+    --scroll-color: #{mat.m2-get-color-from-palette(mat.$m2-light-theme-background-palette, 'card')}
 
 .mat-mdc-dialog, .color-scheme-dialog
-    --background: #{mat.get-color-from-palette(mat.$light-theme-background-palette, 'dialog')}
+    --background: #{mat.m2-get-color-from-palette(mat.$m2-light-theme-background-palette, 'dialog')}
 
 .card.mat-mdc-card
     padding: 16px
@@ -79,37 +76,37 @@ $my-dark-theme: mat.define-dark-theme((color: (primary: $my-primary,accent: $my-
 @media (prefers-color-scheme: dark)
     :root
         @include mat.all-component-themes($my-dark-theme)
-        --background: #{mat.get-color-from-palette(mat.$dark-theme-background-palette, 'background')}
+        --background: #{mat.m2-get-color-from-palette(mat.$m2-dark-theme-background-palette, 'background')}
         --background-card: #777
         --border-color: #555
         --scroll-background: #555
         --scroll-color: #888
-        --text: #{mat.get-color-from-palette(mat.$dark-theme-foreground-palette, 'text')}
-        --text-inv: #{mat.get-color-from-palette(mat.$light-theme-foreground-palette, 'text')}
-        --text-washed: #{mat.get-color-from-palette(mat.$dark-theme-foreground-palette, 'secondary-text')}
-        --text-disabled: #{mat.get-color-from-palette(mat.$dark-theme-foreground-palette, 'disabled-text')}
-        --primary: #{mat.get-color-from-palette($my-primary, 'default')}
-        --primary-darker: #{mat.get-color-from-palette($my-primary, 'darker')}
-        --primary-lighter: #{mat.get-color-from-palette($my-primary, 'lighter')}
-        --primary-text: #{mat.get-color-from-palette($my-primary, A100)}
-        --primary-text-visited: #{mat.get-color-from-palette($my-primary, A200)}
-        --accent: #{mat.get-color-from-palette($my-accent, 'default')}
-        --accent-darker: #{mat.get-color-from-palette($my-accent, 'darker')}
-        --accent-lighter: #{mat.get-color-from-palette($my-accent, 'lighter')}
-        --accent-text: #{mat.get-color-from-palette($my-accent, 'text')}
-        --warn: #{mat.get-color-from-palette($my-warn, 'default')}
-        --warn-darker: #{mat.get-color-from-palette($my-warn, 'darker')}
-        --warn-lighter: #{mat.get-color-from-palette($my-warn, 'lighter')}
-        --warn-text: #{mat.get-color-from-palette($my-warn, 'text')}
-        --text-primary: #{mat.get-color-from-palette($my-primary, 'default-contrast')}
+        --text: #{mat.m2-get-color-from-palette(mat.$m2-dark-theme-foreground-palette, 'text')}
+        --text-inv: #{mat.m2-get-color-from-palette(mat.$m2-light-theme-foreground-palette, 'text')}
+        --text-washed: #{mat.m2-get-color-from-palette(mat.$m2-dark-theme-foreground-palette, 'secondary-text')}
+        --text-disabled: #{mat.m2-get-color-from-palette(mat.$m2-dark-theme-foreground-palette, 'disabled-text')}
+        --primary: #{mat.m2-get-color-from-palette($my-primary, 'default')}
+        --primary-darker: #{mat.m2-get-color-from-palette($my-primary, 'darker')}
+        --primary-lighter: #{mat.m2-get-color-from-palette($my-primary, 'lighter')}
+        --primary-text: #{mat.m2-get-color-from-palette($my-primary, A100)}
+        --primary-text-visited: #{mat.m2-get-color-from-palette($my-primary, A200)}
+        --accent: #{mat.m2-get-color-from-palette($my-accent, 'default')}
+        --accent-darker: #{mat.m2-get-color-from-palette($my-accent, 'darker')}
+        --accent-lighter: #{mat.m2-get-color-from-palette($my-accent, 'lighter')}
+        --accent-text: #{mat.m2-get-color-from-palette($my-accent, 'text')}
+        --warn: #{mat.m2-get-color-from-palette($my-warn, 'default')}
+        --warn-darker: #{mat.m2-get-color-from-palette($my-warn, 'darker')}
+        --warn-lighter: #{mat.m2-get-color-from-palette($my-warn, 'lighter')}
+        --warn-text: #{mat.m2-get-color-from-palette($my-warn, 'text')}
+        --text-primary: #{mat.m2-get-color-from-palette($my-primary, 'default-contrast')}
         --text-primary-lighter: var(--text-inv, black)
         --text-primary-darker: var(--text-primary)
-        --text-accent: #{mat.get-color-from-palette($my-accent, 'default-contrast')}
-        //--text-accent-lighter: #{mat.get-color-from-palette($my-accent, 'lighter-contrast'}
-        //--text-accent-darker: #{mat.get-color-from-palette($my-accent, 'darker-contrast'}
-        --text-warn: #{mat.get-color-from-palette($my-warn, 'default-contrast')}
-        //--text-warn-lighter: #{mat.get-color-from-palette($my-warn, 'lighter-contrast'}
-        //--text-warn-darker: #{mat.get-color-from-palette($my-warn, 'darker-contrast'}
+        --text-accent: #{mat.m2-get-color-from-palette($my-accent, 'default-contrast')}
+        //--text-accent-lighter: #{mat.m2-get-color-from-palette($my-accent, 'lighter-contrast'}
+        //--text-accent-darker: #{mat.m2-get-color-from-palette($my-accent, 'darker-contrast'}
+        --text-warn: #{mat.m2-get-color-from-palette($my-warn, 'default-contrast')}
+        //--text-warn-lighter: #{mat.m2-get-color-from-palette($my-warn, 'lighter-contrast'}
+        //--text-warn-darker: #{mat.m2-get-color-from-palette($my-warn, 'darker-contrast'}
         // line is for milkdown
         --line: 170,170,170
 
@@ -138,28 +135,28 @@ $my-dark-theme: mat.define-dark-theme((color: (primary: $my-primary,accent: $my-
             --mat-tab-header-active-hover-indicator-color: var(--primary-text)
 
     .mat-mdc-card, .mat-expansion-panel, .color-scheme-card
-        --background: #{mat.get-color-from-palette(mat.$dark-theme-background-palette, 'card')}
-        --background-card: #{mat.get-color-from-palette(mat.$dark-theme-background-palette, 'background')}
+        --background: #{mat.m2-get-color-from-palette(mat.$m2-dark-theme-background-palette, 'card')}
+        --background-card: #{mat.m2-get-color-from-palette(mat.$m2-dark-theme-background-palette, 'background')}
         --border-color: #888
-        --scroll-background: #{mat.get-color-from-palette(mat.$dark-theme-background-palette, 'background')}
+        --scroll-background: #{mat.m2-get-color-from-palette(mat.$m2-dark-theme-background-palette, 'background')}
         --scroll-color: #888
-        --text-primary: #{mat.get-color-from-palette($my-primary, 'card-contrast')}
+        --text-primary: #{mat.m2-get-color-from-palette($my-primary, 'card-contrast')}
         --text-primary-lighter: var(--text-inv, black)
         --text-primary-darker: var(--text-primary)
-        --text-accent: #{mat.get-color-from-palette($my-accent, 'card-contrast')}
-        --text-warn: #{mat.get-color-from-palette($my-warn, 'card-contrast')}
+        --text-accent: #{mat.m2-get-color-from-palette($my-accent, 'card-contrast')}
+        --text-warn: #{mat.m2-get-color-from-palette($my-warn, 'card-contrast')}
         --primary-text: #d3b9ff
         --primary-text-visited: #caacff
 
     .mat-mdc-dialog, .color-scheme-dialog
-        --background: #{mat.get-color-from-palette(mat.$dark-theme-background-palette, 'dialog')}
-        --scroll-background: #{mat.get-color-from-palette(mat.$dark-theme-background-palette, 'background')}
-        --scroll-color: #{mat.get-color-from-palette(mat.$dark-theme-background-palette, 'dialog')}
-        --text-primary: #{mat.get-color-from-palette($my-primary, 'dialog-contrast')}
+        --background: #{mat.m2-get-color-from-palette(mat.$m2-dark-theme-background-palette, 'dialog')}
+        --scroll-background: #{mat.m2-get-color-from-palette(mat.$m2-dark-theme-background-palette, 'background')}
+        --scroll-color: #{mat.m2-get-color-from-palette(mat.$m2-dark-theme-background-palette, 'dialog')}
+        --text-primary: #{mat.m2-get-color-from-palette($my-primary, 'dialog-contrast')}
         --text-primary-lighter: var(--text-inv, black)
         --text-primary-darker: var(--text-primary)
-        --text-accent: #{mat.get-color-from-palette($my-accent, 'dialog-contrast')}
-        --text-warn: #{mat.get-color-from-palette($my-warn, 'dialog-contrast')}
+        --text-accent: #{mat.m2-get-color-from-palette($my-accent, 'dialog-contrast')}
+        --text-warn: #{mat.m2-get-color-from-palette($my-warn, 'dialog-contrast')}
         --primary-text: #d3b9ff
         --primary-text-visited: #caacff
 
@@ -202,7 +199,7 @@ $my-dark-theme: mat.define-dark-theme((color: (primary: $my-primary,accent: $my-
 
         .mat-mdc-progress-bar.mat-mdc-primary
             .mat-mdc-progress-bar-buffer
-                background-color: #{mat.get-color-from-palette($my-primary, 600)}
+                background-color: #{mat.m2-get-color-from-palette($my-primary, 600)}
             .mat-mdc-progress-bar-fill::after
                 background-color: var(--primary-text)
 
@@ -224,27 +221,27 @@ $my-dark-theme: mat.define-dark-theme((color: (primary: $my-primary,accent: $my-
             .mat-mdc-option.mat-mdc-selected:not(.mat-mdc-option-disabled)
                 color: var(--primary-text)
 
-$my-typography: mat.define-typography-config()
+$my-typography: mat.m2-define-typography-config()
 
 // expose typography as css classes
 .t-page-headline
-    @include mat.typography-level($my-typography, 'headline-3')
+    @include mat.m2-typography-level($my-typography, 'headline-3')
     margin-block: 0.8ex
 
 .t-headline
-    @include mat.typography-level($my-typography, 'headline-5')
+    @include mat.m2-typography-level($my-typography, 'headline-5')
 
 .t-title
-    @include mat.typography-level($my-typography, 'headline-6')
+    @include mat.m2-typography-level($my-typography, 'headline-6')
 
 .t-subheading
-    @include mat.typography-level($my-typography, 'subtitle-1')
+    @include mat.m2-typography-level($my-typography, 'subtitle-1')
 
 .t-subsubheading
-    @include mat.typography-level($my-typography, 'subtitle-2')
+    @include mat.m2-typography-level($my-typography, 'subtitle-2')
 
 .t-paragraph
-    @include mat.typography-level($my-typography, 'body-1')
+    @include mat.m2-typography-level($my-typography, 'body-1')
 
 .text
     color: var(--text, black)
@@ -400,7 +397,7 @@ a:hover, a:visited
 summary.no-decoration
     list-style: none
 
-summary.no-decoration::marker
+summary.no-decoration::marker,
 summary.no-decoration::-webkit-details-marker
     content: none
     display: none
@@ -742,7 +739,7 @@ form.qhana-form
     max-width: initial
 
 .qhana-form-label
-    @include mat.typography-level($my-typography, 'body-1')
+    @include mat.m2-typography-level($my-typography, 'body-1')
     font-weight: 500
     padding-inline-start: 0.5rem
     color: var(--border-color, currentColor)
@@ -843,7 +840,7 @@ form.qhana-form
     outline: 4px solid var(--accent-darker, black)
 
 .qhana-input-description
-    @include mat.typography-level($my-typography, 'body-1')
+    @include mat.m2-typography-level($my-typography, 'body-1')
 
 .qhana-input-description p
     margin-block: 0.1em
@@ -855,19 +852,19 @@ form.qhana-form
     color: rgb(0, 247, 0)
 
 .plugin-micro-frontend
-    @include mat.typography-level($my-typography, 'body-1')
+    @include mat.m2-typography-level($my-typography, 'body-1')
 
 .plugin-micro-frontend h1
-    @include mat.typography-level($my-typography, 'headline-5')
+    @include mat.m2-typography-level($my-typography, 'headline-5')
 
 .plugin-micro-frontend h2
-    @include mat.typography-level($my-typography, 'headline-6')
+    @include mat.m2-typography-level($my-typography, 'headline-6')
 
 .plugin-micro-frontend h3
-    @include mat.typography-level($my-typography, 'subtitle-1')
+    @include mat.m2-typography-level($my-typography, 'subtitle-1')
 
 .plugin-micro-frontend h4
-    @include mat.typography-level($my-typography, 'subtitle-2')
+    @include mat.m2-typography-level($my-typography, 'subtitle-2')
 
 .qhana-table
     flex-direction: row

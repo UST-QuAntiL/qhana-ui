@@ -1,10 +1,12 @@
-import { Component, Input, OnChanges, SecurityContext, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, SecurityContext, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 @Component({
     selector: 'qhana-iframe-preview',
     templateUrl: './iframe-preview.component.html',
-    styleUrls: ['./iframe-preview.component.sass']
+    styleUrls: ['./iframe-preview.component.sass'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class IframePreviewComponent implements OnChanges {
 

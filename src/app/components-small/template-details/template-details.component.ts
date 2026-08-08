@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { ApiLink, ApiResponse } from 'src/app/services/api-data-types';
 import { PluginRegistryBaseService } from 'src/app/services/registry.service';
@@ -16,7 +16,9 @@ export function isInSetValidator(validValues: any[]): Validators {
 @Component({
     selector: 'qhana-template-details',
     templateUrl: './template-details.component.html',
-    styleUrls: ['./template-details.component.sass']
+    styleUrls: ['./template-details.component.sass'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class TemplateDetailsComponent implements OnInit {
     @Input() templateLink: ApiLink | null = null;

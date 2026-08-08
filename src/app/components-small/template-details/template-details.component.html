@@ -41,6 +41,6 @@
     </mat-form-field>
     <qhana-plugin-filter-editor [tabLink]="tabLink"
         (filterEmitter)="filterString = $event" [hidden]="templateForm.value.groupKey"></qhana-plugin-filter-editor>
-    <p class="form-error" *ngIf="templateForm?.errors?.groupKeyForbidden">Group key cannot be used in experiment workspace tabs!</p>
+    <p class="form-error" *ngIf="templateForm.errors?.groupKeyForbidden">Group key cannot be used in experiment workspace tabs!</p>
     <button mat-raised-button class="submit-button" type="submit" color="primary" [disabled]="templateForm.errors">{{templateLink ? 'Create' : 'Update'}} Tab</button>
 </form>

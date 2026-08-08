@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { ApiLink } from 'src/app/services/api-data-types';
 import { PluginApiObject } from 'src/app/services/qhana-api-data-types';
@@ -13,7 +13,9 @@ interface PluginRestrictions {
 @Component({
     selector: 'qhana-choose-plugin',
     templateUrl: './choose-plugin.dialog.html',
-    styleUrls: ['./choose-plugin.dialog.sass']
+    styleUrls: ['./choose-plugin.dialog.sass'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class ChoosePluginDialog {
 

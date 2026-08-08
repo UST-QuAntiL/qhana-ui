@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
     selector: 'qhana-root',
     templateUrl: './app.component.html',
-    styleUrls: ['./app.component.sass']
+    styleUrls: ['./app.component.sass'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class AppComponent {
     title = 'QHAna';

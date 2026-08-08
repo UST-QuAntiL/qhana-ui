@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -11,7 +11,9 @@ import { PluginRegistryBaseService } from 'src/app/services/registry.service';
 @Component({
     selector: 'qhana-data-detail',
     templateUrl: './data-detail.component.html',
-    styleUrls: ['./data-detail.component.sass']
+    styleUrls: ['./data-detail.component.sass'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class DataDetailComponent implements OnInit, OnDestroy {
 

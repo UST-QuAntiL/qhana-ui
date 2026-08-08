@@ -1,5 +1,5 @@
-# specific node version tagged to prevent dockerfile from suddenly breaking (16 was current lts version)
-FROM node:20-slim AS builder
+# specific node version tagged to prevent dockerfile from suddenly breaking (Angular 21 requires Node 20.19+/22.12+/24)
+FROM node:24-slim AS builder
 
 WORKDIR /app
 COPY . /app

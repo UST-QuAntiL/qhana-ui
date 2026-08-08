@@ -1,5 +1,5 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Input, OnChanges, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
+
 
 const ALLOWED_FILTER_KEYS: Set<'and' | 'or' | 'not' | 'id' | 'name' | 'tag' | 'version' | 'type'> = new Set(['and', 'or', 'not', 'id', 'name', 'tag', 'version', 'type']);
 
@@ -10,7 +10,9 @@ function isAllowedFilter(filterType: string): filterType is 'and' | 'or' | 'not'
 @Component({
     selector: 'qhana-plugin-filter-view',
     templateUrl: './plugin-filter-view.component.html',
-    styleUrl: './plugin-filter-view.component.sass'
+    styleUrl: './plugin-filter-view.component.sass',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class PluginFilterViewComponent implements OnChanges {
 

@@ -8,7 +8,7 @@
             <mat-optgroup label="Builtin Previews">
                 <mat-option *ngFor="let option of builtinPreviewOptions" [value]="option">{{option.name}}</mat-option>
             </mat-optgroup>
-            <mat-optgroup label="Plugin Previews" *ngIf="(pluginPreviewOptions?.length ?? 0) > 0">
+            <mat-optgroup label="Plugin Previews" *ngIf="pluginPreviewOptions.length > 0">
                 <mat-option *ngFor="let option of pluginPreviewOptions" [value]="option">{{option.name}}</mat-option>
             </mat-optgroup>
         </mat-select>

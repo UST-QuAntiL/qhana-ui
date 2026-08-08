@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import TimeAgo from 'javascript-time-ago';
 import { Subscription } from 'rxjs';
@@ -13,7 +13,9 @@ import { FormSubmitData } from '../plugin-uiframe/plugin-uiframe.component';
 @Component({
     selector: 'qhana-experiment-workspace',
     templateUrl: './experiment-workspace.component.html',
-    styleUrls: ['./experiment-workspace.component.sass']
+    styleUrls: ['./experiment-workspace.component.sass'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class ExperimentWorkspaceComponent implements OnInit, OnDestroy {
 

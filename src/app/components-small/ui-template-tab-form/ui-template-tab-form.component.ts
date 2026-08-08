@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { TAB_GROUP_NAME_OVERRIDES, TemplateTabApiObject } from 'src/app/services/templates.service';
 import { FormBuilder, FormGroup, ValidationErrors, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
 import { Subscription } from 'rxjs';
@@ -15,7 +15,9 @@ export function isInSetValidator(validValues: any[]): ValidatorFn {
 @Component({
     selector: 'qhana-ui-template-tab-form',
     templateUrl: './ui-template-tab-form.component.html',
-    styleUrl: './ui-template-tab-form.component.sass'
+    styleUrl: './ui-template-tab-form.component.sass',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class UiTemplateTabFormComponent implements OnChanges, OnDestroy, OnInit {
 
@@ -154,7 +156,7 @@ export class UiTemplateTabFormComponent implements OnChanges, OnDestroy, OnInit 
     }
 
     updateDirty() {
-        let dirty = (this.templateForm?.dirty ?? false) || (this.description !== this.tabData?.description ?? "");
+        let dirty = (this.templateForm?.dirty ?? false) || (this.description !== (this.tabData?.description ?? ""));
 
         if (Boolean(this.currentPluginFilter) && Boolean(this.updatedPluginFilter)) {
             if (JSON.stringify(this.currentPluginFilter) !== JSON.stringify(this.updatedPluginFilter)) {

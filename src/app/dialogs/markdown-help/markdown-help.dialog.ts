@@ -1,10 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 
 @Component({
     selector: 'qhana-markdown-help',
     templateUrl: './markdown-help.dialog.html',
-    styleUrls: ['./markdown-help.dialog.sass']
+    styleUrls: ['./markdown-help.dialog.sass'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class MarkdownHelpDialog {
 

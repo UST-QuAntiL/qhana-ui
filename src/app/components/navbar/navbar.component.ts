@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Component, Input, OnDestroy, OnInit, TrackByFunction } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, TrackByFunction, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
 import { ApiLink, CollectionApiObject } from 'src/app/services/api-data-types';
@@ -27,7 +27,9 @@ import { TemplateApiObject, TemplateTabApiObject, TemplatesService } from 'src/a
 @Component({
     selector: 'qhana-navbar',
     templateUrl: './navbar.component.html',
-    styleUrls: ['./navbar.component.sass']
+    styleUrls: ['./navbar.component.sass'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class NavbarComponent implements OnInit, OnDestroy {
 

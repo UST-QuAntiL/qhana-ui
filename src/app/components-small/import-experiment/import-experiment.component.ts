@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription, interval, of, timer } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
@@ -7,7 +7,9 @@ import { ExperimentImportApiObject, ExperimentImportPollObject, QhanaBackendServ
 @Component({
     selector: 'qhana-import-experiment',
     templateUrl: './import-experiment.component.html',
-    styleUrls: ['./import-experiment.component.sass']
+    styleUrls: ['./import-experiment.component.sass'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class ImportExperimentComponent {
 

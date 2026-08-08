@@ -17,7 +17,7 @@
         <details class="collapsible-item">
             <summary class="summary-item">Parameters</summary>
             <qhana-data-preview [data]="substep"
-                [context]="{experimentId: experimentId??undefined, stepId: substep?.stepId, location: 'timeline-step.substep.parameters.data-preview'}">
+                [context]="{experimentId: experimentId??undefined, stepId: $safeNavigationMigration(substep?.stepId), location: 'timeline-step.substep.parameters.data-preview'}">
             </qhana-data-preview>
         </details>
     </dl>

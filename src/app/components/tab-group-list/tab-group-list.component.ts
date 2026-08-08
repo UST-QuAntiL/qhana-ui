@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { ApiLink } from 'src/app/services/api-data-types';
 import { PluginRegistryBaseService } from 'src/app/services/registry.service';
@@ -23,7 +23,9 @@ import { TAB_GROUP_NAME_OVERRIDES, TAB_GROUP_SORT_KEYS } from 'src/app/services/
 @Component({
     selector: 'qhana-tab-group-list',
     templateUrl: './tab-group-list.component.html',
-    styleUrls: ['./tab-group-list.component.sass']
+    styleUrls: ['./tab-group-list.component.sass'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class TabGroupListComponent implements OnChanges, OnInit, OnDestroy {
 

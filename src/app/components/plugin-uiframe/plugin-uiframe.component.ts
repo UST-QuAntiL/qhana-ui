@@ -1,7 +1,7 @@
-import { Component, ElementRef, EventEmitter, Input, NgZone, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, NgZone, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { catchError, concatAll, filter, map, mergeAll, mergeMap, toArray } from 'rxjs/operators';
 import { ChooseDataDialog } from 'src/app/dialogs/choose-data/choose-data.dialog';
@@ -193,6 +193,30 @@ function isPluginUrlInfoRequest(data: any): data is PluginUrlInfoRequest {
     return true;
 }
 
+interface SwitchPluginRequest {
+    type: "switch-plugin";
+    pluginName: string;
+    parameters: {
+        [index: string]: string;
+    };
+}
+
+function isSwitchPluginRequest(data: any): data is SwitchPluginRequest {
+    if (data?.type !== "switch-plugin") {
+        return false;
+    }
+    if (typeof data.pluginName !== "string" ) {
+        return false;
+    }
+    if (data.parameters === null || typeof data.parameters !== "object") {
+        return false;
+    }
+    if (Object.entries(data.parameters).some(([k,v]) => typeof k !== "string" || typeof v !== "string")) {
+        return false;
+    }
+    return true;
+}
+
 const allowedImplementationContentTypes: Set<string> = new Set(["text/x-qasm", "text/x-qiskit"]);
 const implementationsContentTypeMap: Map<string, string> = new Map([
     ["text/x-qasm", "qasm"],
@@ -209,7 +233,9 @@ interface ImplementationInfo {
 @Component({
     selector: 'qhana-plugin-uiframe',
     templateUrl: './plugin-uiframe.component.html',
-    styleUrls: ['./plugin-uiframe.component.sass']
+    styleUrls: ['./plugin-uiframe.component.sass'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class PluginUiframeComponent implements OnChanges, OnDestroy {
 
@@ -247,7 +273,7 @@ export class PluginUiframeComponent implements OnChanges, OnDestroy {
 
     listenerFunction = (event: MessageEvent) => this.handleMicroFrontendEvent(event);
 
-  constructor(private sanitizer: DomSanitizer, private dialog: MatDialog, private backend: QhanaBackendService, private registry: PluginRegistryBaseService, private route: ActivatedRoute, private ngZone: NgZone) {
+  constructor(private sanitizer: DomSanitizer, private dialog: MatDialog, private backend: QhanaBackendService, private registry: PluginRegistryBaseService, private route: ActivatedRoute, private ngZone: NgZone, private router: Router) {
         this.blank = this.sanitizer.bypassSecurityTrustResourceUrl("about://blank");
         this.frontendUrl = this.blank;
         window.addEventListener(
@@ -538,6 +564,22 @@ export class PluginUiframeComponent implements OnChanges, OnDestroy {
         }
     }
 
+    private async handleSwitchPluginRequest(request: SwitchPluginRequest) {
+        const queryParams = Object.fromEntries([
+            ...Object.entries(request.parameters).map(([key,value]) => ["param-" + key,value])
+        ]);
+        const plugins = await this.registry.getByRel<CollectionApiObject>(["plugin", "collection"], new URLSearchParams({ "name": request.pluginName }), true);
+        if ((plugins?.data?.collectionSize ?? 0) === 0) {
+            console.error(`no plugin with name ${request.pluginName} found!`);
+            return;
+        }
+        const pluginId = plugins?.data?.items[0]?.resourceKey?.pluginId;
+        this.router.navigate(
+            ['/experiments', this.experimentId, 'temp', pluginId ],
+            { queryParams: queryParams, queryParamsHandling: 'merge' }
+        );
+    }
+
     private handleInputDataInfoRequest(request: DataUrlInfoRequest) {
         const dataRef = this.extractExperimentDataInfoFromUrl(request.dataUrl);
         if (dataRef) {
@@ -736,6 +778,12 @@ export class PluginUiframeComponent implements OnChanges, OnDestroy {
                     return;
                 }
                 this.handlePluginInfoRequest(data);
+            }
+            if (data.type === "switch-plugin") {
+                if (!isSwitchPluginRequest(data)) {
+                    return;
+                }
+                this.handleSwitchPluginRequest(data)
             }
         }
     }

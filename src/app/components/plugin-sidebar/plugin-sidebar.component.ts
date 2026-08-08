@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -24,7 +24,9 @@ export interface PluginGroup {
 @Component({
     selector: 'qhana-plugin-sidebar',
     templateUrl: './plugin-sidebar.component.html',
-    styleUrls: ['./plugin-sidebar.component.sass']
+    styleUrls: ['./plugin-sidebar.component.sass'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class PluginSidebarComponent implements OnInit, OnDestroy {
     sidebarOpen: boolean = false;

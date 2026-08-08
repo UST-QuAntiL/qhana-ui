@@ -1,10 +1,12 @@
-import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, OnInit, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { QhanaBackendService } from 'src/app/services/qhana-backend.service';
 
 @Component({
     selector: 'qhana-markdown-preview',
     templateUrl: './markdown-preview.component.html',
-    styleUrls: ['./markdown-preview.component.sass']
+    styleUrls: ['./markdown-preview.component.sass'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class MarkdownPreviewComponent implements OnChanges {
 

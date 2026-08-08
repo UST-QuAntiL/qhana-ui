@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { BehaviorSubject, Observable, Subject, Subscription, from, of, timer } from 'rxjs';
 import { catchError, concatMap, debounceTime, filter, mergeAll, mergeMap, take, throttleTime } from 'rxjs/operators';
@@ -18,7 +18,9 @@ interface Progress {
 @Component({
     selector: 'qhana-timeline-step',
     templateUrl: './timeline-step.component.html',
-    styleUrls: ['./timeline-step.component.sass']
+    styleUrls: ['./timeline-step.component.sass'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class TimelineStepComponent implements OnInit, OnDestroy {
 

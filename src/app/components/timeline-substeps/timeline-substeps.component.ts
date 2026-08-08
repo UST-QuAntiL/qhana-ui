@@ -1,11 +1,13 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 import { ExperimentDataApiObject, QhanaBackendService, TimelineSubStepApiObject, TimelineSubStepPostData } from 'src/app/services/qhana-backend.service';
 import { FormSubmitData } from '../plugin-uiframe/plugin-uiframe.component';
 
 @Component({
     selector: 'qhana-timeline-substeps',
     templateUrl: './timeline-substeps.component.html',
-    styleUrls: ['./timeline-substeps.component.sass']
+    styleUrls: ['./timeline-substeps.component.sass'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class TimelineSubstepsComponent {
 

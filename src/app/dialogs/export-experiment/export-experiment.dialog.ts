@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { QhanaBackendService, TimelineStepApiObject } from 'src/app/services/qhana-backend.service';
 
@@ -10,7 +10,9 @@ interface SelectValue {
 @Component({
     selector: 'qhana-export-experiment',
     templateUrl: './export-experiment.dialog.html',
-    styleUrls: ['./export-experiment.dialog.sass']
+    styleUrls: ['./export-experiment.dialog.sass'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class ExportExperimentDialog implements OnInit {
 
