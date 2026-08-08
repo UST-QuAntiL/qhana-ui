@@ -9,5 +9,13 @@
         "src/main.ts",
         "src/polyfills.ts"
     ],
-    "include": []
+    "include": [],
+    "angularCompilerOptions": {
+      "extendedDiagnostics": {
+        "checks": {
+          "nullishCoalescingNotNullable": "warning",
+          "optionalChainNotNullable": "warning"
+        }
+      }
+    }
 }

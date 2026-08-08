@@ -1,10 +1,12 @@
-import { Component, Input, OnChanges, SecurityContext, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, SecurityContext, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 
 @Component({
     selector: 'qhana-image-preview',
     templateUrl: './image-preview.component.html',
-    styleUrls: ['./image-preview.component.sass']
+    styleUrls: ['./image-preview.component.sass'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class ImagePreviewComponent implements OnChanges {
 

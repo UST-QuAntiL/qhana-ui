@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ApiLink, CollectionApiObject, PageApiObject } from 'src/app/services/api-data-types';
@@ -24,7 +24,9 @@ interface NavTab {
 @Component({
     selector: 'qhana-plugin-tab',
     templateUrl: './plugin-tab.component.html',
-    styleUrls: ['./plugin-tab.component.sass']
+    styleUrls: ['./plugin-tab.component.sass'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class PluginTabComponent implements OnInit, OnDestroy {
 

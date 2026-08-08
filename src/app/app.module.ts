@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatBadgeModule } from '@angular/material/badge';
@@ -23,7 +23,7 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatCommonModule, MatRippleModule } from '@angular/material/core';
+import { MatRippleModule } from '@angular/material/core';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS, MatFormFieldModule } from '@angular/material/form-field';
@@ -41,7 +41,6 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { BrowserModule } from '@angular/platform-browser';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { IframePreviewComponent } from './components-small/iframe-preview/iframe-preview.component';
@@ -153,19 +152,15 @@ import { HelpToggleComponent } from "src/app/components-small/help-toggle/help-t
         PluginFilterViewComponent,
         PluginFilterFormComponent,
     ],
-    imports: [
-        BrowserModule,
+    bootstrap: [AppComponent], imports: [BrowserModule,
         AppRoutingModule,
         FormsModule,
-        BrowserAnimationsModule,
-        HttpClientModule,
         MatToolbarModule,
         MatPaginatorModule,
         MatCardModule,
         MatButtonModule,
         MatButtonToggleModule,
         MatSlideToggleModule,
-        MatCommonModule,
         MatTabsModule,
         MatRippleModule,
         MatDialogModule,
@@ -189,8 +184,8 @@ import { HelpToggleComponent } from "src/app/components-small/help-toggle/help-t
         HelpToggleComponent
     ],
     providers: [
-        { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: "outline" } }
+        { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: "outline" } },
+        provideHttpClient(withXhr(), withInterceptorsFromDi()),
     ],
-    bootstrap: [AppComponent]
 })
 export class AppModule { }

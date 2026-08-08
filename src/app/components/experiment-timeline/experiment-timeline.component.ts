@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { PageEvent } from '@angular/material/paginator';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, Subscription, of } from 'rxjs';
@@ -15,7 +15,9 @@ interface SelectValue {
 @Component({
     selector: 'qhana-experiment-timeline',
     templateUrl: './experiment-timeline.component.html',
-    styleUrls: ['./experiment-timeline.component.sass']
+    styleUrls: ['./experiment-timeline.component.sass'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class ExperimentTimelineComponent implements OnInit, OnDestroy {
 

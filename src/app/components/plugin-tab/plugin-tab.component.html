@@ -27,7 +27,7 @@
     </nav>
 </ng-container>
 <mat-tab-nav-panel class="main-content" #tabContentPanel>
-    <mat-card class="sidebar" *ngIf="currentPluginGroup && ((currentPluginGroup?.collectionSize ?? 0) >= 6 || (navigationTabs.length > 0 && (currentPluginGroup?.collectionSize ?? 0) > 1))">
+    <mat-card class="sidebar" *ngIf="currentPluginGroup && (currentPluginGroup.collectionSize >= 6 || (navigationTabs.length > 0 && currentPluginGroup.collectionSize > 1))">
         <mat-card-header class="sidebar-header t-title">Plugins</mat-card-header>
         <mat-card-content class="sidebar-content-wrapper">
             <qhana-growing-list class="sidebar-content scrollable" [apiLink]="currentPluginGroup.self"

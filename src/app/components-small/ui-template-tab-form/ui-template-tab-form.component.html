@@ -38,6 +38,6 @@
         <input matInput pattern="[^\.]*" formControlName="groupKey">
         <mat-hint>Establish this tab as its own tab group. (Cannot contain '.')</mat-hint>
     </mat-form-field>
-    <p class="form-error" *ngIf="templateForm?.errors?.groupKeyForbidden">Group key cannot be used in experiment workspace tabs!</p>
+    <p class="form-error" *ngIf="templateForm.errors?.groupKeyForbidden">Group key cannot be used in experiment workspace tabs!</p>
     <qhana-plugin-filter-form [filterIn]="currentPluginFilter" (filterOut)="updatedPluginFilter = $event; updateDirty()" (valid)="pluginFilterValid = $event; updateValid()"></qhana-plugin-filter-form>
 </form>

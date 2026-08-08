@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ChoosePluginDialog } from 'src/app/dialogs/choose-plugin/choose-plugin.dialog';
 import { PluginApiObject } from 'src/app/services/qhana-api-data-types';
@@ -13,7 +13,9 @@ const isFilterType = (x: any): x is FilterType => filterTypes.includes(x);
 @Component({
     selector: 'qhana-plugin-filter-node',
     templateUrl: './plugin-filter-node.component.html',
-    styleUrls: ['./plugin-filter-node.component.sass']
+    styleUrls: ['./plugin-filter-node.component.sass'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class PluginFilterNodeComponent implements OnInit {
     @Input() filterIn: any;

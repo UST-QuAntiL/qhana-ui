@@ -8,12 +8,14 @@ describe('PluginFilterNodeComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ PluginFilterNodeComponent ]
-    })
-    .compileComponents();
+      declarations: [
+        PluginFilterNodeComponent
+      ]
+    }).compileComponents();
 
     fixture = TestBed.createComponent(PluginFilterNodeComponent);
     component = fixture.componentInstance;
+    fixture.componentRef.setInput('filterIn', {});
     fixture.detectChanges();
   });
 

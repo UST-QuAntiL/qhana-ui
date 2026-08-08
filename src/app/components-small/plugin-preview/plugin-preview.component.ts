@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { PluginUiContext } from 'src/app/components/plugin-uiframe/plugin-uiframe.component';
 import { ApiLink } from 'src/app/services/api-data-types';
 import { isPluginApiObject, PluginApiObject } from 'src/app/services/qhana-api-data-types';
@@ -9,7 +9,9 @@ import { getMimetypeLikeMatcher } from 'src/app/utils';
 @Component({
     selector: 'qhana-plugin-preview',
     templateUrl: './plugin-preview.component.html',
-    styleUrls: ['./plugin-preview.component.sass']
+    styleUrls: ['./plugin-preview.component.sass'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class PluginPreviewComponent implements OnChanges {
 

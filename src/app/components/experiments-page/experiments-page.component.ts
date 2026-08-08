@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { PageEvent } from '@angular/material/paginator';
 import { Router } from '@angular/router';
@@ -11,7 +11,9 @@ import { ExperimentApiObject, QhanaBackendService } from 'src/app/services/qhana
 @Component({
     selector: 'qhana-experiments-page',
     templateUrl: './experiments-page.component.html',
-    styleUrls: ['./experiments-page.component.sass']
+    styleUrls: ['./experiments-page.component.sass'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class ExperimentsPageComponent implements OnInit {
 

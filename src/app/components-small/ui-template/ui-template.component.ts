@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { ApiLink } from 'src/app/services/api-data-types';
 import { TemplateApiObject } from 'src/app/services/templates.service';
 import { PluginRegistryBaseService } from 'src/app/services/registry.service';
@@ -11,7 +11,9 @@ import { EnvService } from 'src/app/services/env.service';
 @Component({
     selector: 'qhana-ui-template',
     templateUrl: './ui-template.component.html',
-    styleUrl: './ui-template.component.sass'
+    styleUrl: './ui-template.component.sass',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class UiTemplateComponent implements OnChanges, OnInit, OnDestroy {
 

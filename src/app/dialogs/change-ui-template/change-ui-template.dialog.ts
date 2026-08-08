@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, OnInit, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { TemplateApiObject } from 'src/app/services/templates.service';
 
@@ -6,6 +6,8 @@ import { TemplateApiObject } from 'src/app/services/templates.service';
     selector: 'qhana-change-ui-template',
     templateUrl: './change-ui-template.dialog.html',
     styleUrls: ['./change-ui-template.dialog.sass'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class ChangeUiTemplateDialog implements OnInit {
 

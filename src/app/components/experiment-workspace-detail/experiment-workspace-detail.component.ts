@@ -1,6 +1,6 @@
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { KeyValue } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatChipInputEvent } from '@angular/material/chips';
 import { MatDialog } from '@angular/material/dialog';
@@ -15,13 +15,15 @@ import { ALL_PLUGINS_TEMPLATE_ID, TAB_GROUP_NAME_OVERRIDES, TAB_GROUP_SORT_KEYS,
 @Component({
     selector: 'qhana-experiment-workspace-detail',
     templateUrl: './experiment-workspace-detail.component.html',
-    styleUrls: ['./experiment-workspace-detail.component.sass']
+    styleUrls: ['./experiment-workspace-detail.component.sass'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class ExperimentWorkspaceDetailComponent implements OnInit {
 
     readonly separatorKeysCodes = [ENTER, COMMA] as const;
 
-    tabGroupNameOverrides = { ...TAB_GROUP_NAME_OVERRIDES };
+    tabGroupNameOverrides: Partial<Record<string, string>> = { ...TAB_GROUP_NAME_OVERRIDES };
 
     routeTemplateId: string | null = null;
     defaultTemplateId: string | null = null;
