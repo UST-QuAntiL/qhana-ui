@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { PageEvent } from '@angular/material/paginator';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, Subscription, of } from 'rxjs';
-import { catchError, map, switchMap } from 'rxjs/operators';
+import { catchError, map, take } from 'rxjs/operators';
 import { CurrentExperimentService } from 'src/app/services/current-experiment.service';
 import {
     ExperimentResultQuality,
@@ -13,7 +13,9 @@ import {
 import { ServiceRegistryService } from 'src/app/services/service-registry.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { PluginRegistryBaseService } from 'src/app/services/registry.service';
-import { TemplatesService } from 'src/app/services/templates.service';
+import { TemplateTabApiObject, TemplatesService } from 'src/app/services/templates.service';
+import { CollectionApiObject, PageApiObject } from 'src/app/services/api-data-types';
+import { PluginApiObject } from 'src/app/services/qhana-api-data-types';
 import { MatDialog } from '@angular/material/dialog';
 import { ExportWorkflowModalComponent } from '../export-workflow-modal/export-workflow-modal.component';
 import { BpmnXmlBuilder, EnrichedStep } from './bpmn-xml-builder';
@@ -93,7 +95,7 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
                 if (change) {
                     this.updatePageContent();
                     // call method to conditionally set workflowExists
-                    this.checkWorkflowGroup(experimentId);
+                    void this.checkWorkflowGroup();
                 }
             });
         // Subscribe to experiment name changes, keep only alphanumeric characters, hyphens, and underscores
@@ -172,57 +174,75 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
         }
     }
 
-    exportWorkflow() {
+    async exportWorkflow(): Promise<void> {
         if (!this.backendUrl || !this.experimentId) {
             console.error('Backend URL or experimentId is not set');
             return;
         }
-        this.backend
-            .getTimelineStepsPage(this.experimentId, {
-                page: 0,
-                itemCount: 100,
-                sort: 1,
-            })
-            .subscribe({
-                // if the observable retruns something, next will be executed with the value the observable returned
-                next: (pageData) => this.processTimelineSteps(pageData),
-                error: (err) => console.error('Failed to load timeline steps', err),
-            });
+
+        try {
+            const steps = await this.loadAllTimelineSteps();
+            await this.processTimelineSteps(steps);
+        } catch (err) {
+            console.error('Failed to export workflow', err);
+        }
     }
 
-    private processTimelineSteps(pageData: any): void {
-        // save all items or an empty array in steps
-        const steps = pageData.items || [];
+    private async loadAllTimelineSteps(): Promise<TimelineStepApiObject[]> {
+        if (!this.experimentId) {
+            return [];
+        }
+
+        const pageSize = 100;
+        const firstPage = await this.backend.getTimelineStepsPage(this.experimentId, {
+            page: 0,
+            itemCount: pageSize,
+            sort: 1,
+        }).toPromise();
+
+        const steps = [...firstPage.items];
+        const pageCount = Math.ceil(firstPage.itemCount / pageSize);
+
+        for (let page = 1; page < pageCount; page++) {
+            const pageData = await this.backend.getTimelineStepsPage(this.experimentId, {
+                page,
+                itemCount: pageSize,
+                sort: 1,
+            }).toPromise();
+            steps.push(...pageData.items);
+        }
+
+        return steps;
+    }
+
+    private async processTimelineSteps(steps: TimelineStepApiObject[]): Promise<void> {
         const dialogRef = this.dialog.open(ExportWorkflowModalComponent, {
             width: '700px',
             data: { steps },
         });
 
-        dialogRef.afterClosed().subscribe(async (selectedSteps: TimelineStepApiObject[] | null) => {
-            if (!selectedSteps || selectedSteps.length === 0) {
-                console.log('No steps selected for export');
-                return;
-            }
+        const selectedSteps = await dialogRef.afterClosed()
+            .pipe(take(1))
+            .toPromise() as TimelineStepApiObject[] | null | undefined;
 
-            try {
-                const enrichedSteps = await this.fetchEnrichedSteps(selectedSteps);
-                const xml = new BpmnXmlBuilder(this.experimentName, enrichedSteps).toString();
+        if (!selectedSteps || selectedSteps.length === 0) {
+            return;
+        }
 
-                this.getWorkflowEditorHref(this.currentTemplateId!).subscribe(href => {
-                    const postUrl = `${href}workflows/`;
-                    const headers = new HttpHeaders({'Content-Type': 'application/bpmn+xml'});
+        if (!this.currentTemplateId) {
+            throw new Error('Current template ID is not set');
+        }
 
-                    this.http.post(postUrl, xml, { headers })
-                        .pipe(switchMap(() => this.getWorkflowTab(this.currentTemplateId!)))
-                        .subscribe({
-                            next: tabId => this.navigateToTabId(tabId),
-                            error: err => console.error('Failed to export workflow', err),
-                        });
-                });
-            } catch (err) {
-                console.error('Failed to enrich timeline steps', err);
-            }
-        });
+        const enrichedSteps = await this.fetchEnrichedSteps(selectedSteps);
+        const xml = new BpmnXmlBuilder(this.experimentName ?? 'Experiment', enrichedSteps).toString();
+
+        const tabId = await this.getWorkflowTab(this.currentTemplateId);
+        const href = await this.getWorkflowEditorHref(tabId);
+        const postUrl = `${href.replace(/\/?$/, '/')}workflows/`;
+        const headers = new HttpHeaders({'Content-Type': 'application/bpmn+xml'});
+
+        await this.http.post(postUrl, xml, { headers }).toPromise();
+        this.navigateToTabId(tabId);
     }
 
     private async fetchEnrichedSteps(selectedSteps: TimelineStepApiObject[]): Promise<EnrichedStep[]> {
@@ -258,8 +278,6 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
     }
 
     private navigateToTabId(tabId: string): void {
-        console.log(`Switching to workflow tab: ${tabId}`);
-
         const targetRoute = [
             '/experiments',
             this.experimentId,
@@ -274,7 +292,6 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
         const queryParams = Object.fromEntries(
             Object.entries(currentQueryParams)
                 .filter(([key]) => key.startsWith('param-'))
-                .map(([key, value]) => [key.replace(/^param-/, ''), value])
         );
 
         // Navigate to Workflow tab
@@ -284,34 +301,58 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
         });
     }
 
-    private getWorkflowTab(templateId: string): Observable<string> {
-        const tabsUrl = `${this.registry.registryRootUrl}templates/${templateId}/tabs/?group=experiment-navigation`;
-        return this.http.get<any>(tabsUrl).pipe(
-            map((data) => {
-                const workflowTab = data.data.items.find(
-                    (tab: any) => tab.name === 'Workflow'
-                );
-                if (!workflowTab) throw new Error('Workflow tab not found');
-                return workflowTab.resourceKey.uiTemplateTabId;
-            })
+    private async getWorkflowTab(templateId: string): Promise<string> {
+        const groups = await this.template.getTemplateTabGroups(templateId, true);
+        const experimentNavigationGroup = groups.find(
+            (group) => group.resourceKey?.['?group'] === 'experiment-navigation'
         );
+
+        if (!experimentNavigationGroup) {
+            throw new Error('Experiment navigation group not found');
+        }
+
+        const tabsResponse = await this.registry.getByApiLink<CollectionApiObject>(
+            experimentNavigationGroup,
+            null,
+            true
+        );
+
+        const tabLinks = tabsResponse?.data?.items ?? [];
+        const tabResponses = await Promise.all(
+            tabLinks.map((tabLink) =>
+                this.registry.getByApiLink<TemplateTabApiObject>(tabLink, null, false)
+            )
+        );
+
+        const workflowTab = tabResponses
+            .map((response) => response?.data)
+            .find((tab) => tab?.name === 'Workflow');
+
+        const tabId = workflowTab?.self?.resourceKey?.uiTemplateTabId;
+
+        if (!tabId) {
+            throw new Error('Workflow tab not found');
+        }
+
+        return tabId;
     }
 
     /**
      * Checks if a workflow tab exists for the given experiment
      * and updates the workflowExists property accordingly
      */
-    private checkWorkflowGroup(experimentId: string): void {
-        const url = `${this.registry.registryRootUrl}templates/${this.currentTemplateId}/tabs/?group=experiment-navigation`;
-        this.http.get<any>(url)
-            .pipe(
-                map((data) => {
-                    const workflowTab = data.data.items.find(
-                        (tab: any) => tab.name === 'Workflow');
-                    return !!workflowTab;
-                }), catchError(() => of(false)))
-            // If there is an workflow tab set workflowExists to true else false
-            .subscribe((exists) => this.workflowExists = exists);
+    private async checkWorkflowGroup(): Promise<void> {
+        if (!this.currentTemplateId) {
+            this.workflowExists = false;
+            return;
+        }
+
+        try {
+            await this.getWorkflowTab(this.currentTemplateId);
+            this.workflowExists = true;
+        } catch {
+            this.workflowExists = false;
+        }
     }
 
     /**
@@ -321,24 +362,33 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
      * filtering the available plugins by their technical identifier (e.g. "workflow-editor"),
      * and returning the corresponding URL.
      *
-     * @returns Observable<string> containing the Workflow Editor URL
+     * @returns Promise<string> containing the Workflow Editor URL
      */
-    private getWorkflowEditorHref(templateId: string): Observable<string> {
-        return this.getWorkflowTab(templateId).pipe(
-            switchMap((tabId) => {
-                const url = `${this.registry.registryRootUrl}plugins/?template-tab=${tabId}`;
+    private async getWorkflowEditorHref(tabId: string): Promise<string> {
+        const query = new URLSearchParams();
+        query.set('template-tab', tabId);
 
-                return this.http.get<any>(url).pipe(
-                    map(response => {
-                        const plugin = response.embedded
-                            ?.map((e: any) => e.data)
-                            ?.find((p: any) => p.identifier === 'workflow-editor');
-
-                        return plugin.href;
-                    })
-                );
-            })
+        const pluginsResponse = await this.registry.getByRel<PageApiObject>(
+            [['plugin', 'collection']],
+            query
         );
+
+        const pluginLinks = pluginsResponse?.data?.items ?? [];
+        const pluginResponses = await Promise.all(
+            pluginLinks.map((pluginLink) =>
+                this.registry.getByApiLink<PluginApiObject>(pluginLink, null, false)
+            )
+        );
+
+        const workflowEditor = pluginResponses
+            .map((response) => response?.data)
+            .find((plugin) => plugin?.identifier === 'workflow-editor');
+
+        if (!workflowEditor?.href) {
+            throw new Error('Workflow Editor plugin not found');
+        }
+
+        return workflowEditor.href;
     }
 
 }

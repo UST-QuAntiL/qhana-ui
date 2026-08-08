@@ -1,12 +1,30 @@
+export interface TimelineDataItem {
+    type: string;
+    contentType: string;
+    name: string;
+    version: number;
+}
+
+export interface PluginDataInput {
+    parameter: string;
+    dataType: string;
+    contentType: string[];
+}
+
+export interface PluginDataOutput {
+    dataType: string;
+    contentType: string[];
+}
+
 export interface EnrichedStep {
     processorName: string;
     processorVersion: string;
     notes: string;
-    inputData: Array<{ type: string; contentType: string; name: string; version: number }>;
-    outputData: Array<{ type: string; contentType: string; name: string; version: number }>;
+    inputData: TimelineDataItem[];
+    outputData: TimelineDataItem[];
     parameters: Record<string, string>;
-    pluginDataInput: Array<{ parameter: string; dataType: string; contentType: string[] }>;
-    pluginDataOutput: Array<{ dataType: string; contentType: string[] }>;
+    pluginDataInput: PluginDataInput[];
+    pluginDataOutput: PluginDataOutput[];
 }
 
 interface InputMapping {
@@ -48,13 +66,14 @@ export class BpmnXmlBuilder {
     private stepInputMappings: InputMapping[][] = [];
 
     public constructor(
-        private experimentName: any,
+        private experimentName: string,
         private steps: EnrichedStep[]) {
         this.computeMappings();
     }
 
     public toString(): string {
-        const processOpen = `<bpmn2:process id="Experiment_${this.experimentName}" isExecutable="true" name="Experiment_${this.experimentName}" camunda:historyTimeToLive="360000">`;
+        const processId = `Experiment_${this.experimentName.replace(/\s+/g, "_")}`;
+        const processOpen = `<bpmn2:process id="${processId}" isExecutable="true" name="Experiment_${this.experimentName}" camunda:historyTimeToLive="360000">`;
         const diagramXml = `
         <bpmndi:BPMNDiagram id="BPMNDiagram_1">
             <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1">
