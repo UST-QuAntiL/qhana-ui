@@ -55,7 +55,11 @@
                             "is-buffer",
                             "@braintree/sanitize-url",
                             "dayjs",
-                            "dompurify"
+                            "dompurify",
+                            "elkjs",
+                            "cytoscape",
+                            "cytoscape-cose-bilkent",
+                            "node-emoji"
                         ],
                         "scripts": [],
                         "browser": "src/main.ts"
