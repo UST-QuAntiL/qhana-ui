@@ -9,7 +9,8 @@ interface ModalData {
 @Component({
   selector: 'qhana-export-workflow-modal',
   templateUrl: './export-workflow-modal.component.html',
-  styleUrls: ['./export-workflow-modal.component.sass']
+  styleUrls: ['./export-workflow-modal.component.sass'],
+  standalone: false
 })
 
 export class ExportWorkflowModalComponent implements OnInit {
