@@ -20,8 +20,8 @@
 
 <mat-dialog-actions align="end">
   <button mat-button (click)="closeDialog(false)">Cancel</button>
-  <button mat-raised-button color="primary" 
-          (click)="closeDialog(true)" 
+  <button mat-raised-button color="primary"
+          (click)="closeDialog(true)"
           [disabled]="!hasSelectedSteps">
     Export Selected
   </button>
