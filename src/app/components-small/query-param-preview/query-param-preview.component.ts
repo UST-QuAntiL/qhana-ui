@@ -39,7 +39,7 @@ export class QueryParamPreviewComponent implements OnChanges {
                     this.content = mdString;
                 });
             } else {
-                this.content = ":warning: The urlencoded string is too large to preview.";
+                this.content = "⚠️ The urlencoded string is too large to preview.";
             }
         });
     }
