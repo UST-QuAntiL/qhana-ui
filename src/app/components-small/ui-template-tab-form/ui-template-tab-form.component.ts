@@ -28,6 +28,7 @@ export class UiTemplateTabFormComponent implements OnChanges, OnDestroy, OnInit 
     @Output() data: EventEmitter<any> = new EventEmitter();
     @Output() formSubmit: EventEmitter<void> = new EventEmitter();
 
+    private formEventsSubscription: Subscription | null = null;
     private formStatusSubscription: Subscription | null = null;
     private formValueSubscription: Subscription | null = null;
 
@@ -90,6 +91,13 @@ export class UiTemplateTabFormComponent implements OnChanges, OnDestroy, OnInit 
             }
             return null;
         });
+
+
+        this.formEventsSubscription = templateForm.events.subscribe((event) => {
+            if (event instanceof PristineChangeEvent) {
+                this.updateDirty();
+            }
+        });
         this.formStatusSubscription = templateForm.statusChanges.subscribe(() => {
             this.updateDirty();
             this.isValid.emit(!templateForm.invalid);
@@ -126,6 +134,7 @@ export class UiTemplateTabFormComponent implements OnChanges, OnDestroy, OnInit 
     }
 
     ngOnDestroy(): void {
+        this.formEventsSubscription?.unsubscribe();
         this.formStatusSubscription?.unsubscribe();
         this.formValueSubscription?.unsubscribe();
     }
