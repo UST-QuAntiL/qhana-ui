@@ -9,6 +9,11 @@
     <p>Description: {{tabData?.description ? '' : '–'}}</p>
     <qhana-markdown [markdown]="tabData?.description ?? ''" [editable]="false" [hidden]="!tabData?.description"></qhana-markdown>
 }
+@if (!isEditing && tabData?.metadata) {
+    @for (item of tabData.metadata|keyvalue; track item.key) {
+        <p>{{item.key}}: {{item.value}}</p>
+    }
+}
 @if (!isEditing && !(tabData?.groupKey ?? false) && tabFilterData) {
     <p>Plugin filter:</p>
     <qhana-plugin-filter-view [filter]="tabFilterData"></qhana-plugin-filter-view>

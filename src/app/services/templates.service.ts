@@ -42,6 +42,7 @@ export interface TemplateTabApiObject extends ApiObject {  // TODO check fields
     location: string;
     groupKey: string;
     plugins: ApiLink;
+    metadata?: { [props: string]: string };
 }
 
 export const TAB_GROUP_SORT_KEYS: { [group: string]: number } = {
