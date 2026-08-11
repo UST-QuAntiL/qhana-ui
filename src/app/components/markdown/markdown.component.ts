@@ -23,6 +23,20 @@ import { QhanaBackendService } from 'src/app/services/qhana-backend.service';
 
 import { createLatexPreviewRenderer } from './milkdown-latex';
 
+const QHANA_BACKEND_LATEX_LANGUAGE = 'latex';
+
+type ApplyCodeBlockPreview =
+    (value: null | string | HTMLElement) => void;
+
+/**
+ * QHAna reserves the exact lowercase "latex" language for fenced blocks
+ * rendered by the external backend renderer. Crepe uses other casing, such
+ * as "LaTeX", for its own $$ math blocks.
+ */
+const isCrepeMathLanguage = (language: string): boolean =>
+    language !== QHANA_BACKEND_LATEX_LANGUAGE &&
+    language.toLowerCase() === QHANA_BACKEND_LATEX_LANGUAGE;
+
 const qhanaCodeBlockSchema = codeBlockSchema.extendSchema(
     (previousSchema) => (ctx) => {
         const baseSchema = previousSchema(ctx);
@@ -34,10 +48,7 @@ const qhanaCodeBlockSchema = codeBlockSchema.extendSchema(
                 runner: (state, node) => {
                     const language = node.attrs.language ?? '';
 
-                    if (
-                        language !== 'latex' &&
-                        language.toLowerCase() === 'latex'
-                    ) {
+                    if (isCrepeMathLanguage(language)) {
                         state.addNode(
                             'math',
                             undefined,
@@ -55,6 +66,53 @@ const qhanaCodeBlockSchema = codeBlockSchema.extendSchema(
         };
     },
 );
+
+let mermaidRenderId = 0;
+
+const renderMermaidPreview = (
+    content: string,
+    applyPreview: ApplyCodeBlockPreview,
+): string | void => {
+    if (!content.trim()) {
+        return 'Empty';
+    }
+
+    /*
+     * Mermaid uses the ID for temporary rendering DOM. It must be unique so
+     * concurrent diagram previews cannot collide. Mermaid removes its
+     * temporary DOM after rendering; suppressErrorRendering also removes it
+     * when rendering fails.
+     */
+    mermaidRenderId += 1;
+    const id = `qhana-mermaid-${mermaidRenderId}`;
+
+    void mermaid.render(id, content)
+        .then(({ svg }) => {
+            const container =
+                document.createElement('div');
+
+            container.classList.add(
+                'qhana-mermaid-preview',
+            );
+            container.innerHTML = svg;
+
+            applyPreview(container);
+        })
+        .catch((error: unknown) => {
+            console.error(
+                'Could not render Mermaid diagram.',
+                error,
+            );
+
+            const errorElement =
+                document.createElement('span');
+
+            errorElement.textContent =
+                'Mermaid syntax error';
+
+            applyPreview(errorElement);
+        });
+};
 
 @Component({
     selector: 'qhana-markdown',
@@ -75,8 +133,6 @@ export class MarkdownComponent implements OnChanges, OnDestroy {
 
     showAsPreview: boolean = false;
 
-    private static mermaidRenderId = 0;
-
     private crepe: Crepe | null = null;
 
     constructor(
@@ -94,6 +150,7 @@ export class MarkdownComponent implements OnChanges, OnDestroy {
         mermaid.initialize({
             startOnLoad: false,
             securityLevel: 'strict',
+            suppressErrorRendering: true,
         });
 
         const latexPreview = createLatexPreviewRenderer({
@@ -122,44 +179,16 @@ export class MarkdownComponent implements OnChanges, OnDestroy {
                     applyPreview,
                 ) => {
                     if (language.toLowerCase() === 'mermaid') {
-                        if (!content.trim()) {
-                            return 'Empty';
-                        }
-
-                        const id =
-                            `qhana-mermaid-${++MarkdownComponent.mermaidRenderId}`;
-
-                        mermaid.render(id, content)
-                            .then(({ svg }) => {
-                                const container =
-                                    document.createElement('div');
-
-                                container.classList.add(
-                                    'qhana-mermaid-preview',
-                                );
-                                container.innerHTML = svg;
-
-                                applyPreview(container);
-                            })
-                            .catch((error: unknown) => {
-                                console.error(
-                                    'Could not render Mermaid diagram.',
-                                    error,
-                                );
-
-                                const errorElement =
-                                    document.createElement('span');
-
-                                errorElement.textContent =
-                                    'Mermaid syntax error';
-
-                                applyPreview(errorElement);
-                            });
-
-                        return;
+                        return renderMermaidPreview(
+                            content,
+                            applyPreview,
+                        );
                     }
 
-                    if (language === 'latex') {
+                    if (
+                        language ===
+                        QHANA_BACKEND_LATEX_LANGUAGE
+                    ) {
                         return latexPreview(
                             language,
                             content,
@@ -192,8 +221,11 @@ export class MarkdownComponent implements OnChanges, OnDestroy {
 
         crepe.create()
             .then(() => {
+                /*
+                 * Crepe creation is asynchronous. The Angular component can
+                 * already have been destroyed while create() was pending.
+                 */
                 if (this.crepe !== crepe) {
-                    crepe.destroy();
                     return;
                 }
 
@@ -202,20 +234,6 @@ export class MarkdownComponent implements OnChanges, OnDestroy {
                         replaceAll(this.markdown, true),
                     );
                 }
-
-                requestAnimationFrame(() => {
-                    if (this.crepe !== crepe) {
-                        return;
-                    }
-
-                    nativeElement
-                        .querySelectorAll<HTMLElement>(
-                            '.milkdown-block-handle',
-                        )
-                        .forEach((element) => {
-                            element.style.display = 'none';
-                        });
-                });
 
                 this.markdownChanges.emit(this.markdown);
             })
@@ -246,6 +264,11 @@ export class MarkdownComponent implements OnChanges, OnDestroy {
 
     ngOnDestroy(): void {
         const crepe = this.crepe;
+
+        /*
+         * Invalidate pending create() completion before destroying the editor
+         * so its asynchronous continuation cannot update this component.
+         */
         this.crepe = null;
         crepe?.destroy();
     }
