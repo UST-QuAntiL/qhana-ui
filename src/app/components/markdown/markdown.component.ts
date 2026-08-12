@@ -33,9 +33,10 @@ type ApplyCodeBlockPreview =
  * rendered by the external backend renderer. Crepe uses other casing, such
  * as "LaTeX", for its own $$ math blocks.
  */
-const isCrepeMathLanguage = (language: string): boolean =>
-    language !== QHANA_BACKEND_LATEX_LANGUAGE &&
-    language.toLowerCase() === QHANA_BACKEND_LATEX_LANGUAGE;
+const isCrepeMathLanguage = (language: string): boolean => {
+    return language !== QHANA_BACKEND_LATEX_LANGUAGE &&
+        language.toLowerCase() === QHANA_BACKEND_LATEX_LANGUAGE;
+};
 
 const qhanaCodeBlockSchema = codeBlockSchema.extendSchema(
     (previousSchema) => (ctx) => {
