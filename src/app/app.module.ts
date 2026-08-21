@@ -87,8 +87,6 @@ import { RawTextPreviewComponent } from './components-small/raw-text-preview/raw
 import { SettingsPageComponent } from './components/settings-page/settings-page.component';
 import { StepStatusComponent } from './components-small/step-status/step-status.component';
 import { SubstepsDetailsComponent } from './components/substeps-details/substeps-details.component';
-import { TabGroupListComponent } from './components/tab-group-list/tab-group-list.component';
-import { TemplateDetailsComponent } from './components-small/template-details/template-details.component';
 import { TempTabComponent } from './components/temp-tab/temp-tab.component';
 import { TimelineStepComponent } from './components/timeline-step/timeline-step.component';
 import { TimelineStepNavComponent } from './components/timeline-step-nav/timeline-step-nav.component';
@@ -146,8 +144,6 @@ import { UiTemplateTabListComponent } from './components-small/ui-template-tab-l
         SettingsPageComponent,
         StepStatusComponent,
         SubstepsDetailsComponent,
-        TabGroupListComponent,
-        TemplateDetailsComponent,
         TempTabComponent,
         TimelineStepComponent,
         TimelineStepNavComponent,
