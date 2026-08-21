@@ -26,7 +26,7 @@ export class MarkdownPreviewComponent implements OnChanges {
                 // preview must be markdown and not too large!
                 blob.text().then((text) => this.content = text);
             } else {
-                this.content = ":warning: The data content is not of type markdown or too large to preview.";
+                this.content = "⚠️ The data content is not of type markdown or too large to preview.";
             }
         });
     }

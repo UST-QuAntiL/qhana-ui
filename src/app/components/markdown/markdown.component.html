@@ -1,6 +1,36 @@
-<div class="menu" [hidden]="!editable || !showAsPreview">
-    <button type="button" class="button" aria-label="edit" title="edit" (click)="resetEditMode()">
+<div class="menu" [hidden]="!editable">
+    <button
+        *ngIf="showHelp"
+        type="button"
+        class="button"
+        aria-label="markdown help"
+        title="markdown help"
+        (click)="showMarkdownHelp()"
+    >
+        <span class="icon material-icons material-icons-outlined">help</span>
+    </button>
+
+    <button
+        *ngIf="!showAsPreview"
+        type="button"
+        class="button"
+        aria-label="preview"
+        title="preview"
+        (click)="showPreview()"
+    >
+        <span class="icon material-icons material-icons-outlined">visibility</span>
+    </button>
+
+    <button
+        *ngIf="showAsPreview"
+        type="button"
+        class="button"
+        aria-label="edit"
+        title="edit"
+        (click)="resetEditMode()"
+    >
         <span class="icon material-icons material-icons-outlined">edit</span>
     </button>
 </div>
+
 <div class="markdown-wrapper" #milkdown></div>

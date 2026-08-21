@@ -1,240 +1,86 @@
-import { createCmd, createCmdKey, ThemeInnerEditorType, themeManagerCtx } from '@milkdown/core';
-import { InputRule, Node, NodeSelection, setBlockType } from '@milkdown/prose';
-import { AtomList, createNode } from '@milkdown/utils';
-import { customAlphabet } from 'nanoid';
-import { Node as UnistNode } from 'unist';
-import { visit } from 'unist-util-visit';
-
-export const nanoid = customAlphabet('abcedfghicklmn', 10);
-
-export const getId = (node?: Node) => node?.attrs?.['identity'] || nanoid();
-
-const createLatexDiv = (contents: string) => ({
-    type: 'latex',
-    value: contents,
-});
-
-const visitCodeBlock = (ast: UnistNode) =>
-    visit(ast, 'code', (node, index, parent) => {
-        const { lang, value } = node;
-
-        // If this codeblock is not latex, bail.
-        if (lang !== 'latex') {
-            return node;
-        }
-
-        const newNode = createLatexDiv(value);
-
-        if (parent && index != null) {
-            (parent as any).children.splice(index, 1, newNode);
-        }
-
-        return node;
-    });
-
-export const remarkLatex = () => {
-    function transformer(tree: UnistNode) {
-        visitCodeBlock(tree);
-    }
-
-    return transformer;
-};
-
-const inputRegex = /^```latex$/;
-
-export type Options = {
-    placeholder: {
-        empty: string;
-        error: string;
+export type LatexOptions = {
+    placeholder?: {
+        empty?: string;
+        error?: string;
     };
     latexRendererUrl: string | null;
-    latexPackages: string[];
-    imageFormat: string | "svg" | "pdf" | "png" | "jpg";
+    latexPackages?: string[];
+    imageFormat?: string;
 };
 
-export const TurnIntoDiagram = createCmdKey('TurnIntoLatex');
-
-export const latexNode = createNode<string, Options>((utils, options) => {
-    const id = 'latex';
-
+export const createLatexPreviewRenderer = (options: LatexOptions) => {
     const placeholder = {
         empty: 'Empty',
-        error: 'LaTex Syntax Error',
-        ...(options?.placeholder ?? {}),
+        error: 'LaTeX Syntax Error',
+        ...(options.placeholder ?? {}),
     };
 
-    const latexRendererUrl = options?.latexRendererUrl ?? "http://localhost:5030/renderLatex";
-    const defaultPackages = options?.latexPackages ?? ["\\usepackage{tikz}", "\\usetikzlibrary{quantikz}"];
-    const imageFormat = options?.imageFormat ?? "svg";
+    const defaultPackages = options.latexPackages ?? [
+        '\\usepackage{tikz}',
+        '\\usetikzlibrary{quantikz}',
+    ];
 
-    return {
-        id,
-        schema: () => ({
-            content: 'text*',
-            group: 'block',
-            marks: '',
-            defining: true,
-            atom: true,
-            code: true,
-            isolating: true,
-            attrs: {
-                value: {
-                    default: '',
-                },
-                identity: {
-                    default: '',
-                },
-            },
-            parseDOM: [
-                {
-                    tag: `div[data-type="${id}"]`,
-                    preserveWhitespace: 'full',
-                    getAttrs: (dom) => {
-                        if (!(dom instanceof HTMLElement)) {
-                            throw new Error();
-                        }
-                        return {
-                            value: dom.dataset['value'],
-                            identity: dom.id,
-                        };
-                    },
-                },
-            ],
-            toDOM: (node) => {
-                const identity = getId(node);
-                return [
-                    'div',
-                    {
-                        id: identity,
-                        class: utils.getClassName(node.attrs, 'latex'),
-                        'data-type': id,
-                        'data-value': node.attrs['value'] || node.textContent || '',
-                    },
-                    0,
-                ];
-            },
-            parseMarkdown: {
-                match: ({ type }) => type === id,
-                runner: (state, node, type) => {
-                    const value = node['value'] as string;
-                    state.openNode(type, { value });
-                    if (value) {
-                        state.addText(value);
-                    }
-                    state.closeNode();
-                },
-            },
-            toMarkdown: {
-                match: (node) => node.type.name === id,
-                runner: (state, node) => {
-                    state.addNode('code', undefined, node.content.firstChild?.text || '', { lang: 'latex' });
-                },
-            },
-        }),
-        commands: (nodeType) => [createCmd(TurnIntoDiagram, () => setBlockType(nodeType, { id: getId() }))],
-        view: (ctx) => (node, view, getPos) => {
-            const currentId = getId(node);
+    const defaultImageFormat = options.imageFormat ?? 'svg';
 
-            let header = '';
-            let currentNode = node;
+    return (
+        language: string,
+        content: string,
+    ): HTMLElement | string | null => {
+        if (language.toLowerCase() !== 'latex') {
+            return null;
+        }
 
-            const renderer = utils.themeManager.get<ThemeInnerEditorType>('inner-editor', {
-                view,
-                getPos,
-                render: (code) => {
-                    try {
-                        if (!code) {
-                            renderer.preview.innerHTML = placeholder.empty;
-                        } else {
-                            const packagesRegex = /(?:^[\t ]*)(\\use[a-zA-Z]+(?:\[[^\]]*\])?(?:\{[^\}]+\}))/gm;
-                            const foundPackages = [];
-                            let currentPackage = packagesRegex.exec(code);
-                            while (currentPackage != null) {
-                                foundPackages.push(currentPackage[1])
-                                currentPackage = packagesRegex.exec(code);
-                            }
-                            const packages = foundPackages.length > 0 ? foundPackages : defaultPackages;
-                            const imageFormatRegex = /(?:%[\t ]*format\s*[:=]\s*)([a-zA-Z-]+)(?:[\t ]*$)/gm;
-                            const outputFormat = imageFormatRegex.exec(code)?.[1] ?? imageFormat;
-                            const stripImageFormatRegex = /%[^\n]*$/gm;
+        if (!content.trim()) {
+            return placeholder.empty;
+        }
 
-                            const processedCode = code.replace(packagesRegex, "").replace(stripImageFormatRegex, "");
+        if (!options.latexRendererUrl) {
+            return placeholder.error;
+        }
 
-                            const imageUrl = new URL(latexRendererUrl);
-                            imageUrl.searchParams.set("content", processedCode);
-                            imageUrl.searchParams.set("output", outputFormat);
-                            packages.forEach(latexPackage => {
-                                imageUrl.searchParams.append("packages", latexPackage);
-                            });
+        try {
+            const packagesRegex =
+                /(?:^[\t ]*)(\\use[a-zA-Z]+(?:\[[^\]]*\])?(?:\{[^\}]+\}))/gm;
 
-                            if (false) {
-                                // debug output
-                                console.log("Output Format:", imageUrl.searchParams.get("output"))
-                                console.log("Packages:", imageUrl.searchParams.getAll("packages"))
-                                console.log("Content:", imageUrl.searchParams.get("content"))
-                            }
+            const foundPackages: string[] = [];
+            let currentPackage = packagesRegex.exec(content);
 
-                            // TODO debounce actual rendering
-                            renderer.preview.innerHTML = `<img src="${imageUrl}">`;
-                        }
-                    } catch (err) {
-                        console.log(err)
-                        const error = document.getElementById('d' + currentId);
-                        if (error) {
-                            error.remove();
-                        }
-                        renderer.preview.innerHTML = placeholder.error;
-                    } finally {
-                        renderer.dom.appendChild(renderer.preview);
-                    }
-                },
+            while (currentPackage !== null) {
+                foundPackages.push(currentPackage[1]);
+                currentPackage = packagesRegex.exec(content);
+            }
+
+            const packages =
+                foundPackages.length > 0 ? foundPackages : defaultPackages;
+
+            const imageFormatRegex =
+                /(?:%[\t ]*format\s*[:=]\s*)([a-zA-Z-]+)(?:[\t ]*$)/gm;
+
+            const outputFormat =
+                imageFormatRegex.exec(content)?.[1] ?? defaultImageFormat;
+
+            const stripImageFormatRegex = /%[^\n]*$/gm;
+
+            const processedCode = content
+                .replace(packagesRegex, '')
+                .replace(stripImageFormatRegex, '');
+
+            const imageUrl = new URL(options.latexRendererUrl);
+            imageUrl.searchParams.set('content', processedCode);
+            imageUrl.searchParams.set('output', outputFormat);
+
+            packages.forEach((latexPackage) => {
+                imageUrl.searchParams.append('packages', latexPackage);
             });
 
-            if (!renderer) return {};
+            const image = document.createElement('img');
+            image.src = imageUrl.toString();
+            image.alt = 'LaTeX preview';
 
-            const { onUpdate, editor, dom, onFocus, onBlur, onDestroy, stopEvent } = renderer;
-            editor.dataset['type'] = id;
-            dom.classList.add('latex');
-
-            onUpdate(currentNode, true);
-
-            ctx.get(themeManagerCtx).onFlush(() => {
-                onUpdate(currentNode, false);
-            }, false);
-
-            return {
-                dom,
-                update: (updatedNode) => {
-                    if (!updatedNode.sameMarkup(currentNode)) return false;
-                    currentNode = updatedNode;
-                    onUpdate(currentNode, false);
-
-                    return true;
-                },
-                selectNode: () => {
-                    onFocus(currentNode);
-                },
-                deselectNode: () => {
-                    onBlur(currentNode);
-                },
-                stopEvent,
-                ignoreMutation: () => true,
-                destroy() {
-                    onDestroy();
-                },
-            };
-        },
-        inputRules: (nodeType) => [
-            new InputRule(inputRegex, (state, _match, start, end) => {
-                const $start = state.doc.resolve(start);
-                if (!$start.node(-1).canReplaceWith($start.index(-1), $start.indexAfter(-1), nodeType)) return null;
-                const tr = state.tr.delete(start, end).setBlockType(start, start, nodeType, { id: getId() });
-
-                return tr.setSelection(NodeSelection.create(tr.doc, start - 1));
-            }),
-        ],
-        remarkPlugins: () => [remarkLatex],
+            return image;
+        } catch (error) {
+            console.error('Could not render LaTeX preview.', error);
+            return placeholder.error;
+        }
     };
-});
-
-export const latex = AtomList.create([latexNode()]);
+};

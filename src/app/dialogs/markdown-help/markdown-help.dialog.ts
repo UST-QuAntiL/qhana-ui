@@ -43,7 +43,7 @@ Math is rendered using KaTeX and allows the use of LaTeX math characters.
 
 ## Slash Commands
 
-Typing \`/\` in an empty line opens the slash command menue that can be used to insert other markdown elements like lists, tables, code blocks (named "code fences") and mermaid diagrams.
+Typing \`/\` in an empty line opens the slash command menu that can be used to insert Markdown elements like lists, tables, code blocks and math blocks.
 
 \`\`\`
 Example code block.
@@ -55,9 +55,9 @@ To exit a code block while editing press [strg]+[enter] on the last line.
 
 ## Mermaid Diagrams
 
-The markdown editor supports mermaid.js diagrams. See [mermaid-js.github.io](https://mermaid-js.github.io/mermaid/#/?id=diagram-types)
+The markdown editor supports mermaid.js diagrams. See [mermaid.js.org](https://mermaid.js.org/)
 
-First create a new diagram with the slash commands, then click on the diagram box (showing "[empty]") to edit the diagram.
+Create a code block and select \`mermaid\` as its language, or use a fenced Markdown code block with the language \`mermaid\`:
 
 \`\`\`mermaid
 graph LR;

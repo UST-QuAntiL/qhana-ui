@@ -19,25 +19,12 @@
     "@angular/platform-browser": "~22.1.0",
     "@angular/router": "~22.1.0",
     "@fontsource/roboto": "^4.5.7",
-    "@milkdown/core": "^6.0.0",
-    "@milkdown/plugin-clipboard": "^6.0.0",
-    "@milkdown/plugin-cursor": "^6.0.0",
-    "@milkdown/plugin-diagram": "^6.0.0",
-    "@milkdown/plugin-emoji": "^6.0.0",
-    "@milkdown/plugin-history": "^6.0.0",
-    "@milkdown/plugin-indent": "^6.0.0",
-    "@milkdown/plugin-listener": "^6.0.0",
-    "@milkdown/plugin-math": "^6.0.0",
-    "@milkdown/plugin-menu": "^6.0.0",
-    "@milkdown/plugin-prism": "^6.0.0",
-    "@milkdown/plugin-slash": "^6.0.0",
-    "@milkdown/plugin-tooltip": "^6.0.0",
-    "@milkdown/preset-commonmark": "^6.0.0",
-    "@milkdown/preset-gfm": "^6.0.0",
-    "@milkdown/prose": "^6.0.0",
-    "@milkdown/theme-nord": "^6.0.0",
+    "@milkdown/crepe": "7.22.0",
+    "@milkdown/kit": "7.22.0",
     "javascript-time-ago": "^2.5.4",
+    "katex": "0.18.1",
     "material-icons": "^1.10.11",
+    "mermaid": "11.16.1",
     "rxjs": "~6.6.7",
     "tslib": "^2.2.0",
     "zone.js": "^0.15.1"
@@ -55,13 +42,8 @@
     "karma-coverage": "~2.0.3",
     "karma-jasmine": "~4.0.1",
     "karma-jasmine-html-reporter": "~1.7.0",
+    "type-fest": "^4.41.0",
     "typescript": "~6.0.3"
-  },
-  "overrides": {
-    "cytoscape": "3.32.2",
-    "mermaid": {
-      "uuid": "11.1.1"
-    }
   },
   "allowScripts": {
     "esbuild@0.27.7": true,
