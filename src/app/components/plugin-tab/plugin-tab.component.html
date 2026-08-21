@@ -1,21 +1,34 @@
-<ng-container *ngFor="let navTabBar of navigationTabs">
-    <nav mat-tab-nav-bar class="big-nav-tabs" [tabPanel]="tabContentPanel">
-        <a mat-tab-link
-            [routerLink]="navTabLinkPrefix.concat(navTab.link)"
-            [queryParams]="(templateParam != null) ? {'template': templateParam} : {}"
-            [active]="navTab.tabId === currentTabId || (navTab.groupPath && currentPath?.startsWith(navTab.groupPath))"
-            *ngFor="let navTab of navTabBar">
-            <span class="link-label">
-                <mat-icon *ngIf="navTab.icon">
-                    {{navTab.icon}}
-                </mat-icon>
-                {{navTab.name}}
-                <mat-icon *ngIf="navTab.isGroup">more_vert</mat-icon>
-            </span>
-        </a>
-    </nav>
-</ng-container>
-<ng-container *ngIf="navigationTabs.length === 0 && (currentPluginGroup?.collectionSize ?? 0) > 1 && (currentPluginGroup?.collectionSize ?? 0) < 6">
+<!-- Default tab navigation layout: nested tab bars -->
+@if (tabNavigationLayout === "nested-tabs") {
+    @for (tabUrlOnPath of tabPath; track tabUrlOnPath) {
+        @if (groupToTabs.get(urlToTab.get(tabUrlOnPath)?.self?.resourceKey?.["?tab"] ?? "")?.length) {
+            <nav mat-tab-nav-bar class="big-nav-tabs" [tabPanel]="tabContentPanel">
+                @for (tabUrl of groupToTabs.get(urlToTab.get(tabUrlOnPath)?.self?.resourceKey?.["?tab"] ?? ""); track tabUrl) {
+                    <a mat-tab-link
+                        [routerLink]="navTabLinkPrefix.concat(urlToNavData.get(tabUrl)?.navigationLink ?? [])"
+                        [queryParams]="(templateParam != null) ? {'template': templateParam} : {}"
+                        [active]="tabPath.includes(tabUrl)">
+                        <span class="link-label">
+                            @if (urlToTab.get(tabUrl)?.icon) {
+                                <mat-icon>
+                                    {{urlToTab.get(tabUrl)?.icon}}
+                                </mat-icon>
+                            }
+                            {{urlToTab.get(tabUrl)?.name ?? tabUrl}}
+                            @if (urlToTab.get(tabUrl)?.groupKey) {
+                                <mat-icon>more_vert</mat-icon>
+                            }
+                        </span>
+                    </a>
+                }
+            </nav>
+        }
+    }
+}
+
+
+<!-- Plugins as navigation tabs if nr. < 6-->
+<ng-container *ngIf="tabPath.length === 1 && (currentPluginGroup?.collectionSize ?? 0) > 1 && (currentPluginGroup?.collectionSize ?? 0) < 6">
     <nav mat-tab-nav-bar class="big-nav-tabs" [tabPanel]="tabContentPanel">
         <a mat-tab-link
             [routerLink]="navTabLinkPrefix.concat(currentPath ? [currentPath] : []).concat([currentTabId ?? '-1', 'plugin', plugin.resourceKey?.pluginId ?? '-1'])"
@@ -26,24 +39,127 @@
         </a>
     </nav>
 </ng-container>
-<mat-tab-nav-panel class="main-content" #tabContentPanel>
-    <mat-card class="sidebar" *ngIf="currentPluginGroup && (currentPluginGroup.collectionSize >= 6 || (navigationTabs.length > 0 && currentPluginGroup.collectionSize > 1))">
-        <mat-card-header class="sidebar-header t-title">Plugins</mat-card-header>
-        <mat-card-content class="sidebar-content-wrapper">
-            <qhana-growing-list class="sidebar-content scrollable" [apiLink]="currentPluginGroup.self"
-                [highlighted]="highlightedPlugin" [highlightByKey]="'pluginId'"
-                (clickItem)="selectPlugin($event)"></qhana-growing-list>
-        </mat-card-content>
-    </mat-card>
-    <qhana-plugin-uiframe class="plugin-frame" [url]="activePluginFrontendUrl"
-        [context]="{experimentId: currentExperimentId??undefined, location: currentLocation??undefined}"
-        (formDataSubmit)="onPluginUiFormSubmit($event)" (requestDataPreview)="previewData = $event"
-        *ngIf="activePluginFrontendUrl != null">
-    </qhana-plugin-uiframe>
 
-    <qhana-data-preview class="data-preview" [data]="previewData"
-        [context]="{experimentId: currentExperimentId??undefined, location: currentLocation ? currentLocation + '.data-preview' : undefined}"
-        *ngIf="previewData">
-        <h3 class="t-headline">Preview "{{previewData.name}}"</h3>
-    </qhana-data-preview>
+<!-- Main content panel -->
+<mat-tab-nav-panel class="main-content" #tabContentPanel>
+
+    @if (tabNavigationLayout === "outline") {
+        <mat-card class="sidebar">
+            <mat-card-header class="sidebar-header t-title">Outline:</mat-card-header>
+            <mat-card-content class="sidebar-content-wrapper">
+                <nav name="sidebar" class="sidebar-content scrollable">
+                    @for (tabUrl of allTabs; track tabUrl) {
+                        <a [routerLink]="navTabLinkPrefix.concat(urlToNavData.get(tabUrl)?.navigationLink ?? [])"
+                            [queryParams]="(templateParam != null) ? {'template': templateParam} : {}"
+                            class="sidebar-link {{(tabUrl === currentTemplateTab?.self?.href) ? 'active' : ''}}"
+                            style="--level: {{(urlToTab.get(tabUrl)?.location?.split('.')?.length ?? 1)-1}};">
+                            <span class="link-label">
+                                @if (urlToTab.get(tabUrl)?.icon) {
+                                    <mat-icon>
+                                        {{urlToTab.get(tabUrl)?.icon}}
+                                    </mat-icon>
+                                }
+                                {{urlToTab.get(tabUrl)?.name ?? tabUrl}}
+                            </span>
+                        </a>
+                        @if (tabUrl === currentTemplateTab?.self?.href && (urlToNavData.get(tabUrl)?.previousTabs?.length || urlToNavData.get(tabUrl)?.nextTabs?.length)) {
+                            <div class="inline-buttons">
+                                @if (urlToNavData.get(tabUrl)?.previousTabs?.length === 1) {
+                                    @for (prevTabUrl of urlToNavData.get(tabUrl)?.previousTabs ?? []; track prevTabUrl) {
+                                        @if (urlToNavData.get(prevTabUrl)) {
+                                            <a [routerLink]="navTabLinkPrefix.concat(urlToNavData.get(prevTabUrl)?.navigationLink ?? [])"
+                                                [queryParams]="(templateParam != null) ? {'template': templateParam} : {}" mat-flat-button>
+                                                previous
+                                            </a>
+                                        }
+                                    }
+                                }
+                                @if ((urlToNavData.get(tabUrl)?.previousTabs?.length ?? 0) > 1) {
+                                    <details class="inline-details">
+                                        <summary class="summary-button no-decoration" mat-ripple>previous ({{urlToNavData.get(tabUrl)?.previousTabs?.length}})</summary>
+                                        @for (prevTabUrl of urlToNavData.get(tabUrl)?.previousTabs ?? []; track prevTabUrl) {
+                                            @if (urlToNavData.get(prevTabUrl)) {
+                                                <a [routerLink]="navTabLinkPrefix.concat(urlToNavData.get(prevTabUrl)?.navigationLink ?? [])"
+                                                    [queryParams]="(templateParam != null) ? {'template': templateParam} : {}" mat-flat-button>
+                                                    {{urlToTab.get(prevTabUrl)?.name ?? 'previous tab'}}
+                                                </a>
+                                            }
+                                        }
+                                    </details>
+                                }
+                                @if (urlToNavData.get(tabUrl)?.nextTabs?.length === 1) {
+                                    @for (nextTabUrl of urlToNavData.get(tabUrl)?.nextTabs ?? []; track nextTabUrl) {
+                                        @if (urlToNavData.get(nextTabUrl)) {
+                                            <a [routerLink]="navTabLinkPrefix.concat(urlToNavData.get(nextTabUrl)?.navigationLink ?? [])"
+                                                [queryParams]="(templateParam != null) ? {'template': templateParam} : {}" mat-flat-button>
+                                                next
+                                            </a>
+                                        }
+                                    }
+                                }
+                                @if ((urlToNavData.get(tabUrl)?.nextTabs?.length ?? 0) > 1) {
+                                    <details class="inline-details">
+                                        <summary class="summary-button no-decoration">next ({{urlToNavData.get(tabUrl)?.nextTabs?.length}})</summary>
+                                        @for (nextTabUrl of urlToNavData.get(tabUrl)?.nextTabs ?? []; track nextTabUrl) {
+                                            @if (urlToNavData.get(nextTabUrl)) {
+                                                <a [routerLink]="navTabLinkPrefix.concat(urlToNavData.get(nextTabUrl)?.navigationLink ?? [])"
+                                                    [queryParams]="(templateParam != null) ? {'template': templateParam} : {}" mat-flat-button>
+                                                    {{urlToTab.get(nextTabUrl)?.name ?? 'next tab'}}
+                                                </a>
+                                            }
+                                        }
+                                    </details>
+                                }
+                            </div>
+                        }
+                        @if (tabUrl === currentTemplateTab?.self?.href && currentPluginGroup) {
+                            <qhana-growing-list [apiLink]="currentPluginGroup.self"
+                                [highlighted]="highlightedPlugin" [highlightByKey]="'pluginId'"
+                                (clickItem)="selectPlugin($event)"></qhana-growing-list>
+                        }
+                    }
+                </nav>
+            </mat-card-content>
+        </mat-card>
+    }
+
+    @if (tabNavigationLayout === "nested-tabs" && currentPluginGroup && (currentPluginGroup.collectionSize >= 6 || (tabPath.length > 1 && currentPluginGroup.collectionSize > 1))) {
+        <!-- Plugins as sidebar if >=6 Plugins -->
+        <mat-card class="sidebar">
+            <mat-card-header class="sidebar-header t-title">Plugins</mat-card-header>
+            <mat-card-content class="sidebar-content-wrapper">
+                <qhana-growing-list class="sidebar-content scrollable" [apiLink]="currentPluginGroup.self"
+                    [highlighted]="highlightedPlugin" [highlightByKey]="'pluginId'"
+                    (clickItem)="selectPlugin($event)"></qhana-growing-list>
+            </mat-card-content>
+        </mat-card>
+    }
+
+    @if (activePluginFrontendUrl == null && currentTemplateTab && currentPluginId == null) {
+        <mat-card class="tab-content">
+            <mat-card-header class="tab-content-header t-title">
+                @if (currentTemplateTab.icon) {
+                    <mat-icon>{{currentTemplateTab.icon}}</mat-icon>
+                }
+                {{currentTemplateTab.name}}
+            </mat-card-header>
+            <mat-card-content>
+                <qhana-markdown [markdown]="currentTemplateTab.description"></qhana-markdown>
+            </mat-card-content>
+        </mat-card>
+    }
+
+    @if (activePluginFrontendUrl != null) {
+        <qhana-plugin-uiframe class="plugin-frame" [url]="activePluginFrontendUrl"
+            [context]="{experimentId: currentExperimentId??undefined, location: currentLocation??undefined}"
+            (formDataSubmit)="onPluginUiFormSubmit($event)" (requestDataPreview)="previewData = $event">
+        </qhana-plugin-uiframe>
+    }
+
+    @if (previewData) {
+        <qhana-data-preview class="data-preview" [data]="previewData"
+            [context]="{experimentId: currentExperimentId??undefined, location: currentLocation ? currentLocation + '.data-preview' : undefined}">
+            <h3 class="t-headline">Preview "{{previewData.name}}"</h3>
+        </qhana-data-preview>
+    }
 </mat-tab-nav-panel>

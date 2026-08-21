@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { ApiLink, CollectionApiObject, PageApiObject } from 'src/app/services/api-data-types';
+import { ApiLink, PageApiObject } from 'src/app/services/api-data-types';
 import { CurrentExperimentService } from 'src/app/services/current-experiment.service';
 import { PluginApiObject } from 'src/app/services/qhana-api-data-types';
 import { ExperimentDataApiObject, QhanaBackendService } from 'src/app/services/qhana-backend.service';
@@ -10,14 +10,11 @@ import { TemplateApiObject, TemplatesService, TemplateTabApiObject } from 'src/a
 import { FormSubmitData } from '../plugin-uiframe/plugin-uiframe.component';
 
 
-interface NavTab {
-    tabId: string;
-    name: string;
-    icon: string | null;
-    path: string;
-    groupPath: string | null;
-    isGroup: boolean;
-    link: string[];
+interface NavigationData {
+    navigationLink: string[];
+    parentTabUrl: string | null;
+    nextTabs: string[];
+    previousTabs: string[];
 }
 
 
@@ -36,17 +33,31 @@ export class PluginTabComponent implements OnInit, OnDestroy {
     private templateTabUpdatesSubscription: Subscription | null = null;
 
     private currentTemplate: TemplateApiObject | null = null;
-    private currentTemplateTab: TemplateTabApiObject | null = null;
+    currentTemplateTab: TemplateTabApiObject | null = null;
 
     currentLocation: string | null = null;
     currentExperimentId: string | null = null;
     currentPath: string | null = null;
-    currentTemplateId: string | null = null;
     routeTemplateId: string | null = null;
     currentTabId: string | null = null;
     currentPluginId: string | null = null;
 
-    navigationTabs: NavTab[][] = [];
+    urlToTab: Map<string, TemplateTabApiObject> = new Map();
+    urlToNavData: Map<string, NavigationData> = new Map();
+    groupToTabs: Map<string, string[]> = new Map();
+
+    get currentMainLocation() {
+        if (this.currentExperimentId != null) {
+            return "experiment-navigation";
+        }
+        return "navigation";
+    }
+
+    tabNavigationLayout: "nested-tabs" | "outline" = "outline"
+
+    tabPath: string[] = [];
+    allTabs: string[] = [];
+
     navTabLinkPrefix: string[] = [];
 
     templateParam: string | undefined = undefined;
@@ -65,7 +76,13 @@ export class PluginTabComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.currentTemplateSubscription = this.templates.currentTemplate.subscribe(template => {
+            const sameTemplate = this.currentTemplate?.self?.href === template?.self?.href;
             this.currentTemplate = template;
+            if (!sameTemplate) {
+                this.urlToTab = this.getPrefilledUrlToTabMap(template);
+                this.urlToNavData = new Map();
+            }
+            this.prepareNavigationData();
             this.onParamsChanged();
         });
         this.queryParamsSubscription = this.route.queryParamMap.subscribe(params => {
@@ -127,11 +144,63 @@ export class PluginTabComponent implements OnInit, OnDestroy {
         }) ?? [];
     }
 
+    private prepareNavigationData() {
+        const urlToNavData = this.urlToNavData;
+        const template = this.currentTemplate;
+        if (template == null) {
+            return;
+        }
+
+        const groupToTabs = new Map<string, string[]>();
+        groupToTabs.set("navigation", []);
+        groupToTabs.set("experiment-navigation", []);
+        groupToTabs.set("experiment-workspace", []);  // TODO check
+
+        const groupToParent = new Map<string, string>();
+
+        template.tabs.forEach(tab => {
+            const link: string[] = [];
+            if (tab?.resourceKey?.["?group"]) {
+                link.push(tab?.resourceKey?.["?group"]);
+            }
+            link.push(tab.resourceKey?.uiTemplateTabId ?? "-1");
+            urlToNavData.set(tab.href, { navigationLink: link, parentTabUrl: null, nextTabs: [], previousTabs: [] });
+            if (tab.resourceKey?.["?tab"]) {
+                groupToTabs.set(tab.resourceKey?.["?tab"], []);
+                groupToParent.set(tab.resourceKey?.["?tab"], tab.href);
+            }
+        });
+
+        // populate tab groups
+        template.tabs.forEach(tab => {
+            const group = tab?.resourceKey?.["?group"];
+            if (group == null) {
+                return;
+            }
+            groupToTabs.get(group)?.push(tab.href);
+            const parentTabUrl = groupToParent.get(group);
+            if (parentTabUrl != null) {
+                const data = urlToNavData.get(tab.href);
+                if (data != null) {
+                    data.parentTabUrl = parentTabUrl;
+                }
+            }
+        });
+
+        this.groupToTabs = groupToTabs;
+        this.loadAllTabs(); // start async loading of tabs
+    }
+
     private async onParamsChanged() {
+        if (this.currentTemplate == null) {
+            this.urlToTab.clear();
+            this.urlToNavData.clear();
+        }
         if (this.currentTabId == null || this.currentTemplate == null) {
             this.currentTemplateTab = null;
             this.currentLocation = null;
-            this.navigationTabs = [];
+            this.tabPath = [];
+            this.allTabs = [];
             this.currentPluginGroup = null;
             this.onPluginGroupChanged();
             return;
@@ -148,27 +217,49 @@ export class PluginTabComponent implements OnInit, OnDestroy {
         await this.loadPlugin();
     }
 
+    private getPrefilledUrlToTabMap(template: TemplateApiObject | null) {
+        const urlToTab = new Map<string, TemplateTabApiObject>()
+        if (template == null) {
+            return urlToTab;
+        }
+        template.tabs.forEach(tabLink => {
+            const location = tabLink.resourceKey?.["?group"];
+            if (location == null) {
+                return;
+            }
+            const tabGroup = tabLink.resourceKey?.["?tab"];
+            const mockTabObject: TemplateTabApiObject = {
+                self: tabLink,
+                name: tabLink.name ?? tabLink.href,
+                description: "",
+                location: location,
+                groupKey: tabGroup ? tabGroup.substring(location.length + 1) : "",
+                sortKey: 0,
+                icon: null,
+                filterString: "",
+                metadata: {},
+                plugins: null as any,
+            }
+            urlToTab.set(tabLink.href, mockTabObject);
+        });
+        return urlToTab;
+    }
+
     private async loadTab() {
         if (this.currentTemplateTab?.self?.resourceKey?.templateTabId === this.currentTabId) {
             return;
         }
-        if (this.currentTemplate == null) {
+        const currentTemplate = this.currentTemplate;
+        if (currentTemplate == null) {
             return;
         }
 
-        const templateResponse = await this.registry.getByApiLink<TemplateApiObject>(this.currentTemplate.self, null, false);
-        const tabsLink = templateResponse?.links?.find(link => link.resourceType === "ui-template-tab" && link.rel.some(r => r === "collection"));
-        if (tabsLink == null) {
-            return;
-        }
-
-        const allTabs = await this.registry.getByApiLink<CollectionApiObject>(tabsLink, null, true);
-        const tabLink = allTabs?.data?.items?.find(tab => tab.resourceKey?.uiTemplateTabId === this.currentTabId);
+        const tabLink = currentTemplate.tabs.find(link => link.resourceType === "ui-template-tab" && link.resourceKey?.uiTemplateTabId === this.currentTabId);
         if (tabLink == null) {
             return;
         }
 
-        const tab = await this.registry.getByApiLink<TemplateTabApiObject>(tabLink, null, false);
+        const tab = await this.registry.getByApiLink<TemplateTabApiObject>(tabLink, null, true);
         this.currentTemplateTab = tab?.data ?? null;
         this.currentLocation = tab?.data?.location ?? null;
 
@@ -176,36 +267,113 @@ export class PluginTabComponent implements OnInit, OnDestroy {
             return;
         }
 
-        const groups = this.getNavigationGroups(tab.data);
-        groups.sort((a, b) => (a.resourceKey?.["?group"]?.length ?? 0) - (b.resourceKey?.["?group"]?.length ?? 0));
-
-        const navigationTabs: NavTab[][] = await Promise.all(groups.map(group => {
-            const filtered = allTabs?.data?.items?.filter(tab => tab.resourceKey?.["?group"] != null && tab.resourceKey["?group"] === group.resourceKey?.["?group"]) ?? [];
-            const promises = filtered.map(tabLink => {
-                return this.registry.getByApiLink<TemplateTabApiObject>(tabLink, null, false).then(tab => {
-                    const link: string[] = [];
-                    if (tab?.data?.location) {
-                        link.push(tab?.data?.location);
+        const allTabs: string[] = [];
+        const groupPath = tab.data.self?.resourceKey?.["?tab"]?.split(".") ?? tab.data.self?.resourceKey?.["?group"]?.split(".") ?? [];
+        const groupToTabs = this.groupToTabs;
+        const urlToTab = this.urlToTab;
+        if (groupPath.length > 1) {
+            const startGroup = `${groupPath[0]}.${groupPath[1]}`;
+            function insertAllFromGroup(group: string, allTabs: string[]) {
+                const tabs = groupToTabs.get(group) ?? [];
+                tabs.forEach(tabUrl => {
+                    allTabs.push(tabUrl);
+                    const tabGroupKey = urlToTab.get(tabUrl)?.groupKey;
+                    if (tabGroupKey) {
+                        insertAllFromGroup(`${group}.${tabGroupKey}`, allTabs);
                     }
-                    link.push(tabLink.resourceKey?.uiTemplateTabId ?? "-1");
-                    const path = (tab?.data?.location ?? "") + ".";
-                    const groupPath = path + (tab?.data?.groupKey ?? "");
-                    const isGroup = Boolean(tab?.data?.groupKey);
-                    const t: NavTab = {
-                        tabId: tab?.data?.self?.resourceKey?.uiTemplateTabId ?? "-1",
-                        name: tab?.data?.name ?? tabLink.name ?? "UNNAMED TAB",
-                        icon: tab?.data?.icon ?? null,
-                        path: path,
-                        groupPath: isGroup ? groupPath : null,
-                        isGroup: isGroup,
-                        link: link,
-                    }
-                    return t;
                 });
+            }
+            insertAllFromGroup(startGroup, allTabs);
+        }
+        this.allTabs = allTabs;
+
+        const newTabPath = [tab.data.self.href];
+        const urlToNavData = this.urlToNavData;
+        let parent = urlToNavData.get(tab.data.self.href)?.parentTabUrl;
+        while (parent != null && !newTabPath.includes(parent)) {
+            newTabPath.push(parent);
+            parent = urlToNavData.get(parent)?.parentTabUrl;
+        }
+        this.tabPath = newTabPath.reverse();
+
+        // set layout mode based on the root tab in the navigation path
+        if (newTabPath.length === 0) {
+            return;
+        }
+        const rootTabUrl = newTabPath[0];
+        const rootTabLink = this.urlToTab.get(rootTabUrl)?.self;
+        if (rootTabLink == null) {
+            return;
+        }
+        const rootTab = await this.registry.getByApiLink<TemplateTabApiObject>(rootTabLink, null, false);
+        const layoutMode = rootTab?.data?.metadata?.layout?.toLowerCase();
+        if (layoutMode == null || layoutMode === "default" || layoutMode === "nested-tabs") {
+            this.tabNavigationLayout = "nested-tabs";
+        }
+        if (layoutMode === "outline") {
+            this.tabNavigationLayout = "outline";
+        }
+    }
+
+    private async loadAllTabs() {
+        const currentTemplateId = this.currentTemplate?.self?.resourceKey?.uiTemplateId;
+        const urlToTab = this.urlToTab;
+        if (currentTemplateId == null) {
+            return;
+        }
+        const allTabs = await this.templates.getAllTabs(currentTemplateId);
+        allTabs.forEach(tab => urlToTab.set(tab.self.href, tab));
+        await this.calculateTabRelations();
+    }
+
+    private async calculateTabRelations() {
+        const currentTemplate = this.currentTemplate;
+        const urlToTab = this.urlToTab;
+        const urlToNavData = this.urlToNavData;
+        if (currentTemplate == null) {
+            return;
+        }
+
+        const idToUrl = new Map<string, string>();
+        currentTemplate.tabs.forEach(tabLink => {
+            const tabId = tabLink.resourceKey?.uiTemplateTabId;
+            if (tabId != null) {
+                idToUrl.set(tabId, tabLink.href);
+            }
+        });
+
+        // fill out next/previous relations bi-directinally
+        const urlToPrevious = new Map<string, Set<string>>();
+        const urlToNext = new Map<string, Set<string>>();
+        idToUrl.forEach((tabUrl) => {
+            const tab = urlToTab.get(tabUrl);
+            if (tab == null) {
+                return;
+            }
+            const next = tab.metadata?.next?.split(/,?\s+/g) ?? [];
+            next.forEach(nextId => {
+                const nextUrl = idToUrl.get(nextId);
+                if (nextUrl != null) {
+                    urlToNext.getOrInsertComputed(tabUrl, () => new Set()).add(nextUrl);
+                    urlToPrevious.getOrInsertComputed(nextUrl, () => new Set()).add(tabUrl);
+                }
             });
-            return Promise.all(promises);
-        }));
-        this.navigationTabs = navigationTabs;
+
+            const previous = tab.metadata?.previous?.split(/,?\s+/g) ?? [];
+            previous.forEach(previousId => {
+                const previousUrl = idToUrl.get(previousId);
+                if (previousUrl != null) {
+                    urlToPrevious.getOrInsertComputed(tabUrl, () => new Set()).add(previousUrl);
+                    urlToNext.getOrInsertComputed(previousUrl, () => new Set()).add(tabUrl);
+                }
+            });
+        });
+
+        // update nav data
+        urlToNavData.forEach((navData, tabUrl) => {
+            navData.nextTabs = Array.from(urlToNext.get(tabUrl) ?? []);
+            navData.previousTabs = Array.from(urlToPrevious.get(tabUrl) ?? []);
+        });
     }
 
     private async loadPluginGroup() {
