@@ -18,6 +18,7 @@ export class UiTemplateTabComponent implements OnChanges, OnInit, OnDestroy {
 
     @Input() tabLink: ApiLink | null = null;
     @Input() useCache: boolean = false;
+    @Input() showOnly: boolean = false;
 
     @ViewChild(UiTemplateTabFormComponent) tabFormChild: UiTemplateTabFormComponent | null = null;
 
@@ -63,6 +64,11 @@ export class UiTemplateTabComponent implements OnChanges, OnInit, OnDestroy {
     ngOnChanges(changes: SimpleChanges): void {
         if (changes.tabLink != null) {
             this.loadTemplateTab();
+        }
+        if (changes.showOnly != null) {
+            if (this.showOnly && this.isEditing) {
+                this.isEditing = false;
+            }
         }
     }
 

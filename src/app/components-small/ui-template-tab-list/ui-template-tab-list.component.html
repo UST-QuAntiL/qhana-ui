@@ -1,4 +1,4 @@
-@if (createTabLink != null) {
+@if (createTabLink != null && !showOnly) {
     <mat-expansion-panel>
         <mat-expansion-panel-header>
             <mat-panel-title class="tab-title">Create New Tab</mat-panel-title>
@@ -29,7 +29,7 @@
                                 <mat-panel-description>(Group: {{navigationGroup.groupKey}}.{{hrefToTab.get(tab.href)?.groupKey}})</mat-panel-description>
                             }
                         </mat-expansion-panel-header>
-                        <qhana-ui-template-tab [tabLink]="tab" [useCache]="true"></qhana-ui-template-tab>
+                        <qhana-ui-template-tab [tabLink]="tab" [useCache]="true" [showOnly]="true"></qhana-ui-template-tab>
                     </mat-expansion-panel>
                 }
             </mat-accordion>
@@ -60,7 +60,7 @@
                                 <mat-panel-description>(Group: {{group.groupKey}}.{{hrefToTab.get(tab.href)?.groupKey}})</mat-panel-description>
                             }
                         </mat-expansion-panel-header>
-                        <qhana-ui-template-tab [tabLink]="tab" [useCache]="true"></qhana-ui-template-tab>
+                        <qhana-ui-template-tab [tabLink]="tab" [useCache]="true" [showOnly]="true"></qhana-ui-template-tab>
                     </mat-expansion-panel>
                 }
             </mat-accordion>
@@ -81,7 +81,7 @@
                             {{tab.name}} @if (tab.resourceKey?.uiTemplateTabId) {({{tab.resourceKey.uiTemplateTabId}})}
                         </mat-panel-title>
                     </mat-expansion-panel-header>
-                    <qhana-ui-template-tab [tabLink]="tab" [useCache]="true"></qhana-ui-template-tab>
+                    <qhana-ui-template-tab [tabLink]="tab" [useCache]="true" [showOnly]="true"></qhana-ui-template-tab>
                 </mat-expansion-panel>
             }
         </mat-accordion>
@@ -108,7 +108,7 @@
                                 <mat-panel-description>(Group: {{experimentNavigationGroup.groupKey}}.{{hrefToTab.get(tab.href)?.groupKey}})</mat-panel-description>
                             }
                         </mat-expansion-panel-header>
-                        <qhana-ui-template-tab [tabLink]="tab" [useCache]="true"></qhana-ui-template-tab>
+                        <qhana-ui-template-tab [tabLink]="tab" [useCache]="true" [showOnly]="true"></qhana-ui-template-tab>
                     </mat-expansion-panel>
                 }
             </mat-accordion>
@@ -139,7 +139,7 @@
                                 <mat-panel-description>(Group: {{group.groupKey}}.{{hrefToTab.get(tab.href)?.groupKey}})</mat-panel-description>
                             }
                         </mat-expansion-panel-header>
-                        <qhana-ui-template-tab [tabLink]="tab" [useCache]="true"></qhana-ui-template-tab>
+                        <qhana-ui-template-tab [tabLink]="tab" [useCache]="true" [showOnly]="true"></qhana-ui-template-tab>
                     </mat-expansion-panel>
                 }
             </mat-accordion>
@@ -174,7 +174,7 @@
                             <mat-panel-description>(Group: {{group.groupKey}}.{{hrefToTab.get(tab.href)?.groupKey}})</mat-panel-description>
                         }
                     </mat-expansion-panel-header>
-                    <qhana-ui-template-tab [tabLink]="tab" [useCache]="true"></qhana-ui-template-tab>
+                    <qhana-ui-template-tab [tabLink]="tab" [useCache]="true" [showOnly]="true"></qhana-ui-template-tab>
                 </mat-expansion-panel>
             }
         </mat-accordion>

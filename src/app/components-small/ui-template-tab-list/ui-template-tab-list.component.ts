@@ -22,6 +22,7 @@ interface NavTabGroup {
 export class UiTemplateTabListComponent implements OnInit, OnChanges, OnDestroy {
 
     @Input() templateLink: ApiLink | null = null;
+    @Input() showOnly: boolean = false;
 
     isLoading: boolean = true;
 
