@@ -113,8 +113,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
         });
     }
 
-    trackExport: TrackByFunction<ExportResult> = (index, item) => item.exportId.toString();
-
     deleteExport(experimentId: number, exportId: number) {
         this.backend.deleteExport(experimentId, exportId).subscribe(() => console.log());
     }
@@ -124,12 +122,15 @@ export class NavbarComponent implements OnInit, OnDestroy {
     }
 
     isActive(tab: ApiLink): boolean {
+        if (tab.href === this.currentTab?.href) {
+            return true;
+        }
         let location = tab.resourceKey?.["?group"] ?? null;
         const group = this.tabLinkHrefToApiObject.get(tab.href)?.groupKey ?? null;
         if (location && group) {
-            location = `${location}.${group}`;
-            const currentLocation = this.currentTab?.resourceKey?.["?group"] ?? null;
-            if (location && currentLocation && currentLocation.startsWith(location + ".")) {
+            location = `${location}.${group}.`;
+            const currentLocation = this.currentTab?.resourceKey?.["?tab"] ?? this.currentTab?.resourceKey?.["?group"] ?? null;
+            if (location && currentLocation && currentLocation.startsWith(location)) {
                 return true;
             }
         }
