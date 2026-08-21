@@ -18,7 +18,7 @@ import { Injectable } from '@angular/core';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { BehaviorSubject, Subject, Subscription, combineLatest } from 'rxjs';
 import { distinctUntilChanged, filter, take } from 'rxjs/operators';
-import { ApiLink, ApiObject, CollectionApiObject, PageApiObject } from './api-data-types';
+import { ApiLink, ApiObject, ApiResponse, CollectionApiObject, PageApiObject } from './api-data-types';
 import { CurrentExperimentService } from './current-experiment.service';
 import { EnvService } from './env.service';
 import { QhanaBackendService } from './qhana-backend.service';
@@ -30,6 +30,7 @@ export interface TemplateApiObject extends ApiObject {  // TODO check fields
     description: string;
     tags: string[];
     groups: ApiLink[];
+    tabs: ApiLink[];
 }
 
 
@@ -232,16 +233,7 @@ export class TemplatesService {
         }
 
         const templateResponse = await this.registry.getByApiLink<TemplateApiObject>(currentTemplate.self, null, false);
-        const tabsLink = templateResponse?.links?.find(link => link.resourceType === "ui-template-tab" && link.rel.some(r => r === "collection"));
-        if (tabsLink == null) {
-            if (this.currentTemplateSubject.value != null) {
-                this.currentTemplateTabSubject.next(null);
-            }
-            return;
-        }
-
-        const allTabs = await this.registry.getByApiLink<CollectionApiObject>(tabsLink, null, true);
-        const tabLink = allTabs?.data?.items?.find(tab => tab.resourceKey?.uiTemplateTabId === templateTabId);
+        const tabLink = templateResponse?.data?.tabs?.find(tab => tab.resourceKey?.uiTemplateTabId === templateTabId);
         if (tabLink == null) {
             if (this.currentTemplateSubject.value != null) {
                 this.currentTemplateTabSubject.next(null);
@@ -279,6 +271,24 @@ export class TemplatesService {
             console.warn(`Template API returned an ambiguous response for template id ${templateId}`, templatePage);
             return null;
         }
+    }
+
+    async getAllTabs(templateId: string | ApiResponse<TemplateApiObject>) {
+        let templateResponse: ApiResponse<TemplateApiObject> | null;
+        if (typeof templateId === "string") {
+            templateResponse = await this.getTemplate(templateId, false);
+        } else {
+            templateResponse = templateId;
+        }
+        const allTasbLink = templateResponse?.links?.find(link => link.resourceType === "ui-template-tab" && link.rel.some(r => r === "collection"));
+        if (allTasbLink == null) {
+            return [];
+        }
+        const allTabsResponse = await this.registry.getByApiLink<CollectionApiObject>(allTasbLink);
+        const allTabPromises = allTabsResponse?.data?.items?.map(tabLink => this.registry.getByApiLink<TemplateTabApiObject>(tabLink)) ?? [];
+        // TODO: check what happens for >25 tabs!
+        const allTabs = await Promise.all(allTabPromises);
+        return allTabs.filter(tab => tab != null).map(tab => tab.data);
     }
 
     async getTemplateTabGroups(templateId: string, ignoreCache: boolean | "ignore-embedded" = false) {
