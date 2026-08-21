@@ -142,7 +142,8 @@ export class UiTemplateTabFormComponent implements OnChanges, OnDestroy, OnInit 
     ngOnChanges(changes: SimpleChanges): void {
         if (this.tabData != null) {
             const location = this.tabData.location;
-            const [baseLocation, locationExtra] = location.split(".", 2);
+            const [baseLocation] = location.split(".", 1);
+            const locationExtra = location.length > baseLocation.length ? location.substring(baseLocation.length + 1) : "";
             this.description = this.tabData.description;
             try {
                 this.currentPluginFilter = JSON.parse(this.tabData.filterString);
@@ -167,7 +168,7 @@ export class UiTemplateTabFormComponent implements OnChanges, OnDestroy, OnInit 
                 sortKey: this.tabData.sortKey,
                 groupKey: this.tabData.groupKey,
                 location: baseLocation,
-                locationExtra: locationExtra ?? "",
+                locationExtra: locationExtra,
                 metadata: metadata,
             });
         } else {
