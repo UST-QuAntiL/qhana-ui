@@ -309,7 +309,7 @@ export class UiTemplateTabListComponent implements OnInit, OnChanges, OnDestroy 
         }
     }
 
-    async createNewTab() {
+    async createNewTab(onSuccess?: () => void) {
         if (this.createTabLink == null) {
             return;
         }
@@ -317,7 +317,10 @@ export class UiTemplateTabListComponent implements OnInit, OnChanges, OnDestroy 
             return;
         }
 
-        this.registry.submitByApiLink(this.createTabLink, this.newTabData);
+        const response = await this.registry.submitByApiLink(this.createTabLink, this.newTabData);
+        if (response != null) {
+            onSuccess?.();
+        }
     }
 
 }

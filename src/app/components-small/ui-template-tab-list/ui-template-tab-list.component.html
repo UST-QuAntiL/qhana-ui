@@ -3,7 +3,7 @@
         <mat-expansion-panel-header>
             <mat-panel-title class="tab-title">Create New Tab</mat-panel-title>
         </mat-expansion-panel-header>
-        <qhana-ui-template-tab-form  (isValid)="isValid = $event" (data)="newTabData = $event" (formSubmit)="createNewTab()" #newTabForm></qhana-ui-template-tab-form>
+        <qhana-ui-template-tab-form  (isValid)="isValid = $event" (data)="newTabData = $event" (formSubmit)="createNewTab(() => newTabForm.clearForm())" #newTabForm></qhana-ui-template-tab-form>
         <button class="new-tab-button" mat-flat-button color="primary" [disabled]="!isValid" (click)="newTabForm.submitForm()"><mat-icon>save</mat-icon>save</button>
     </mat-expansion-panel>
 }

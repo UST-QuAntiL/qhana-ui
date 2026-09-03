@@ -176,6 +176,19 @@ export class UiTemplateTabFormComponent implements OnChanges, OnDestroy, OnInit 
         }
     }
 
+    public clearForm() {
+        this.currentPluginFilter = null;
+        this.templateForm?.setValue({
+            name: this.initialValues.name,
+            icon: this.initialValues.icon,
+            sortKey: this.initialValues.sortKey,
+            groupKey: this.initialValues.groupKey,
+            location: this.initialValues.location,
+            locationExtra: this.initialValues.locationExtra,
+            metadata: {},
+        });
+    }
+
     public submitForm() {
         this.templateForm?.updateValueAndValidity();
         this.formSubmit.emit();
