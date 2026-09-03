@@ -222,29 +222,11 @@ export class QhanaBackendService {
         this.serviceRegistry.latexRendererUrl.subscribe(url => this.latexUrl = url);
     }
 
-    public getPluginEndpoints(): Observable<ApiObjectList<PluginEndpointApiObject>> {
-        return this.http.get<ApiObjectList<PluginEndpointApiObject>>(`${this.rootUrl}/plugin-endpoints`);
-    }
-
-    public addPluginEndpoint(url: string, type?: string): Observable<PluginEndpointApiObject> {
-        const body: { url: string, type?: string } = { url };
-        if (type != null) {
-            body.type = type;
-        }
-        return this.http.post<PluginEndpointApiObject>(`${this.rootUrl}/plugin-endpoints`, body);
-    }
-
     private callWithRootUrl<T>(callback: (url: string) => Observable<T>): Observable<T> {
         return this.serviceRegistry.backendRootUrl.pipe(
             filter(urlIsString),
             take(1),
             mergeMap(callback)
-        );
-    }
-
-    public removePluginEndpoint(endpoint: PluginEndpointApiObject): Observable<void> {
-        return this.callWithRootUrl<void>(
-            rootUrl => this.http.delete(`${rootUrl}/plugin-endpoints/${endpoint.endpointId}`).pipe(map(() => { return; }))
         );
     }
 
