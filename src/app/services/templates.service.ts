@@ -90,6 +90,9 @@ export class TemplatesService {
     private currentTemplateTabSubject: BehaviorSubject<ApiLink | null> = new BehaviorSubject<ApiLink | null>(null);
     private currentTemplateTabId: string | null = null;
 
+    private tabCompletionStatusChangedSubject = new Subject<{ experimentId: string, templateTabId: string, isCompleted: boolean }>();
+    private tabCompletionStorage: Map<string, boolean> = new Map();
+
     get defaultTemplateId() {
         return this.defaultTemplateIdSubject.asObservable();
     }
@@ -116,6 +119,10 @@ export class TemplatesService {
 
     get currentTemplateTab() {
         return this.currentTemplateTabSubject.asObservable();
+    }
+
+    get tabCompletionStatusChanged() {
+        return this.tabCompletionStatusChangedSubject.asObservable();
     }
 
     constructor(private registry: PluginRegistryBaseService, private env: EnvService, private currentExperiment: CurrentExperimentService, private backend: QhanaBackendService, private route: ActivatedRoute, private router: Router) {
@@ -303,5 +310,23 @@ export class TemplatesService {
                 this.currentExperiment.reloadExperiment();
             }
         );
+    }
+
+    setTemplateTabCompletion(isCompleted: boolean, experimentId: string, templateTabId: string) {
+        if (sessionStorage) {
+            sessionStorage.setItem(`${experimentId}/${templateTabId}`, isCompleted.toString());
+        } else {
+            this.tabCompletionStorage.set(`${experimentId}/${templateTabId}`, isCompleted);
+        }
+        this.tabCompletionStatusChangedSubject.next({ experimentId, templateTabId, isCompleted });
+    }
+
+    getTemplateTabCompletion(experimentId: string, templateTabId: string): boolean {
+        if (sessionStorage) {
+            const value = sessionStorage.getItem(`${experimentId}/${templateTabId}`);
+            return value === "true";
+        } else {
+            return this.tabCompletionStorage.get(`${experimentId}/${templateTabId}`) ?? false;
+        }
     }
 }

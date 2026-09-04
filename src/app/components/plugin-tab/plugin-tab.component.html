@@ -18,6 +18,7 @@
                             @if (urlToTab.get(tabUrl)?.groupKey) {
                                 <mat-icon>more_vert</mat-icon>
                             }
+                            <qhana-tab-completion-indicator [tab]="urlToTab.get(tabUrl)?.self ?? null"></qhana-tab-completion-indicator>
                         </span>
                     </a>
                 }
@@ -60,6 +61,7 @@
                                     </mat-icon>
                                 }
                                 {{urlToTab.get(tabUrl)?.name ?? tabUrl}}
+                                <qhana-tab-completion-indicator [tab]="urlToTab.get(tabUrl)?.self ?? null"></qhana-tab-completion-indicator>
                             </span>
                         </a>
                         @if (tabUrl === currentTemplateTab?.self?.href && (urlToNavData.get(tabUrl)?.previousTabs?.length || urlToNavData.get(tabUrl)?.nextTabs?.length)) {
@@ -142,6 +144,7 @@
                     <mat-icon>{{currentTemplateTab.icon}}</mat-icon>
                 }
                 {{currentTemplateTab.name}}
+                <qhana-tab-completion-indicator [tab]="currentTemplateTab.self" [color]="'primary'"></qhana-tab-completion-indicator>
             </mat-card-header>
             <mat-card-content>
                 <qhana-markdown [markdown]="currentTemplateTab.description"></qhana-markdown>

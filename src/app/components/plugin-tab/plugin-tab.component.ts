@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 import { ApiLink, PageApiObject } from 'src/app/services/api-data-types';
 import { CurrentExperimentService } from 'src/app/services/current-experiment.service';
 import { PluginApiObject } from 'src/app/services/qhana-api-data-types';
@@ -8,6 +8,7 @@ import { ExperimentDataApiObject, QhanaBackendService } from 'src/app/services/q
 import { PluginRegistryBaseService } from 'src/app/services/registry.service';
 import { TemplateApiObject, TemplatesService, TemplateTabApiObject } from 'src/app/services/templates.service';
 import { FormSubmitData } from '../plugin-uiframe/plugin-uiframe.component';
+import { debounceTime } from 'rxjs/operators';
 
 
 interface NavigationData {
@@ -31,6 +32,9 @@ export class PluginTabComponent implements OnInit, OnDestroy {
     private queryParamsSubscription: Subscription | null = null;
     private currentTemplateSubscription: Subscription | null = null;
     private templateTabUpdatesSubscription: Subscription | null = null;
+    private tabCompletionUpdatesubscription: Subscription | null = null;
+
+    private tabCompletionRequestSubject: Subject<null> = new Subject();
 
     private currentTemplate: TemplateApiObject | null = null;
     currentTemplateTab: TemplateTabApiObject | null = null;
@@ -103,6 +107,7 @@ export class PluginTabComponent implements OnInit, OnDestroy {
             }
         });
         this.routeParamsSubscription = this.route.params.subscribe(params => {
+            const lastExperimentId = this.currentExperimentId;
             this.currentExperimentId = params?.experimentId ?? null;
             this.experiment.setExperimentId(params?.experimentId ?? null);
             this.currentPath = params?.path ?? null;
@@ -113,10 +118,14 @@ export class PluginTabComponent implements OnInit, OnDestroy {
             }
             this.currentPluginId = pluginId;
             this.onParamsChanged();
+
+            if (this.currentExperimentId != lastExperimentId) {
+                this.tabCompletionRequestSubject.next(); // schedule an update
+            }
         });
+        this.tabCompletionUpdatesubscription = this.tabCompletionRequestSubject.pipe(debounceTime(10000)).subscribe(() => this.updateLeafTabCompletion());
         this.templateTabUpdatesSubscription = this.templates.currentTemplateTabsUpdates.subscribe(() => {
-            // this.updateGeneralExtraTabGroup();
-            // this.updateExperimentExtraTabGroup();
+            // FIXME handle tab updates!
         });
     }
 
@@ -125,23 +134,7 @@ export class PluginTabComponent implements OnInit, OnDestroy {
         this.queryParamsSubscription?.unsubscribe();
         this.currentTemplateSubscription?.unsubscribe();
         this.templateTabUpdatesSubscription?.unsubscribe();
-    }
-
-    private getNavigationGroups(tab: TemplateTabApiObject) {
-        let groupLocation = tab.location;
-        if (tab.groupKey) {
-            groupLocation = `${tab.location}.${tab.groupKey}`;
-        }
-        return this.currentTemplate?.groups?.filter(group => {
-            const groupKey = group.resourceKey?.["?group"] ?? null;
-            if (!groupKey?.includes(".")) {
-                return false;
-            }
-            if (groupKey && groupLocation.startsWith(groupKey)) {
-                return true;
-            }
-            return false;
-        }) ?? [];
+        this.tabCompletionUpdatesubscription?.unsubscribe();
     }
 
     private prepareNavigationData() {
@@ -215,6 +208,9 @@ export class PluginTabComponent implements OnInit, OnDestroy {
         await this.loadTab();
         await this.loadPluginGroup();
         await this.loadPlugin();
+
+        // kick of async tab completion check
+        this.checkCurrentTabCompletion();
     }
 
     private getPrefilledUrlToTabMap(template: TemplateApiObject | null) {
@@ -376,6 +372,131 @@ export class PluginTabComponent implements OnInit, OnDestroy {
         });
     }
 
+    private async updateLeafTabCompletion() {
+        const experimentId = this.currentExperimentId;
+        if (experimentId == null) {
+            return;
+        }
+
+        const tabsToCheck: TemplateTabApiObject[] = [];
+        this.urlToTab.forEach(tab => {
+            if (tab.groupKey) {
+                return; // not a leaf tab
+            }
+            if (!tab.location.startsWith("experiment-navigation")) {
+                return; // not in the correct location
+            }
+            if (tab.self.href === this.currentTemplateTab?.self?.href) {
+                return; // already checked elsewhere
+            }
+            tabsToCheck.push(tab);
+        });
+
+        const successfulPlugins = await this.backend.getPluginSummary(experimentId).toPromise();
+
+        const promises = tabsToCheck.map(async tab => {
+            const tabId = tab.self.resourceKey?.uiTemplateTabId;
+            if (tabId == null) {
+                return; // cannot check tab completion
+            }
+
+            const query = new URLSearchParams();
+            query.set("template-tab", tabId);
+            const pluginsResponse = await this.registry.getByRel<PageApiObject>([["plugin", "collection"]], query);
+            const pluginGroup = pluginsResponse?.data ?? null;
+
+            if (pluginGroup == null) {
+                this.templates.setTemplateTabCompletion(false, experimentId, tabId);
+                return;
+            }
+
+            const nrOfPlugins = pluginGroup.collectionSize;
+            const nrOfSuccesses = pluginGroup.items.reduce((value, link) => {
+                if (successfulPlugins[link.resourceKey?.["?name"] ?? ""] != null) {
+                    return value + 1;
+                }
+                return value;
+            }, 0);
+
+            const completionCriteria = tab.metadata?.completedOn ?? "any-success";
+
+            let completed: boolean = false;
+            if (completionCriteria === "any-success") {
+                completed = nrOfSuccesses > 0;
+            }
+            if (completionCriteria === "all-success") {
+                completed = nrOfSuccesses === nrOfPlugins && nrOfPlugins > 0;
+            }
+
+            this.templates.setTemplateTabCompletion(completed, experimentId, tabId);
+        });
+
+        await Promise.allSettled(promises);
+
+        // kick off inner tab completion update next
+        this.updateInnerTabCompletion();
+    }
+
+    private async updateInnerTabCompletion() {
+        const experimentId = this.currentExperimentId;
+        if (experimentId == null) {
+            return;
+        }
+
+        const urlToTab = this.urlToTab;
+        const groupToTabs = this.groupToTabs;
+
+        let runawayCount = 10000;
+
+        const updateTabCompletion = async (tabUrl: string): Promise<boolean> => {
+            runawayCount -= 1;
+            const tab = urlToTab.get(tabUrl);
+            const tabId = tab?.self?.resourceKey?.uiTemplateTabId;
+            if (runawayCount < 0) {
+                console.warn("Detected infinite recursion!");
+                return false;
+            }
+            if (tab == null || tabId == null) {
+                return false; // assume as not completed in case of errors
+            }
+            if (!tab.groupKey) {
+                // is not an inner tab, return child status as is
+                return this.templates.getTemplateTabCompletion(experimentId, tabId);
+            }
+            const childGroup = `${tab.location}.${tab.groupKey}`;
+            const childUrls = groupToTabs.get(childGroup) ?? [];
+
+            if (childUrls.length === 0) {
+                // cannot complete inner tab without child tabs!
+                this.templates.setTemplateTabCompletion(false, experimentId, tabId);
+                return false;
+            }
+
+            const childrenStatus = await Promise.all(childUrls.map(updateTabCompletion));
+
+            // by default, all children of inner tabs must be successful
+            const completionCriteria = tab.metadata?.completedOn ?? "all-success";
+
+            let completed: boolean = false;
+            if (completionCriteria === "one-success") {
+                const nrOfSuccesses = childrenStatus.filter(s => s).length;
+                completed = nrOfSuccesses === 1;
+            }
+            if (completionCriteria === "any-success") {
+                completed = childrenStatus.some(s => s);
+            }
+            if (completionCriteria === "all-success") {
+                completed = childrenStatus.every(s => s);
+            }
+
+            this.templates.setTemplateTabCompletion(completed, experimentId, tabId);
+            return completed;
+        }
+
+        const expNavTabs = groupToTabs.get("experiment-navigation") ?? [];
+        expNavTabs.forEach(tabUrl => updateTabCompletion(tabUrl));
+    }
+
     private async loadPluginGroup() {
         if (this.currentTemplateTab?.self?.resourceKey?.uiTemplateTabId == null || this.currentTemplateTab.groupKey) {
             this.currentPluginGroup = null;
@@ -393,6 +514,39 @@ export class PluginTabComponent implements OnInit, OnDestroy {
         const pluginsResponse = await this.registry.getByRel<PageApiObject>([["plugin", "collection"]], query);
         this.currentPluginGroup = pluginsResponse?.data ?? null;
         await this.onPluginGroupChanged();
+    }
+
+    private async checkCurrentTabCompletion() {
+        const currentTab = this.currentTemplateTab;
+        const pluginGroup = this.currentPluginGroup;
+        const experimentId = this.currentExperimentId;
+        if (currentTab == null || pluginGroup == null || experimentId == null) {
+            return;
+        }
+        const successfulPlugins = await this.backend.getPluginSummary(experimentId).toPromise();
+        const nrOfPlugins = pluginGroup.collectionSize;
+        const nrOfSuccesses = pluginGroup.items.reduce((value, link) => {
+            if (successfulPlugins[link.resourceKey?.["?name"] ?? ""] != null) {
+                return value + 1;
+            }
+            return value;
+        }, 0);
+
+        const completionCriteria = currentTab.metadata?.completedOn ?? "any-success";
+
+        let completed: boolean = false;
+        if (completionCriteria === "any-success") {
+            completed = nrOfSuccesses > 0;
+        }
+        if (completionCriteria === "all-success") {
+            if (nrOfPlugins > 25) {
+                console.warn("Success Criterium 'all-success' is not supported for large numbers of plugins.");
+            }
+            completed = nrOfSuccesses === nrOfPlugins && nrOfPlugins > 0;
+        }
+
+        this.templates.setTemplateTabCompletion(completed, experimentId, currentTab.self.resourceKey?.uiTemplateTabId ?? "");
+        this.updateInnerTabCompletion();
     }
 
     private async onPluginGroupChanged() {

@@ -88,6 +88,7 @@
                     @if (tabLinkHrefToApiObject.get(tab.href)?.groupKey) {
                         <mat-icon>more_vert</mat-icon>
                     }
+                    <qhana-tab-completion-indicator [tab]="tab"></qhana-tab-completion-indicator>
                 </span>
             </a>
         }
