@@ -36,6 +36,22 @@ export interface ApiObjectListWithoutCount<T> extends ApiObject {
     items: T[];
 }
 
+/**
+ * Mapping from data type to a list of content types.
+ * The mapping represents all data-/content- type combinations available in the experiment.
+ */
+export interface DataSummary {
+    [props: string]: string[];
+}
+
+/**
+ * Mapping from plugin name to a list of versions.
+ * The mapping represents all successfully executed plugins.
+ */
+export interface PluginSummary {
+    [props: string]: string[];
+}
+
 export interface PluginEndpointApiObject extends ApiObject {
     endpointId: number;
     url: string;
@@ -388,6 +404,16 @@ export class QhanaBackendService {
     public importExperimentPoll(importId: number): Observable<ExperimentImportPollObject> {
         return this.callWithRootUrl<ExperimentImportPollObject>(
             rootUrl => this.http.get<ExperimentImportPollObject>(`${rootUrl}/experiments/import/${importId}`, { responseType: "json" }));
+    }
+
+    public getPluginSummary(experimentId: number | string): Observable<PluginSummary> {
+        return this.callWithRootUrl<PluginSummary>(
+            rootUrl => this.http.get<PluginSummary>(`${rootUrl}/experiments/${experimentId}/processor-summary`));
+    }
+
+    public getDataSummary(experimentId: number | string): Observable<DataSummary> {
+        return this.callWithRootUrl<DataSummary>(
+            rootUrl => this.http.get<DataSummary>(`${rootUrl}/experiments/${experimentId}/data-summary`));
     }
 
     public getExperimentDataPage(experimentId: number | string, allVersions: boolean = true, search: string | null = null, dataType: string | null = null, page: number = 0, itemCount: number = 10, sort: number = 1): Observable<ApiObjectList<ExperimentDataApiObject>> {
