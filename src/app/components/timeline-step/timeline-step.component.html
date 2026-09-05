@@ -17,12 +17,24 @@
             Step {{timelineStep.sequence}} ({{timelineStep.processorName}}&#64;{{timelineStep.processorVersion}})
             <qhana-step-status [step]="timelineStep" [noText]="true"></qhana-step-status>
             <div class="spacer"></div>
+            <span class="t-subheading" *ngIf="cancelError" style="color: #f44336; margin-right: 16px;">
+                {{cancelError}}
+            </span>
             <span class="t-subheading clickable" (click)="restartWatching()" *ngIf="timelineStep.end == null">
                 {{watching}}
             </span>
             <button mat-button color="primary" (click)="restartWatching()"
-                *ngIf="timelineStep.end == null && watching === 'error' || watching === 'paused'">
+                [disabled]="isCanceling"
+                *ngIf="timelineStep.end == null && (watching === 'error' || watching === 'paused')">
                 restart
+            </button>
+            <button mat-button color="warn" (click)="cancelTask()" style="margin-left: 8px;"
+                [disabled]="isCanceling"
+                *ngIf="timelineStep.status === 'PENDING'">
+                
+                <span *ngIf="!isCanceling">cancel</span>
+                
+                <mat-spinner *ngIf="isCanceling" diameter="20" style="margin: 0 auto;"></mat-spinner>
             </button>
         </mat-card-title>
         <mat-card-content>
@@ -38,7 +50,7 @@
                     <dd>
                         <div class="step-progress">
                             <mat-progress-bar class="progress-meter" mode="determinate" color="primary"
-                                [value]="((stepProgress.value-stepProgress.start) / (stepProgress.target-stepProgress.start)) * 100">
+                                [value]="((stepProgress.value) / (stepProgress.target)) * 100">
                             </mat-progress-bar>
                             <span [hidden]="stepProgress.unit == null">
                                 {{stepProgress.value}}/{{stepProgress.target}} {{stepProgress.unit}}
