@@ -17,9 +17,11 @@
             Step {{timelineStep.sequence}} ({{timelineStep.processorName}}&#64;{{timelineStep.processorVersion}})
             <qhana-step-status [step]="timelineStep" [noText]="true"></qhana-step-status>
             <div class="spacer"></div>
-            <span class="t-subheading" *ngIf="cancelError" style="color: #f44336; margin-right: 16px;">
-                {{cancelError}}
-            </span>
+            @if (cancelError) {
+                <span class="t-subheading cancel-error-text">
+                    {{cancelError}}
+                </span>
+            }
             <span class="t-subheading clickable" (click)="restartWatching()" *ngIf="timelineStep.end == null">
                 {{watching}}
             </span>
@@ -28,14 +30,17 @@
                 *ngIf="timelineStep.end == null && (watching === 'error' || watching === 'paused')">
                 restart
             </button>
-            <button mat-button color="warn" (click)="cancelTask()" style="margin-left: 8px;"
-                [disabled]="isCanceling"
-                *ngIf="timelineStep.status === 'PENDING'">
-                
-                <span *ngIf="!isCanceling">cancel</span>
-                
-                <mat-spinner *ngIf="isCanceling" diameter="20" style="margin: 0 auto;"></mat-spinner>
-            </button>
+            @if (timelineStep.status === 'PENDING') {
+                <button mat-button class="cancel-button" (click)="cancelTask()" [disabled]="isCanceling">
+                    <span class="cancel-button-content">
+                        <span>cancel</span>
+                        
+                        @if (isCanceling) {
+                            <mat-spinner diameter="20"></mat-spinner>
+                        }
+                    </span>
+                </button>
+            }
         </mat-card-title>
         <mat-card-content>
             <dl class="step-details">
@@ -50,7 +55,7 @@
                     <dd>
                         <div class="step-progress">
                             <mat-progress-bar class="progress-meter" mode="determinate" color="primary"
-                                [value]="((stepProgress.value) / (stepProgress.target)) * 100">
+                                [value]="((stepProgress.value-stepProgress.start) / (stepProgress.target-stepProgress.start)) * 100">
                             </mat-progress-bar>
                             <span [hidden]="stepProgress.unit == null">
                                 {{stepProgress.value}}/{{stepProgress.target}} {{stepProgress.unit}}

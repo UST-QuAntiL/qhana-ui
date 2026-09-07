@@ -17,6 +17,7 @@ export class StepStatusComponent implements OnChanges {
     isPending: boolean = false;
     isSuccess: boolean = false;
     isError: boolean = false;
+    isCanceled: boolean = false;
     status: string = "UNKNOWN";
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -25,6 +26,7 @@ export class StepStatusComponent implements OnChanges {
             this.isPending = status === "PENDING";
             this.isError = status === "FAILURE";
             this.isSuccess = status === "SUCCESS";
+            this.isCanceled = status === "CANCELED";
             this.status = status;
         }
     }

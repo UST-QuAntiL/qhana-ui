@@ -3,6 +3,7 @@
         aria-hidden="true">
     </mat-spinner>
     <mat-icon *ngIf="isSuccess" color="primary" inline="true" aria-hidden="true">done</mat-icon>
+    <mat-icon *ngIf="isCanceled" color="primary" inline="true" aria-hidden="true">canceled</mat-icon>
     <mat-icon *ngIf="isError" inline="true" aria-hidden="true">error</mat-icon>
     <span *ngIf="!noText">{{status}}</span>
 </div>

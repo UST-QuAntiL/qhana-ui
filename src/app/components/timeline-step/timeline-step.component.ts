@@ -121,7 +121,6 @@ export class TimelineStepComponent implements OnInit, OnDestroy {
 
         this.backend.cancelTimelineStep(this.experimentId, stepSequence).subscribe({
             next: (response) => {
-                console.log('Task successfully canceled.');
                 this.timelineStep!.status = 'CANCELED'; 
                 this.isCanceling = false;
             },
