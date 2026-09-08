@@ -17,7 +17,7 @@
             Step {{timelineStep.sequence}} ({{timelineStep.processorName}}&#64;{{timelineStep.processorVersion}})
             <qhana-step-status [step]="timelineStep" [noText]="true"></qhana-step-status>
             <div class="spacer"></div>
-            @if (cancelError) {
+            @if (cancelError && timelineStep.status === 'PENDING') {
                 <span class="t-subheading cancel-error-text">
                     {{cancelError}}
                 </span>
