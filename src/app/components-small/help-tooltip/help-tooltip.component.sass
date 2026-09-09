@@ -21,6 +21,11 @@
         right: calc(anchor(right) - 0.3rem)
         z-index: 1
 
+@supports (position-anchor: --anchor)
+    .tooltip-button.top-center
+        right: unset
+        left: calc(anchor(center) - 1rem)
+
 .tooltip-button:hover, .tooltip-button:focus
     width: 1.5rem
     height: 1.5rem
@@ -40,6 +45,10 @@
         position-area: bottom span-right
         position-try-fallbacks: bottom span-left, right, left, top span-right, top span-left
         margin: 0.1rem
+
+@supports (position-anchor: --anchor)
+    .tooltip-content.bottom-center
+        position-area: bottom center
 
 ::ng-deep.tooltip-content p
     margin-block: 0px
