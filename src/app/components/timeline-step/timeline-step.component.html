@@ -17,13 +17,30 @@
             Step {{timelineStep.sequence}} ({{timelineStep.processorName}}&#64;{{timelineStep.processorVersion}})
             <qhana-step-status [step]="timelineStep" [noText]="true"></qhana-step-status>
             <div class="spacer"></div>
+            @if (cancelError && timelineStep.status === 'PENDING') {
+                <span class="t-subheading cancel-error-text">
+                    {{cancelError}}
+                </span>
+            }
             <span class="t-subheading clickable" (click)="restartWatching()" *ngIf="timelineStep.end == null">
                 {{watching}}
             </span>
             <button mat-button color="primary" (click)="restartWatching()"
-                *ngIf="timelineStep.end == null && watching === 'error' || watching === 'paused'">
+                [disabled]="isCanceling"
+                *ngIf="timelineStep.end == null && (watching === 'error' || watching === 'paused')">
                 restart
             </button>
+            @if (timelineStep.status === 'PENDING') {
+                <button mat-button class="cancel-button" (click)="cancelTask()" [disabled]="isCanceling">
+                    <span class="cancel-button-content">
+                        <span>cancel</span>
+                        
+                        @if (isCanceling) {
+                            <mat-spinner diameter="20"></mat-spinner>
+                        }
+                    </span>
+                </button>
+            }
         </mat-card-title>
         <mat-card-content>
             <dl class="step-details">

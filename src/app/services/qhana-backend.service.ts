@@ -176,7 +176,7 @@ export interface TimelineStepPageOptions {
     sort?: number;
     pluginName?: string;
     version?: string;
-    stepStatus?: "SUCCESS" | "PENDING" | "ERROR" | "";
+    stepStatus?: "SUCCESS" | "PENDING" | "ERROR" | "CANCELED" | "";
     unclearedSubstep?: number;
     resultQuality?: ExperimentResultQuality | "";
 }
@@ -527,6 +527,12 @@ export class QhanaBackendService {
     public getTimelineSubStep(experimentId: number | string, step: number | string, substep: number | string): Observable<TimelineSubStepApiObject> {
         return this.callWithRootUrl<TimelineSubStepApiObject>(
             rootUrl => this.http.get<TimelineSubStepApiObject>(`${rootUrl}/experiments/${experimentId}/timeline/${step}/substeps/${substep}`)
+        );
+    }
+
+    public cancelTimelineStep(experimentId: number | string, step: number | string): Observable<{message: string}> {
+        return this.callWithRootUrl<{message: string}>(
+            rootUrl => this.http.post<{message: string}>(`${rootUrl}/experiments/${experimentId}/timeline/${step}/cancel`, {})
         );
     }
 
