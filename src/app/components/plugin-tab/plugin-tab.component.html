@@ -27,6 +27,160 @@
     }
 }
 
+<!-- Stepper Layout -->
+<ng-template #laneGroup let-group>
+    @if (group.kind === "parallel") {
+        <mat-icon>arrow_forward</mat-icon>
+        <div class="bracket-left"></div>
+    }
+    @if (group.kind === "parallel-choice") {
+        <mat-icon class="rotate-90">call_split</mat-icon>
+    }
+    @if (group.kind === "sequential") {
+        <mat-icon>arrow_forward</mat-icon>
+    }
+    <div class="stepper-group-{{group.kind}}">
+        @for (lane of group.lanes; track $index) {
+            @if (group.kind === "sequential") {
+                @if ($index !== 0) {
+                    <div class="bracket-right"></div>
+                    <mat-icon>arrow_forward</mat-icon>
+                }
+                <div class="bracket-left"></div>
+            }
+            <ng-container *ngTemplateOutlet="stepperLane; context:{$implicit: lane}"></ng-container>
+        }
+        @if (group.kind === "sequential") {
+            <div class="bracket-right"></div>
+        }
+    </div>
+    @if (group.kind === "parallel") {
+        <div class="bracket-right"></div>
+        <mat-icon>arrow_forward</mat-icon>
+    }
+    @if (group.kind === "parallel-choice") {
+        <mat-icon class="rotate-90">merge</mat-icon>
+    }
+    @if (group.kind === "sequential") {
+        <mat-icon>arrow_forward</mat-icon>
+    }
+</ng-template>
+<ng-template #stepperLane let-lane>
+    <div class="stepper-lane">
+        @for (entry of lane.entries; track $index) {
+            @if ($index === 0 && lane === stepperData) {
+                <mat-icon>start</mat-icon>
+            }
+            @if (entry.type === "tab") {
+                @if ($index !== 0) {
+                    <mat-icon>arrow_forward</mat-icon>
+                }
+                <a [matButton]="tabCompletion.isCompleted || entry.tabUrl === currentTemplateTab?.self?.href ? 'tonal' : 'outlined'"
+                    [routerLink]="navTabLinkPrefix.concat(urlToNavData.get(entry.tabUrl)?.navigationLink ?? [])"
+                    [queryParams]="(templateParam != null) ? {'template': templateParam} : {}" [color]="entry.tabUrl === currentTemplateTab?.self?.href ? 'primary' : null">
+                    <span class="link-label">
+                        @if (urlToTab.get(entry.tabUrl)?.icon) {
+                            <mat-icon>
+                                {{urlToTab.get(entry.tabUrl)?.icon}}
+                            </mat-icon>
+                        }
+                        {{urlToTab.get(entry.tabUrl)?.name ?? entry.tabUrl}}
+                        @if (urlToTab.get(entry.tabUrl)?.groupKey) {
+                            <mat-icon>more_vert</mat-icon>
+                        }
+                        <qhana-tab-completion-indicator [tab]="urlToTab.get(entry.tabUrl)?.self ?? null" #tabCompletion></qhana-tab-completion-indicator>
+                    </span>
+                </a>
+            }
+            @if (entry.type === "group") {
+                <ng-container *ngTemplateOutlet="laneGroup; context:{$implicit: entry}"></ng-container>
+            }
+        }
+        @if (lane === stepperData) {
+            <mat-icon>flag</mat-icon>
+        }
+    </div>
+</ng-template>
+@if (tabNavigationLayout === "stepper") {
+    <div class="stepper" [style]="{'anchor-name': '--' + (stepperHelp.anchor|async)}">
+        @if (stepperData != null) {
+            <ng-container *ngTemplateOutlet="stepperLane; context:{$implicit: stepperData}"></ng-container>
+        } @else {
+            <div class="stepper-lane">
+                <p>Failed to generate a stepper layout from the template tabs.</p>
+                <button mat-raised-button (click)="tabNavigationLayout = 'nested-tabs'">show all tabs</button>
+            </div>
+        }
+    </div>
+    <qhana-help-tooltip label="Show help for the stepper layout." buttonPos="top-center" tooltipPos="bottom-center" #stepperHelp>
+        <p>
+            The stepper layout orders tabs by their "previous" and "next" relations.
+        </p>
+        <div class="help-paragraph">
+            <p><b>Sequential:</b> Tabs should be completed in order from left to right.</p>
+            <div class="stepper">
+                <div class="stepper-lane">
+                    <mat-icon>start</mat-icon>
+                    <button [matButton]="'tonal'">first tab <mat-icon inline="true">done</mat-icon></button>
+                    <mat-icon>arrow_forward</mat-icon>
+                    <button [matButton]="'tonal'" color="primary">current tab</button>
+                    <mat-icon>arrow_forward</mat-icon>
+                    <button [matButton]="'outlined'">next tab</button>
+                    <mat-icon>arrow_forward</mat-icon>
+                    <div class="stepper-group-sequential">
+                        <div class="bracket-left"></div>
+                        <div class="stepper-lane">
+                            <button [matButton]="'outlined'">first tab (nested sequence)</button>
+                            <mat-icon>arrow_forward</mat-icon>
+                            <button [matButton]="'outlined'">second tab (nested sequence)</button>
+                        </div>
+                        <div class="bracket-right"></div>
+                    </div>
+                    <mat-icon>flag</mat-icon>
+                </div>
+            </div>
+        </div>
+        <div class="help-paragraph">
+            <p><b>Parallel:</b> Tabs can be completed in any order, but within a lane tabs must still be completed from left to right.</p>
+            <div class="stepper">
+                <div class="stepper-lane">
+                    <div class="bracket-left"></div>
+                    <div class="stepper-group-parallel">
+                        <div class="stepper-lane">
+                            <button [matButton]="'outlined'">first tab (top)</button>
+                            <mat-icon>arrow_forward</mat-icon>
+                            <button [matButton]="'outlined'">second tab (top)</button>
+                        </div>
+                        <div class="stepper-lane">
+                            <button [matButton]="'outlined'">first tab (bottom)</button>
+                        </div>
+                    </div>
+                    <div class="bracket-right"></div>
+                </div>
+            </div>
+        </div>
+        <div class="help-paragraph">
+            <p><b>Parallel Choice:</b> Two or more (exclusive) alternative paths. Only one path needs to be completed.</p>
+            <div class="stepper">
+                <div class="stepper-lane">
+                    <mat-icon class="rotate-90">call_split</mat-icon>
+                    <div class="stepper-group-parallel-choice">
+                        <div class="stepper-lane">
+                            <button [matButton]="'outlined'">first tab (top)</button>
+                            <mat-icon>arrow_forward</mat-icon>
+                            <button [matButton]="'outlined'">second tab (top)</button>
+                        </div>
+                        <div class="stepper-lane">
+                            <button [matButton]="'outlined'">first tab (bottom)</button>
+                        </div>
+                    </div>
+                    <mat-icon class="rotate-90">call_merge</mat-icon>
+                </div>
+            </div>
+        </div>
+    </qhana-help-tooltip>
+}
+
 
 <!-- Plugins as navigation tabs if nr. < 6-->
 @if (tabNavigationLayout === "nested-tabs" && tabPath.length === 1 && (currentPluginGroup?.collectionSize ?? 0) > 1 && (currentPluginGroup?.collectionSize ?? 0) < 6) {
@@ -122,6 +276,17 @@
                         }
                     }
                 </nav>
+            </mat-card-content>
+        </mat-card>
+    }
+
+    @if (tabNavigationLayout === "stepper" && currentPluginGroup && !currentTemplateTab?.groupKey) {
+        <mat-card class="sidebar">
+            <mat-card-header class="sidebar-header t-title">Plugins</mat-card-header>
+            <mat-card-content class="sidebar-content-wrapper">
+                <qhana-growing-list class="sidebar-content scrollable" [apiLink]="currentPluginGroup.self"
+                    [highlighted]="highlightedPlugin" [highlightByKey]="'pluginId'"
+                    (clickItem)="selectPlugin($event)"></qhana-growing-list>
             </mat-card-content>
         </mat-card>
     }

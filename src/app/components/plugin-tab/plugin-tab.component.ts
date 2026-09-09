@@ -1,6 +1,7 @@
-import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, Subscription } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
 import { ApiLink, PageApiObject } from 'src/app/services/api-data-types';
 import { CurrentExperimentService } from 'src/app/services/current-experiment.service';
 import { PluginApiObject } from 'src/app/services/qhana-api-data-types';
@@ -8,7 +9,6 @@ import { ExperimentDataApiObject, QhanaBackendService } from 'src/app/services/q
 import { PluginRegistryBaseService } from 'src/app/services/registry.service';
 import { TemplateApiObject, TemplatesService, TemplateTabApiObject } from 'src/app/services/templates.service';
 import { FormSubmitData } from '../plugin-uiframe/plugin-uiframe.component';
-import { debounceTime } from 'rxjs/operators';
 
 
 interface NavigationData {
@@ -16,6 +16,25 @@ interface NavigationData {
     parentTabUrl: string | null;
     nextTabs: string[];
     previousTabs: string[];
+}
+
+interface StepperEntry {
+    type: string;
+}
+
+interface TabStepperEntry extends StepperEntry {
+    type: 'tab';
+    tabUrl: string;
+}
+
+interface LaneGroupStepperEntry extends StepperEntry {
+    type: 'group';
+    lanes: StepperLane[];
+    kind: 'sequential' | 'parallel' | 'parallel-choice';
+}
+
+interface StepperLane {
+    entries: StepperEntry[];
 }
 
 
@@ -50,6 +69,8 @@ export class PluginTabComponent implements OnInit, OnDestroy {
     urlToNavData: Map<string, NavigationData> = new Map();
     groupToTabs: Map<string, string[]> = new Map();
 
+    stepperData: StepperLane | null = null;
+
     get currentMainLocation() {
         if (this.currentExperimentId != null) {
             return "experiment-navigation";
@@ -57,7 +78,7 @@ export class PluginTabComponent implements OnInit, OnDestroy {
         return "navigation";
     }
 
-    tabNavigationLayout: "nested-tabs" | "outline" = "outline"
+    tabNavigationLayout: "nested-tabs" | "outline" | "stepper" = "outline"
 
     tabPath: string[] = [];
     allTabs: string[] = [];
@@ -85,6 +106,7 @@ export class PluginTabComponent implements OnInit, OnDestroy {
             if (!sameTemplate) {
                 this.urlToTab = this.getPrefilledUrlToTabMap(template);
                 this.urlToNavData = new Map();
+                this.stepperData = null;
             }
             this.prepareNavigationData();
             this.onParamsChanged();
@@ -188,6 +210,7 @@ export class PluginTabComponent implements OnInit, OnDestroy {
         if (this.currentTemplate == null) {
             this.urlToTab.clear();
             this.urlToNavData.clear();
+            this.stepperData = null;
         }
         if (this.currentTabId == null || this.currentTemplate == null) {
             this.currentTemplateTab = null;
@@ -283,6 +306,7 @@ export class PluginTabComponent implements OnInit, OnDestroy {
         }
         this.allTabs = allTabs;
 
+        const oldTabPath = this.tabPath;
         const newTabPath = [tab.data.self.href];
         const urlToNavData = this.urlToNavData;
         let parent = urlToNavData.get(tab.data.self.href)?.parentTabUrl;
@@ -297,6 +321,9 @@ export class PluginTabComponent implements OnInit, OnDestroy {
             return;
         }
         const rootTabUrl = newTabPath[0];
+        if (oldTabPath.length > 0 && rootTabUrl === oldTabPath[0]) {
+            return; // don't update layout mode when root tab does not change
+        }
         const rootTabLink = this.urlToTab.get(rootTabUrl)?.self;
         if (rootTabLink == null) {
             return;
@@ -305,9 +332,13 @@ export class PluginTabComponent implements OnInit, OnDestroy {
         const layoutMode = rootTab?.data?.metadata?.layout?.toLowerCase();
         if (layoutMode == null || layoutMode === "default" || layoutMode === "nested-tabs") {
             this.tabNavigationLayout = "nested-tabs";
-        }
-        if (layoutMode === "outline") {
+        } else if (layoutMode === "outline") {
             this.tabNavigationLayout = "outline";
+        } else if (layoutMode === "stepper") {
+            this.tabNavigationLayout = "stepper";
+        } else {
+            // fallback to default layout
+            this.tabNavigationLayout = "nested-tabs";
         }
     }
 
@@ -365,11 +396,134 @@ export class PluginTabComponent implements OnInit, OnDestroy {
             });
         });
 
+        // tabs with next tabs but not previous tabs (starting points for the stepper layout)
+        const startTabs: string[] = [];
+
         // update nav data
         urlToNavData.forEach((navData, tabUrl) => {
             navData.nextTabs = Array.from(urlToNext.get(tabUrl) ?? []);
             navData.previousTabs = Array.from(urlToPrevious.get(tabUrl) ?? []);
+            if (navData.nextTabs.length > 0 && navData.previousTabs.length === 0) {
+                startTabs.push(tabUrl);
+            }
         });
+
+        const mainLane: StepperLane = { entries: [] };
+
+        const addedToStepper = new Set<string>();
+        let runawayProtection = 100000;
+
+        const addEntryToStepperLane = (lane: StepperLane, next: string[]): string[] => {
+            runawayProtection -= 1;
+            if (runawayProtection < 0) {
+                console.warn("LOOP DETECTED!")
+                return [];
+            }
+            // prevent tabs from being added more than once!
+            next = next.filter(tabUrl => !addedToStepper.has(tabUrl));
+            if (next.length === 0) {
+                return []; // nothing left to add
+            }
+            if (next.length === 1) {
+                // only a single tab, add a new entry
+                const tabUrl = next[0];
+                addedToStepper.add(tabUrl);
+                const entry: TabStepperEntry = { type: 'tab', tabUrl: tabUrl };
+                lane.entries.push(entry);
+                const nextTabs = urlToNavData.get(tabUrl)?.nextTabs ?? [];
+                return nextTabs;
+            }
+            // multiple next tabs possible, fist check fork type
+            const parents = new Set<string>();
+            const previous = new Set<string>();
+            next.forEach(tabUrl => {
+                const navData = urlToNavData.get(tabUrl);
+                parents.add(navData?.parentTabUrl ?? "UNKNOWN");
+                const previousTabs = navData?.previousTabs;
+                if (previousTabs == null) {
+                    return;
+                }
+                previousTabs.forEach(prevUrl => previous.add(prevUrl));
+            });
+
+            let groupType: 'sequential' | 'parallel' | 'parallel-choice' = 'parallel';
+            const parent = parents.keys().next().value;
+            if (parent != null) {
+                const childOrder = urlToTab.get(parent)?.metadata?.childOrder;
+                if (childOrder === 'sequential' || childOrder === 'parallel' || childOrder === 'parallel-choice') {
+                    groupType = childOrder;
+                }
+            }
+            const previouTab = previous.keys().next().value;
+            if (previouTab != null) {
+                const nextOrder = urlToTab.get(previouTab)?.metadata?.nextOrder;
+                if (nextOrder === 'sequential' || nextOrder === 'parallel' || nextOrder === 'parallel-choice') {
+                    groupType = nextOrder;
+                }
+            }
+
+            const groupEntry: LaneGroupStepperEntry = { type: 'group', lanes: [], kind: groupType };
+            lane.entries.push(groupEntry);
+
+            const combinedNext: string[] = [];
+
+            next.forEach(nextUrl => {
+                const groupLane: StepperLane = { entries: [] };
+                groupEntry.lanes.push(groupLane);
+                let nextTabs = [nextUrl]; // start with the tab as a single tab
+                while (nextTabs.length > 0) {
+                    runawayProtection -= 1;
+                    if (runawayProtection < 0) {
+                        console.warn("LOOP DETECTED!")
+                        return;
+                    }
+                    nextTabs = addEntryToStepperLane(groupLane, nextTabs);
+                    if (parent != null && nextTabs.length > 0) {
+                        const anyOutsideParent = nextTabs.some(t => {
+                            let p: string | null = t;
+                            while (p != null) {
+                                runawayProtection -= 1;
+                                if (runawayProtection < 0) {
+                                    console.warn("LOOP DETECTED!")
+                                    return true;
+                                }
+                                if (p === parent) {
+                                    return false; // tab is under current parent
+                                }
+                                p = urlToNavData.get(p)?.parentTabUrl ?? null;
+                            }
+                            return true; // tab has different parent
+                        });
+                        if (anyOutsideParent) {
+                            // one ore more next tab is not inside the current parent tab
+                            // => end group and handle next tabs outside group
+                            nextTabs.forEach(n => {
+                                if (!combinedNext.includes(n)) {
+                                    combinedNext.push(n);
+                                }
+                            });
+                            // next tabs are handled outside this group lane,
+                            // end iteration
+                            nextTabs = [];
+                        }
+                    }
+                }
+            });
+
+            // exhausted all groups without merging
+            return combinedNext;
+        }
+
+        let nextTabs = startTabs;
+        while (nextTabs.length > 0) {
+            runawayProtection -= 1;
+            if (runawayProtection < 0) {
+                console.warn("LOOP DETECTED!")
+                return;
+            }
+            nextTabs = addEntryToStepperLane(mainLane, nextTabs);
+        }
+        this.stepperData = mainLane;
     }
 
     private async updateLeafTabCompletion() {

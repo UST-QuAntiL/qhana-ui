@@ -22,6 +22,58 @@
     flex-direction: row
     width: 100%
 
+.stepper
+    box-sizing: border-box
+    width: 100%
+    overflow-x: auto
+    display: flex
+    flex-direction: row
+    justify-content: space-around
+    padding-block: 0.5rem
+    padding-inline: 0.5rem
+
+.stepper-lane
+    display: flex
+    flex-direction: row
+    gap: 0.5rem
+    align-items: center
+    > *
+        flex-shrink: 0
+
+.stepper-group-parallel, .stepper-group-parallel-choice
+    display: flex
+    flex-direction: column
+    gap: 0.5rem
+    align-items: center
+
+.stepper-group-sequential
+    display: flex
+    flex-direction: row
+    gap: 0.5rem
+    align-items: center
+
+.rotate-90
+    transform: rotate(90deg)
+
+.bracket-left
+    align-self: stretch
+    width: 0.3rem
+    border-width: 2px
+    border-color: var(--border-color)
+    border-style: solid
+    border-right: none
+
+.bracket-right
+    align-self: stretch
+    width: 0.3rem
+    border-width: 2px
+    border-color: var(--border-color)
+    border-style: solid
+    border-left: none
+
+.help-paragraph
+    margin-block: 1rem
+
 .sidebar
     position: sticky
     top: 1rem
