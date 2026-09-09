@@ -29,17 +29,18 @@
 
 
 <!-- Plugins as navigation tabs if nr. < 6-->
-<ng-container *ngIf="tabPath.length === 1 && (currentPluginGroup?.collectionSize ?? 0) > 1 && (currentPluginGroup?.collectionSize ?? 0) < 6">
+@if (tabNavigationLayout === "nested-tabs" && tabPath.length === 1 && (currentPluginGroup?.collectionSize ?? 0) > 1 && (currentPluginGroup?.collectionSize ?? 0) < 6) {
     <nav mat-tab-nav-bar class="big-nav-tabs" [tabPanel]="tabContentPanel">
-        <a mat-tab-link
-            [routerLink]="navTabLinkPrefix.concat(currentPath ? [currentPath] : []).concat([currentTabId ?? '-1', 'plugin', plugin.resourceKey?.pluginId ?? '-1'])"
-            [queryParams]="(templateParam != null) ? {'template': templateParam} : {}"
-            [active]="plugin.resourceKey?.pluginId === currentPluginId || plugin.resourceKey?.pluginId === activePlugin?.resourceKey?.pluginId"
-            *ngFor="let plugin of currentPluginGroup?.items">
-            {{plugin.name}}
-        </a>
+        @for (plugin of currentPluginGroup?.items; track plugin.href) {
+            <a mat-tab-link
+                [routerLink]="navTabLinkPrefix.concat(currentPath ? [currentPath] : []).concat([currentTabId ?? '-1', 'plugin', plugin.resourceKey?.pluginId ?? '-1'])"
+                [queryParams]="(templateParam != null) ? {'template': templateParam} : {}"
+                [active]="plugin.resourceKey?.pluginId === currentPluginId || plugin.resourceKey?.pluginId === activePlugin?.resourceKey?.pluginId">
+                {{plugin.name}}
+            </a>
+        }
     </nav>
-</ng-container>
+}
 
 <!-- Main content panel -->
 <mat-tab-nav-panel class="main-content" #tabContentPanel>
