@@ -1,7 +1,7 @@
-import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
-import { TAB_GROUP_NAME_OVERRIDES, TemplateTabApiObject } from 'src/app/services/templates.service';
-import { FormBuilder, FormGroup, ValidationErrors, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
+import { AbstractControl, FormBuilder, FormControl, FormGroup, PristineChangeEvent, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
+import { TAB_GROUP_NAME_OVERRIDES, TemplateTabApiObject } from 'src/app/services/templates.service';
 
 export function isInSetValidator(validValues: any[]): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } | null => {
@@ -28,8 +28,11 @@ export class UiTemplateTabFormComponent implements OnChanges, OnDestroy, OnInit 
     @Output() data: EventEmitter<any> = new EventEmitter();
     @Output() formSubmit: EventEmitter<void> = new EventEmitter();
 
+    private formEventsSubscription: Subscription | null = null;
     private formStatusSubscription: Subscription | null = null;
     private formValueSubscription: Subscription | null = null;
+
+    metadataFormGroup: FormGroup | null = null;
 
     description: string = "";
 
@@ -57,6 +60,7 @@ export class UiTemplateTabFormComponent implements OnChanges, OnDestroy, OnInit 
         location: "workspace",
         locationExtra: "",
         groupKey: "",
+        metadata: {},
     };
 
     templateForm: FormGroup | null = null;
@@ -64,17 +68,8 @@ export class UiTemplateTabFormComponent implements OnChanges, OnDestroy, OnInit 
     constructor(private fb: FormBuilder) { }
 
     ngOnInit(): void {
-        this.ngOnChanges({});
-    }
-
-    ngOnDestroy(): void {
-        this.formStatusSubscription?.unsubscribe();
-        this.formValueSubscription?.unsubscribe();
-    }
-
-    ngOnChanges(changes: SimpleChanges): void {
-        this.formStatusSubscription?.unsubscribe();
-        this.formValueSubscription?.unsubscribe();
+        const newMetaGroup = this.fb.group<{ [props: string]: string }>(this.initialValues.metadata ?? {});
+        this.metadataFormGroup = newMetaGroup;
         const templateForm = this.fb.group({
             name: [this.initialValues.name, [Validators.required, Validators.minLength(1)]],
             icon: [this.initialValues.locationExtra, [Validators.maxLength(64)]],
@@ -82,6 +77,7 @@ export class UiTemplateTabFormComponent implements OnChanges, OnDestroy, OnInit 
             location: [this.initialValues.location, [Validators.required, isInSetValidator(Object.keys(TAB_GROUP_NAME_OVERRIDES))]],
             locationExtra: [this.initialValues.locationExtra],
             groupKey: [this.initialValues.locationExtra, [Validators.maxLength(32)]],
+            metadata: newMetaGroup,
         });
         templateForm.addValidators((control): ValidationErrors | null => {
             const loc = control.get("location")?.getRawValue() ?? "";
@@ -95,26 +91,13 @@ export class UiTemplateTabFormComponent implements OnChanges, OnDestroy, OnInit 
             }
             return null;
         });
-        if (this.tabData != null) {
-            const location = this.tabData.location;
-            const [baseLocation, locationExtra] = location.split(".", 2);
-            this.description = this.tabData.description;
-            try {
-                this.currentPluginFilter = JSON.parse(this.tabData.filterString);
-            } catch {
-                this.currentPluginFilter = null;
+
+
+        this.formEventsSubscription = templateForm.events.subscribe((event) => {
+            if (event instanceof PristineChangeEvent) {
+                this.updateDirty();
             }
-            templateForm.setValue({
-                name: this.tabData.name,
-                icon: this.tabData.icon,
-                sortKey: this.tabData.sortKey,
-                groupKey: this.tabData.groupKey,
-                location: baseLocation,
-                locationExtra: locationExtra ?? "",
-            });
-        } else {
-            this.description = "";
-        }
+        });
         this.formStatusSubscription = templateForm.statusChanges.subscribe(() => {
             this.updateDirty();
             this.isValid.emit(!templateForm.invalid);
@@ -130,6 +113,7 @@ export class UiTemplateTabFormComponent implements OnChanges, OnDestroy, OnInit 
                 "sortKey": value.sortKey,
                 "location": location,
                 "groupKey": value.groupKey ?? "",
+                "metadata": value.metadata,
             };
             data.description = this.description;
             if (value.groupKey) {
@@ -143,7 +127,66 @@ export class UiTemplateTabFormComponent implements OnChanges, OnDestroy, OnInit 
             }
             this.data.emit(data);
         });
+
         this.templateForm = templateForm;
+
+        this.ngOnChanges({});
+    }
+
+    ngOnDestroy(): void {
+        this.formEventsSubscription?.unsubscribe();
+        this.formStatusSubscription?.unsubscribe();
+        this.formValueSubscription?.unsubscribe();
+    }
+
+    ngOnChanges(changes: SimpleChanges): void {
+        if (this.tabData != null) {
+            const location = this.tabData.location;
+            const [baseLocation] = location.split(".", 1);
+            const locationExtra = location.length > baseLocation.length ? location.substring(baseLocation.length + 1) : "";
+            this.description = this.tabData.description;
+            try {
+                this.currentPluginFilter = JSON.parse(this.tabData.filterString);
+            } catch {
+                this.currentPluginFilter = null;
+            }
+            const metadata = this.tabData.metadata ?? {};
+
+            // add missing controls to form group before setting value
+            // redundant controls will be automatically removed by the key-value input component
+            const metadataKeys = Object.keys(metadata);
+            metadataKeys.forEach(key => {
+                if (this.metadataFormGroup?.contains(key)) {
+                    return;
+                }
+                this.metadataFormGroup?.addControl(key, new FormControl<string>(""));
+            });
+
+            this.templateForm?.setValue({
+                name: this.tabData.name,
+                icon: this.tabData.icon,
+                sortKey: this.tabData.sortKey,
+                groupKey: this.tabData.groupKey,
+                location: baseLocation,
+                locationExtra: locationExtra,
+                metadata: metadata,
+            });
+        } else {
+            this.description = "";
+        }
+    }
+
+    public clearForm() {
+        this.currentPluginFilter = null;
+        this.templateForm?.setValue({
+            name: this.initialValues.name,
+            icon: this.initialValues.icon,
+            sortKey: this.initialValues.sortKey,
+            groupKey: this.initialValues.groupKey,
+            location: this.initialValues.location,
+            locationExtra: this.initialValues.locationExtra,
+            metadata: {},
+        });
     }
 
     public submitForm() {

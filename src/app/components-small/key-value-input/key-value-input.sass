@@ -1,0 +1,29 @@
+.key-value-group
+    display: grid
+    grid-template-columns: auto 1fr auto
+    column-gap: 0.5rem
+    row-gap: 0.3rem
+    margin-block: 1rem
+
+    .key
+        grid-column: 1
+        align-self: center
+
+    .value
+        grid-column: 2
+        align-self: center
+
+    .action
+        grid-column: 3
+        align-self: center
+        height: stretch
+
+    .key-value
+        grid-column-start: 1
+        grid-column-end: 3
+        align-self: center
+
+.no-subscript
+    ::ng-deep .mat-mdc-form-field-subscript-wrapper
+        background-color: magenta
+        display: none

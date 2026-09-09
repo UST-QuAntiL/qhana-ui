@@ -1,0 +1,23 @@
+@if (formGroup != null) {
+    <div class="key-value-group" [formGroup]="formGroup">
+        @for (key of keys; track key) {
+            <span class="key">{{key}}:</span>
+            <mat-form-field class="form-field value no-subscript">
+                <mat-label>Value for {{key}}</mat-label>
+                <input matInput [formControlName]="key" [name]="key">
+            </mat-form-field>
+            <button class="action" mat-button="tonal" (click)="removeKey(key)">
+                <mat-icon aria-hidden="true" fontIcon="remove"></mat-icon>
+                remove
+            </button>
+        }
+        <mat-form-field class="form-field key-value no-subscript">
+            <mat-label>Add new Entry</mat-label>
+            <input matInput #newKeyInput>
+        </mat-form-field>
+        <button class="action" mat-button="tonal" (click)="addKey(newKeyInput.value); $event.preventDefault()">
+            <mat-icon aria-hidden="true" fontIcon="add"></mat-icon>
+            add entry
+        </button>
+    </div>
+}

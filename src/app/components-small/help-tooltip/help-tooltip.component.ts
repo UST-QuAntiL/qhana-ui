@@ -23,6 +23,9 @@ export class HelpTooltipComponent implements OnInit, OnDestroy {
     @Input() label: string | null = null;
     @Output() anchor: EventEmitter<string> = new EventEmitter();
 
+    @Input() buttonPos: "top-right" | "top-center" = "top-right";
+    @Input() tooltipPos: "bottom-left" | "bottom-center" = "bottom-left";
+
     constructor(private helpService: HelpServiceService) { }
 
     ngOnInit(): void {

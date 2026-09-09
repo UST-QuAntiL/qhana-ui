@@ -22,6 +22,58 @@
     flex-direction: row
     width: 100%
 
+.stepper
+    box-sizing: border-box
+    width: 100%
+    overflow-x: auto
+    display: flex
+    flex-direction: row
+    justify-content: space-around
+    padding-block: 0.5rem
+    padding-inline: 0.5rem
+
+.stepper-lane
+    display: flex
+    flex-direction: row
+    gap: 0.5rem
+    align-items: center
+    > *
+        flex-shrink: 0
+
+.stepper-group-parallel, .stepper-group-parallel-choice
+    display: flex
+    flex-direction: column
+    gap: 0.5rem
+    align-items: center
+
+.stepper-group-sequential
+    display: flex
+    flex-direction: row
+    gap: 0.5rem
+    align-items: center
+
+.rotate-90
+    transform: rotate(90deg)
+
+.bracket-left
+    align-self: stretch
+    width: 0.3rem
+    border-width: 2px
+    border-color: var(--border-color)
+    border-style: solid
+    border-right: none
+
+.bracket-right
+    align-self: stretch
+    width: 0.3rem
+    border-width: 2px
+    border-color: var(--border-color)
+    border-style: solid
+    border-left: none
+
+.help-paragraph
+    margin-block: 1rem
+
 .sidebar
     position: sticky
     top: 1rem
@@ -40,6 +92,7 @@
     margin-inline: -16px
     margin-block-end: -16px
     height: calc(100% - 4rem)
+    max-height: calc( 100vh - 4rem )
 
 .sidebar-content
     display: block
@@ -47,11 +100,81 @@
     padding-inline: 16px
     padding-block-end: 1rem
     height: 100%
+    max-height: calc( 100vh - 4rem - 32px )
     overflow-y: auto
     scrollbar-width: thin
 
-.sidebar-content ::ng-deep > ul
+.sidebar-content-wrapper ::ng-deep qhana-growing-list > ul
     margin-inline: -16px
+
+.sidebar-link
+    display: inline-flex
+    box-sizing: border-box
+    width: 100%
+    width: stretch
+    min-height: 2.5rem
+    margin-inline: -16px
+    --level: 1
+    padding-inline-start: calc( 16px + (var(--level, 1)*1rem) - 1rem)
+    padding-inline-end: 16px
+    padding-block: 0.5rem
+
+.sidebar-link.active
+    background-color: var(--primary-lighter)
+    color: var(--background)
+
+.sidebar-link:hover, .sidebar-link:focus
+    background-color: var(--primary)
+    color: var(--text-primary)
+
+.inline-buttons
+    display: flex
+    align-items: center
+    gap: 0.5rem
+    flex-wrap: wrap
+    margin-block: 0.5rem
+
+.inline-details:not(:open)
+    display: inline-flex
+
+.summary-button
+    display: inline-flex
+    align-items: center
+    cursor: pointer
+    height: var(--mat-button-filled-container-height, 40px)
+    font-family: var(--mat-button-filled-label-text-font, var(--mat-sys-label-large-font))
+    font-size: var(--mat-button-filled-label-text-size, var(--mat-sys-label-large-size))
+    letter-spacing: var(--mat-button-filled-label-text-tracking, var(--mat-sys-label-large-tracking))
+    text-transform: var(--mat-button-filled-label-text-transform)
+    font-weight: var(--mat-button-filled-label-text-weight, var(--mat-sys-label-large-weight))
+    padding: 0 var(--mat-button-filled-horizontal-padding, 24px)
+    border-radius: var(--mat-button-filled-container-shape, var(--mat-sys-corner-full))
+
+.summary-button:hover, .summary-button:focus
+    background-color: #0000000a
+
+.summary-button:active
+    background-color: #0000001f
+
+@media (prefers-color-scheme: dark)
+    .summary-button:hover, .summary-button:focus
+        background-color: #ffffff0a
+
+    .summary-button:active
+        background-color: #ffffff1f
+
+.tab-content
+    box-sizing: border-box
+    top: 1rem
+    margin-block-start: 0rem
+    margin-block-end: 1rem
+    margin-inline: 1rem
+    flex-grow: 1
+    min-height: 50vh
+
+.tab-content-header
+    padding-block: 1rem
+    height: 2rem
 
 .plugin-frame
     flex-grow: 1

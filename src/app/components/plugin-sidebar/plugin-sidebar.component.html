@@ -60,8 +60,10 @@
         </div>
         <div class="template-tab-sidebar" [hidden]="activeArea != 'detail'">
             <mat-divider></mat-divider>
-            <qhana-tab-group-list [templateId]="templateId ?? defaultTemplateId" [selectedTab]="tabId"
-                (clickedOnTab)="selectTab($event)"></qhana-tab-group-list>
+            <p style="margin-inline: 1rem">
+                Information about the currently selected UI template.
+            </p>
+            <a style="margin-inline: 1rem" [routerLink]="['/templates', templateId]" mat-flat-button>edit</a>
         </div>
         <details class="plugin-group" attr.data-group="{{group.key}}" [open]="group.open" *ngFor="let group of pluginGroups"
             [hidden]="activeArea == 'detail' || activeArea == 'templates'">

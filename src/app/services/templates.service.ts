@@ -18,7 +18,7 @@ import { Injectable } from '@angular/core';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { BehaviorSubject, Subject, Subscription, combineLatest } from 'rxjs';
 import { distinctUntilChanged, filter, take } from 'rxjs/operators';
-import { ApiLink, ApiObject, CollectionApiObject, PageApiObject } from './api-data-types';
+import { ApiLink, ApiObject, ApiResponse, CollectionApiObject, PageApiObject } from './api-data-types';
 import { CurrentExperimentService } from './current-experiment.service';
 import { EnvService } from './env.service';
 import { QhanaBackendService } from './qhana-backend.service';
@@ -30,6 +30,7 @@ export interface TemplateApiObject extends ApiObject {  // TODO check fields
     description: string;
     tags: string[];
     groups: ApiLink[];
+    tabs: ApiLink[];
 }
 
 
@@ -42,6 +43,7 @@ export interface TemplateTabApiObject extends ApiObject {  // TODO check fields
     location: string;
     groupKey: string;
     plugins: ApiLink;
+    metadata?: { [props: string]: string };
 }
 
 export const TAB_GROUP_SORT_KEYS: { [group: string]: number } = {
@@ -88,6 +90,9 @@ export class TemplatesService {
     private currentTemplateTabSubject: BehaviorSubject<ApiLink | null> = new BehaviorSubject<ApiLink | null>(null);
     private currentTemplateTabId: string | null = null;
 
+    private tabCompletionStatusChangedSubject = new Subject<{ experimentId: string, templateTabId: string, isCompleted: boolean }>();
+    private tabCompletionStorage: Map<string, boolean> = new Map();
+
     get defaultTemplateId() {
         return this.defaultTemplateIdSubject.asObservable();
     }
@@ -114,6 +119,10 @@ export class TemplatesService {
 
     get currentTemplateTab() {
         return this.currentTemplateTabSubject.asObservable();
+    }
+
+    get tabCompletionStatusChanged() {
+        return this.tabCompletionStatusChangedSubject.asObservable();
     }
 
     constructor(private registry: PluginRegistryBaseService, private env: EnvService, private currentExperiment: CurrentExperimentService, private backend: QhanaBackendService, private route: ActivatedRoute, private router: Router) {
@@ -231,16 +240,7 @@ export class TemplatesService {
         }
 
         const templateResponse = await this.registry.getByApiLink<TemplateApiObject>(currentTemplate.self, null, false);
-        const tabsLink = templateResponse?.links?.find(link => link.resourceType === "ui-template-tab" && link.rel.some(r => r === "collection"));
-        if (tabsLink == null) {
-            if (this.currentTemplateSubject.value != null) {
-                this.currentTemplateTabSubject.next(null);
-            }
-            return;
-        }
-
-        const allTabs = await this.registry.getByApiLink<CollectionApiObject>(tabsLink, null, true);
-        const tabLink = allTabs?.data?.items?.find(tab => tab.resourceKey?.uiTemplateTabId === templateTabId);
+        const tabLink = templateResponse?.data?.tabs?.find(tab => tab.resourceKey?.uiTemplateTabId === templateTabId);
         if (tabLink == null) {
             if (this.currentTemplateSubject.value != null) {
                 this.currentTemplateTabSubject.next(null);
@@ -280,6 +280,24 @@ export class TemplatesService {
         }
     }
 
+    async getAllTabs(templateId: string | ApiResponse<TemplateApiObject>) {
+        let templateResponse: ApiResponse<TemplateApiObject> | null;
+        if (typeof templateId === "string") {
+            templateResponse = await this.getTemplate(templateId, false);
+        } else {
+            templateResponse = templateId;
+        }
+        const allTasbLink = templateResponse?.links?.find(link => link.resourceType === "ui-template-tab" && link.rel.some(r => r === "collection"));
+        if (allTasbLink == null) {
+            return [];
+        }
+        const allTabsResponse = await this.registry.getByApiLink<CollectionApiObject>(allTasbLink);
+        const allTabPromises = allTabsResponse?.data?.items?.map(tabLink => this.registry.getByApiLink<TemplateTabApiObject>(tabLink)) ?? [];
+        // TODO: check what happens for >25 tabs!
+        const allTabs = await Promise.all(allTabPromises);
+        return allTabs.filter(tab => tab != null).map(tab => tab.data);
+    }
+
     async getTemplateTabGroups(templateId: string, ignoreCache: boolean | "ignore-embedded" = false) {
         const templateResponse = await this.getTemplate(templateId, ignoreCache);
         return templateResponse?.data?.groups ?? [];
@@ -292,5 +310,23 @@ export class TemplatesService {
                 this.currentExperiment.reloadExperiment();
             }
         );
+    }
+
+    setTemplateTabCompletion(isCompleted: boolean, experimentId: string, templateTabId: string) {
+        if (sessionStorage) {
+            sessionStorage.setItem(`${experimentId}/${templateTabId}`, isCompleted.toString());
+        } else {
+            this.tabCompletionStorage.set(`${experimentId}/${templateTabId}`, isCompleted);
+        }
+        this.tabCompletionStatusChangedSubject.next({ experimentId, templateTabId, isCompleted });
+    }
+
+    getTemplateTabCompletion(experimentId: string, templateTabId: string): boolean {
+        if (sessionStorage) {
+            const value = sessionStorage.getItem(`${experimentId}/${templateTabId}`);
+            return value === "true";
+        } else {
+            return this.tabCompletionStorage.get(`${experimentId}/${templateTabId}`) ?? false;
+        }
     }
 }

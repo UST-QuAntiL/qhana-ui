@@ -1,9 +1,8 @@
-import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
-import { TemplateApiObject, TemplateTabApiObject } from 'src/app/services/templates.service';
-import { PluginRegistryBaseService } from 'src/app/services/registry.service';
-import { MatDialog } from '@angular/material/dialog';
+import { ChangeDetectionStrategy, Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { ApiLink, CollectionApiObject } from 'src/app/services/api-data-types';
+import { ApiLink } from 'src/app/services/api-data-types';
+import { PluginRegistryBaseService } from 'src/app/services/registry.service';
+import { TemplateApiObject, TemplatesService, TemplateTabApiObject } from 'src/app/services/templates.service';
 
 interface NavTabGroup {
     groupKey: string;
@@ -23,6 +22,7 @@ interface NavTabGroup {
 export class UiTemplateTabListComponent implements OnInit, OnChanges, OnDestroy {
 
     @Input() templateLink: ApiLink | null = null;
+    @Input() showOnly: boolean = false;
 
     isLoading: boolean = true;
 
@@ -47,7 +47,7 @@ export class UiTemplateTabListComponent implements OnInit, OnChanges, OnDestroy 
     private changedTabsSubscription: Subscription | null = null;
     private deletedTabsSubscription: Subscription | null = null;
 
-    constructor(private registry: PluginRegistryBaseService, private dialog: MatDialog) { }
+    constructor(private registry: PluginRegistryBaseService, private templates: TemplatesService) { }
 
     ngOnInit(): void {
         this.newTabsSubscription = this.registry.newApiObjectSubject.subscribe((apiObject) => {
@@ -119,8 +119,6 @@ export class UiTemplateTabListComponent implements OnInit, OnChanges, OnDestroy 
 
         const hrefToTab = new Map<string, TemplateTabApiObject>();
 
-        const tabPromises: Promise<unknown>[] = [];
-
         let navGroup: NavTabGroup | null = null;
         let workspace: NavTabGroup | null = null;
         let expNavGroup: NavTabGroup | null = null;
@@ -130,32 +128,19 @@ export class UiTemplateTabListComponent implements OnInit, OnChanges, OnDestroy 
 
         const allGroups: NavTabGroup[] = [];
 
-        const groupIcons = new Map<string, string>();
+        const allTabs = await this.templates.getAllTabs(templateResponse);
 
-        const groupPromises = templateResponse.data.groups.map(async (group) => {
-            const groupResponse = await this.registry.getByApiLink<CollectionApiObject>(group, null, true);
+        const locationToGroup = new Map<string, NavTabGroup>();
 
-            // fetch tab data
-            groupResponse?.data?.items?.forEach?.(tabLink => {
-                const prom = this.registry.getByApiLink<TemplateTabApiObject>(tabLink).then(tab => {
-                    if (tab) {
-                        hrefToTab.set(tab.data.self.href, tab.data);
-                        if (tab.data.groupKey && tab.data.icon) {
-                            groupIcons.set(`${tab.data.location}.${tab.data.groupKey}`, tab.data.icon);
-                        }
-                    }
-                });
-                tabPromises.push(prom);
-            });
-
+        templateResponse.data.groups.forEach((group) => {
             const tabGroup: NavTabGroup = {
                 groupKey: group.resourceKey?.["?group"] ?? "unknwon",
                 name: group.name ?? "UNNAMED",
-                tabs: groupResponse?.data?.items ?? [],
+                tabs: [],
             };
 
             allGroups.push(tabGroup);
-
+            locationToGroup.set(tabGroup.groupKey, tabGroup);
             if (tabGroup.groupKey === "workspace") {
                 workspace = tabGroup;
             } else if (tabGroup.groupKey === "navigation") {
@@ -171,17 +156,17 @@ export class UiTemplateTabListComponent implements OnInit, OnChanges, OnDestroy 
             }
         });
 
-        await Promise.allSettled(tabPromises);
-        await Promise.allSettled(groupPromises);
+        allTabs.forEach((tab) => {
+            hrefToTab.set(tab.self.href, tab);
+            const tabGroup = locationToGroup.get(tab.location);
+            tabGroup?.tabs.push(tab.self);
 
-        navGroups.forEach(g => {
-            g.icon = groupIcons.get(g.groupKey);
-        });
-        expNavGroups.forEach(g => {
-            g.icon = groupIcons.get(g.groupKey);
-        });
-        unknownGroups.forEach(g => {
-            g.icon = groupIcons.get(g.groupKey);
+            if (tab.groupKey && tab.icon) {
+                const childTabGroup = locationToGroup.get(`${tab.location}.${tab.groupKey}`);
+                if (childTabGroup) {
+                    childTabGroup.icon = tab.icon;
+                }
+            }
         });
 
         this.hrefToTab = hrefToTab;
@@ -201,99 +186,76 @@ export class UiTemplateTabListComponent implements OnInit, OnChanges, OnDestroy 
             return; // cannot update tab
         }
 
-        const groupLink = tabResponse.links.find(link => {
-            return link.resourceType === "ui-template-tab" && link.rel.some(r => r === "collection") && link.resourceKey?.["?group"];
-        }) ?? null;
-
         const tab = tabResponse.data;
 
         this.hrefToTab.set(tab.self.href, tab);
 
-        if (tab.location === "workspace") {
-            this.workspaceGroup = this.updateTabInGroup(this.workspaceGroup, tabLink, groupLink);
-        } else if (tab.location === "navigation") {
-            this.navigationGroup = this.updateTabInGroup(this.navigationGroup, tabLink, groupLink);
-        } else if (tab.location === "experiment-navigation") {
-            this.experimentNavigationGroup = this.updateTabInGroup(this.experimentNavigationGroup, tabLink, groupLink);
-        } else if (tab.location.startsWith("navigation")) {
-            if (this.navigationGroups.some(g => g.groupKey === tab.location)) {
-                this.navigationGroups.map(g => {
-                    if (g.groupKey === tab.location) {
-                        return this.updateTabInGroup(g, tabLink, groupLink);
+        let group = this.allGroups.find(group => group.groupKey === tab.location);
+
+        if (group == null) {
+            const tabGroup: NavTabGroup = {
+                groupKey: tab.location,
+                name: tab.location,
+                tabs: [],
+            };
+            this.hrefToTab.forEach(tab => {
+                if (tab.groupKey && tabGroup.groupKey === `${tab.location}.${tab.groupKey}`) {
+                    tabGroup.name = tab.name;
+                    if (tab.icon) {
+                        tabGroup.icon = tab.icon;
                     }
-                    return g;
-                })
+                }
+            })
+            this.allGroups.push(tabGroup);
+            if (tabGroup.groupKey === "workspace") {
+                this.workspaceGroup = tabGroup;
+            } else if (tabGroup.groupKey === "navigation") {
+                this.navigationGroup = tabGroup;
+            } else if (tabGroup.groupKey === "experiment-navigation") {
+                this.experimentNavigationGroup = tabGroup;
+            } else if (tabGroup.groupKey.startsWith("navigation")) {
+                this.navigationGroups.push(tabGroup);
+            } else if (tabGroup.groupKey.startsWith("experiment-navigation")) {
+                this.experimentNavigationGroups.push(tabGroup);
             } else {
-                this.navigationGroups.push(this.updateTabInGroup(null, tabLink, groupLink))
+                this.unknownGroups.push(tabGroup);
             }
-        } else if (tab.location.startsWith("experiment-navigation")) {
-            if (this.experimentNavigationGroups.some(g => g.groupKey === tab.location)) {
-                this.experimentNavigationGroups.map(g => {
-                    if (g.groupKey === tab.location) {
-                        return this.updateTabInGroup(g, tabLink, groupLink);
-                    }
-                    return g;
-                })
-            } else {
-                this.experimentNavigationGroups.push(this.updateTabInGroup(null, tabLink, groupLink))
-            }
-        } else {
-            if (this.unknownGroups.some(g => g.groupKey === tab.location)) {
-                this.unknownGroups.map(g => {
-                    if (g.groupKey === tab.location) {
-                        return this.updateTabInGroup(g, tabLink, groupLink);
-                    }
-                    return g;
-                })
-            } else {
-                this.unknownGroups.push(this.updateTabInGroup(null, tabLink, groupLink))
-            }
+            group = tabGroup;
         }
+
+        const newTabs = group.tabs.filter(t => t.href !== tab.self.href);
+        newTabs.push(tab.self);
+        newTabs.sort((a, b) => {
+            // sort by sortKey first
+            const keyA = this.hrefToTab.get(a.href)?.sortKey ?? 0;
+            const keyB = this.hrefToTab.get(b.href)?.sortKey ?? 0;
+            if (keyA < keyB) {
+                return -1;
+            }
+            if (keyA > keyB) {
+                return 1;
+            }
+            // sort by name second
+            if (a.name && b.name) {
+                if (a.name < b.name) {
+                    return -1;
+                }
+                if (a.name > b.name) {
+                    return 1;
+                }
+            }
+            return 0;
+        })
+        group.tabs = newTabs;
 
         this.removeOldTemplateTabLinkFromOtherGroups(tabLink);
-    }
 
-    private updateTabInGroup(group: NavTabGroup | null, tab: ApiLink, groupLink: ApiLink | null) {
-        if (group == null) {
-            if (groupLink != null) {
-                group = {
-                    groupKey: groupLink.resourceKey?.["?group"] ?? "unknwon",
-                    name: groupLink.name ?? "UNNAMED",
-                    tabs: [],
-                }
-            } else {
-                group = {
-                    groupKey: tab.resourceKey?.["?group"] ?? "unknwon",
-                    name: tab.resourceKey?.["?group"] ?? "UNNAMED",
-                    tabs: [],
-                }
+        if (tab.groupKey) {
+            const childGroup = this.allGroups.find(group => group.groupKey === `${tab.location}.${tab.groupKey}`);
+            if (childGroup) {
+                childGroup.icon = tab.icon;
             }
-            group.icon = this.getGroupIcon(group.groupKey);
-            this.allGroups.push(group);
         }
-        if (group.tabs.some(t => t.href === tab.href)) {
-            group.tabs.map(t => {
-                if (t.href === tab.href) {
-                    return tab;  // insert new
-                }
-                return t;  // keep original
-            });
-        } else {
-            group.tabs.push(tab);
-        }
-        return group;
-    }
-
-    private getGroupIcon(groupLocation: string) {
-        let icon: string | null = null;
-        this.hrefToTab.forEach((tab) => {
-            if (tab.groupKey && groupLocation.startsWith(tab.location)) {
-                if (groupLocation === `${tab.location}.${tab.groupKey}`) {
-                    icon = tab.icon;
-                }
-            }
-        });
-        return icon;
     }
 
     private async removeOldTemplateTabLinkFromOtherGroups(tabLink: ApiLink) {
@@ -347,7 +309,7 @@ export class UiTemplateTabListComponent implements OnInit, OnChanges, OnDestroy 
         }
     }
 
-    async createNewTab() {
+    async createNewTab(onSuccess?: () => void) {
         if (this.createTabLink == null) {
             return;
         }
@@ -355,7 +317,10 @@ export class UiTemplateTabListComponent implements OnInit, OnChanges, OnDestroy 
             return;
         }
 
-        this.registry.submitByApiLink(this.createTabLink, this.newTabData);
+        const response = await this.registry.submitByApiLink(this.createTabLink, this.newTabData);
+        if (response != null) {
+            onSuccess?.();
+        }
     }
 
 }
