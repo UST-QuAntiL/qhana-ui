@@ -10,7 +10,7 @@
         <div *ngIf="!parentFinished && !step.cleared && step.hrefUi">
             <!-- TODO -->
             <qhana-plugin-uiframe [url]="step.hrefUi"
-                [context]="{experimentId: experimentId??undefined, stepId: step?.stepId??undefined, location: 'timeline-step.substep'}"
+                [context]="{experimentId: experimentId??undefined, stepId: step.stepId, location: 'timeline-step.substep'}"
                 (formDataSubmit)="onPluginUiFormSubmit($event, step)"
                 (requestDataPreview)="requestDataPreview.emit($event)">
             </qhana-plugin-uiframe>
