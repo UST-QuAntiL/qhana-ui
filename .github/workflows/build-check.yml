@@ -1,14 +1,22 @@
-on: [push, pull_request]
-name: Build Angular Project
+on:
+    push:
+        branches:
+            - main
+    pull_request:
+
+name: Build and Test Angular Project
+
 jobs:
-    build:
+    build-and-test:
         runs-on: ubuntu-latest
+
         strategy:
             matrix:
                 node-version: ["24.x"]
 
         steps:
             - uses: actions/checkout@v4
+
             - name: Cache Node Modules
               uses: actions/cache@v4
               with:
@@ -16,11 +24,17 @@ jobs:
                   key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
                   restore-keys: |
                       ${{ runner.os }}-node-
+
             - name: Node ${{ matrix.node-version }}
               uses: actions/setup-node@v4
               with:
                   node-version: ${{ matrix.node-version }}
+
             - name: Install Dependencies
               run: npm clean-install
+
+            - name: Run Unit Tests
+              run: npm test -- --watch=false --browsers=ChromeHeadless
+
             - name: Build
               run: npm run build

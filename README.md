@@ -11,7 +11,7 @@ This project was generated with [Angular CLI](https://github.com/angular/angular
 
 Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
 
-Then, make sure that the correct Plugin Seed URLs is set on the Settings page. If not manually specify a URL (e.g. `http://localhost:5005` if the plugin runner runs on port `5005`). Also specify the QHAna Backend service by clicking navigating to "All services" in the "Services" card and insert the backend service info (e.g. Service URL `http://localhost:9090` if the backend is running on port `9090`). The Service Identifier must be set to `qhana-backend`. 
+Then, make sure that the correct Plugin Seed URLs is set on the Settings page. If not manually specify a URL (e.g. `http://localhost:5005` if the plugin runner runs on port `5005`). Also specify the QHAna Backend service by clicking navigating to "All services" in the "Services" card and insert the backend service info (e.g. Service URL `http://localhost:9090` if the backend is running on port `9090`). The Service Identifier must be set to `qhana-backend`.
 
 ## Development server in docker container
 
@@ -30,7 +30,11 @@ Run `ng build` to build the project. The build artifacts will be stored in the `
 
 ## Running unit tests
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+Run the unit tests locally with ChromeHeadless:
+
+`npm test -- --watch=false --browsers=ChromeHeadless`
+
+The same command is executed automatically by GitHub Actions for pull requests and pushes to the `main` branch.
 
 ## Running end-to-end tests
 
@@ -54,9 +58,6 @@ They can be added to the run command if you want to change them temporarily e.g.
 ## Further help
 
 To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
-
-
-
 
 
 ## Acknowledgements
