@@ -11,108 +11,14 @@ import {
     ViewChild,
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { Crepe } from '@milkdown/crepe';
-import { codeBlockConfig } from '@milkdown/kit/component/code-block';
-import { EditorStatus } from '@milkdown/kit/core';
-import { codeBlockSchema } from '@milkdown/kit/preset/commonmark';
-import { replaceAll } from '@milkdown/kit/utils';
-import mermaid from 'mermaid';
 
 import { MarkdownHelpDialog } from 'src/app/dialogs/markdown-help/markdown-help.dialog';
 import { QhanaBackendService } from 'src/app/services/qhana-backend.service';
 
-import { createLatexPreviewRenderer } from './milkdown-latex';
-
-const QHANA_BACKEND_LATEX_LANGUAGE = 'latex';
-
-type ApplyCodeBlockPreview =
-    (value: null | string | HTMLElement) => void;
-
-/**
- * QHAna reserves the exact lowercase "latex" language for fenced blocks
- * rendered by the external backend renderer. Crepe uses other casing, such
- * as "LaTeX", for its own $$ math blocks.
- */
-const isCrepeMathLanguage = (language: string): boolean => {
-    return language !== QHANA_BACKEND_LATEX_LANGUAGE &&
-        language.toLowerCase() === QHANA_BACKEND_LATEX_LANGUAGE;
-};
-
-const qhanaCodeBlockSchema = codeBlockSchema.extendSchema(
-    (previousSchema) => (ctx) => {
-        const baseSchema = previousSchema(ctx);
-
-        return {
-            ...baseSchema,
-            toMarkdown: {
-                match: baseSchema.toMarkdown.match,
-                runner: (state, node) => {
-                    const language = node.attrs.language ?? '';
-
-                    if (isCrepeMathLanguage(language)) {
-                        state.addNode(
-                            'math',
-                            undefined,
-                            node.content.firstChild?.text || '',
-                        );
-                        return;
-                    }
-
-                    return baseSchema.toMarkdown.runner(
-                        state,
-                        node,
-                    );
-                },
-            },
-        };
-    },
-);
-
-let mermaidRenderId = 0;
-
-const renderMermaidPreview = (
-    content: string,
-    applyPreview: ApplyCodeBlockPreview,
-): string | void => {
-    if (!content.trim()) {
-        return 'Empty';
-    }
-
-    /*
-     * Mermaid uses the ID for temporary rendering DOM. It must be unique so
-     * concurrent diagram previews cannot collide. Mermaid removes its
-     * temporary DOM after rendering; suppressErrorRendering also removes it
-     * when rendering fails.
-     */
-    mermaidRenderId += 1;
-    const id = `qhana-mermaid-${mermaidRenderId}`;
-
-    void mermaid.render(id, content)
-        .then(({ svg }) => {
-            const container =
-                document.createElement('div');
-
-            container.classList.add(
-                'qhana-mermaid-preview',
-            );
-            container.innerHTML = svg;
-
-            applyPreview(container);
-        })
-        .catch((error: unknown) => {
-            console.error(
-                'Could not render Mermaid diagram.',
-                error,
-            );
-
-            const errorElement =
-                document.createElement('span');
-
-            errorElement.textContent =
-                'Mermaid syntax error';
-
-            applyPreview(errorElement);
-        });
+type MarkdownEditorHandle = {
+    updateMarkdown: (markdown: string) => void;
+    setReadonly: (readonly: boolean) => void;
+    destroy: () => void;
 };
 
 @Component({
@@ -134,128 +40,54 @@ export class MarkdownComponent implements OnChanges, OnDestroy {
 
     showAsPreview: boolean = false;
 
-    private crepe: Crepe | null = null;
+    private editor: MarkdownEditorHandle | null = null;
+    private destroyed = false;
 
     constructor(
         public dialog: MatDialog,
         private backend: QhanaBackendService,
     ) {}
 
-    ngAfterViewInit(): void {
+    async ngAfterViewInit(): Promise<void> {
         const nativeElement = this.editorRef?.nativeElement;
 
         if (nativeElement == null) {
             return;
         }
 
-        mermaid.initialize({
-            startOnLoad: false,
-            securityLevel: 'strict',
-            suppressErrorRendering: true,
-        });
+        try {
+            const { createMarkdownEditor } =
+                await import('./markdown-editor');
 
-        const latexPreview = createLatexPreviewRenderer({
-            latexRendererUrl: this.backend.latexRendererUrl,
-        });
+            if (this.destroyed) {
+                return;
+            }
 
-        const initialMarkdown = this.markdown;
-
-        const crepe = new Crepe({
-            root: nativeElement,
-            defaultValue: initialMarkdown,
-        });
-
-        crepe.editor.use(qhanaCodeBlockSchema);
-
-        crepe.setReadonly(
-            !this.editable || this.showAsPreview,
-        );
-
-        crepe.editor.config((ctx) => {
-            ctx.update(codeBlockConfig.key, (previousConfig) => ({
-                ...previousConfig,
-                renderPreview: (
-                    language,
-                    content,
-                    applyPreview,
-                ) => {
-                    if (language.toLowerCase() === 'mermaid') {
-                        return renderMermaidPreview(
-                            content,
-                            applyPreview,
-                        );
-                    }
-
-                    if (
-                        language ===
-                        QHANA_BACKEND_LATEX_LANGUAGE
-                    ) {
-                        return latexPreview(
-                            language,
-                            content,
-                        );
-                    }
-
-                    return previousConfig.renderPreview(
-                        language,
-                        content,
-                        applyPreview,
-                    );
-                },
-            }));
-        });
-
-        crepe.on((listener) => {
-            listener.markdownUpdated(
-                (_ctx, markdown, previousMarkdown) => {
-                    if (
-                        this.editable &&
-                        markdown !== previousMarkdown
-                    ) {
+            this.editor = createMarkdownEditor({
+                root: nativeElement,
+                markdown: this.markdown,
+                readonly: !this.editable || this.showAsPreview,
+                latexRendererUrl: this.backend.latexRendererUrl,
+                onMarkdownUpdated: (markdown) => {
+                    if (this.editable) {
                         this.markdownChanges.emit(markdown);
                     }
                 },
-            );
-        });
-
-        this.crepe = crepe;
-
-        crepe.create()
-            .then(() => {
-                /*
-                 * Crepe creation is asynchronous. The Angular component can
-                 * already have been destroyed while create() was pending.
-                 */
-                if (this.crepe !== crepe) {
-                    return;
-                }
-
-                if (this.markdown !== initialMarkdown) {
-                    crepe.editor.action(
-                        replaceAll(this.markdown, true),
-                    );
-                }
-
-                this.markdownChanges.emit(this.markdown);
-            })
-            .catch((error: unknown) => {
-                console.error(
-                    'Could not initialize Markdown editor.',
-                    error,
-                );
+                onReady: (markdown) => {
+                    this.markdownChanges.emit(markdown);
+                },
             });
+        } catch (error) {
+            console.error(
+                'Could not load Markdown editor.',
+                error,
+            );
+        }
     }
 
     ngOnChanges(changes: SimpleChanges): void {
-        const crepe = this.crepe;
-
-        if (
-            changes.markdown != null &&
-            crepe?.editor.status === EditorStatus.Created
-        ) {
-            crepe.editor.action(
-                replaceAll(this.markdown, true),
-            );
+        if (changes.markdown != null) {
+            this.editor?.updateMarkdown(this.markdown);
         }
 
         if (changes.editable != null) {
@@ -264,14 +96,12 @@ export class MarkdownComponent implements OnChanges, OnDestroy {
     }
 
     ngOnDestroy(): void {
-        const crepe = this.crepe;
+        this.destroyed = true;
 
-        /*
-         * Invalidate pending create() completion before destroying the editor
-         * so its asynchronous continuation cannot update this component.
-         */
-        this.crepe = null;
-        crepe?.destroy();
+        const editor = this.editor;
+        this.editor = null;
+
+        editor?.destroy();
     }
 
     showPreview(): void {
@@ -293,7 +123,7 @@ export class MarkdownComponent implements OnChanges, OnDestroy {
     }
 
     private updateReadonlyState(): void {
-        this.crepe?.setReadonly(
+        this.editor?.setReadonly(
             !this.editable || this.showAsPreview,
         );
     }
