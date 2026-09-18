@@ -72,6 +72,12 @@
     max-height: 12rem
     overflow: hidden
 
+.plugin-description-container.open
+    min-height: 12rem
+    max-height: 80vh
+    overflow: auto
+    resize: vertical
+
 .plugin-description-container.closed::after
     position: absolute
     content: ""
@@ -105,9 +111,12 @@
 .material-icon
     margin-left: .5rem
     margin-right: .5rem
+
 .material-icon.color_green
     color: rgb(0, 247, 0)
+
 .material-icon.color_grey
     color: rgb(136, 136, 136)
+
 .material-icon.color_red
     color: rgb(255, 0, 0)
