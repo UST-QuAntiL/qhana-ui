@@ -50,12 +50,13 @@ export class ExperimentTimelineComponent implements OnInit, OnDestroy {
     sort: -1 | 0 | 1 = 1;
     pluginName: string | null = null;
     version: string | null = null;
-    stepStatus: "SUCCESS" | "PENDING" | "ERROR" | "" = "";
+    stepStatus: "SUCCESS" | "PENDING" | "ERROR" | "CANCELED" | "" = "";
     statusValues: SelectValue[] = [
         { value: "", viewValue: "Not selected" },
         { value: "SUCCESS", viewValue: "Success" },
         { value: "PENDING", viewValue: "Pending" },
-        { value: "ERROR", viewValue: "Error" }
+        { value: "ERROR", viewValue: "Error" },
+        { value: "CANCELED", viewValue: "Canceled" }
     ];
     unclearedSubstep: number = 0;
     unclearedSubstepValues: SelectValue[] = [

@@ -60,6 +60,9 @@ export class TimelineStepComponent implements OnInit, OnDestroy {
 
     previewData: ExperimentDataApiObject | null = null;
 
+    isCanceling: boolean = false;
+    cancelError: string | null = null;
+
 
     constructor(private route: ActivatedRoute, private experiment: CurrentExperimentService, private backend: QhanaBackendService, private registry: PluginRegistryBaseService) {
         this.backendUrl = backend.backendRootUrl;
@@ -97,6 +100,35 @@ export class TimelineStepComponent implements OnInit, OnDestroy {
                 this.saveNotes(newNotesText);
             }
         }
+    }
+
+    cancelTask(): void {
+        this.cancelError = null;
+
+        if (!this.timelineStep || !this.experimentId) {
+            this.cancelError = 'Unable to cancel: Missing experiment or step data.';
+            return;
+        }
+
+        if (this.timelineStep.status !== 'PENDING') {
+            this.cancelError = `Unable to cancel: Task is currently '${this.timelineStep.status}'. Only 'PENDING' tasks can be canceled.`;
+            return;
+        }
+
+        this.isCanceling = true;
+
+        const stepSequence = this.timelineStep.sequence;
+
+        this.backend.cancelTimelineStep(this.experimentId, stepSequence).subscribe({
+            next: (response) => {
+                // Let the background watcher handle the state update.
+            },
+            error: (err) => {
+                console.error('Failed to cancel the task:', err);
+                this.cancelError = err?.message || 'An error occurred while canceling the task.';
+                this.isCanceling = false;
+            }
+        });
     }
 
     restartWatching() {
