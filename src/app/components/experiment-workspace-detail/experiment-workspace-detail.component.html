@@ -6,87 +6,22 @@
     <mat-card appearance="outlined">
         <div class="card-header">
             <h2>Template Details</h2>
-            <button mat-icon-button aria-label="Edit item" (click)="editTemplate()">
-                <mat-icon>edit</mat-icon>
-            </button>
-            <button mat-icon-button aria-label="Delete item" (click)="deleteTemplate()">
-                <mat-icon>delete</mat-icon>
-            </button>
         </div>
         <mat-card-content>
-            <ng-container *ngIf="editTemplateName">
-                <mat-form-field class="form-field">
-                    <mat-label>Name</mat-label>
-                    <input matInput [(ngModel)]="editTemplateName" required minlength="1">
-                </mat-form-field>
-                <mat-form-field class="form-field">
-                    <mat-label>Description</mat-label>
-                    <textarea matInput [(ngModel)]="editTemplateDescription"></textarea>
-                </mat-form-field>
-                <mat-form-field class="form-field">
-                    <mat-label>Tags</mat-label>
-                    <mat-chip-grid #chiplist>
-                        <mat-chip-row *ngFor="let tag of editTemplateTags" [removable]="true" (removed)="removeTag(tag)">
-                            {{tag}}
-                            <mat-icon matChipRemove>cancel</mat-icon>
-                        </mat-chip-row>
-                        <input matInput [matChipInputFor]="chiplist" [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-                            [matChipInputAddOnBlur]="true" (matChipInputTokenEnd)="addTag($event)">
-                    </mat-chip-grid>
-                </mat-form-field>
-                <div class="edit-template-buttons">
-                    <button mat-raised-button color="primary" (click)="updateTemplate()">Update Template</button>
-                    <button mat-raised-button (click)="cancelEditTemplate()">Cancel</button>
-                </div>
-            </ng-container>
-            <ng-container *ngIf="!editTemplateName">
-                <p>Name: {{templateObject?.name}}</p>
-                <p>Description: {{templateObject?.description}}</p>
-                <p>Tags:</p>
-                <mat-chip-listbox>
-                    <mat-chip *ngFor="let tag of templateObject?.tags">
+            <p>Name: {{templateObject?.name}}</p>
+            <p>Description: {{templateObject?.description}}</p>
+            <p>Tags:</p>
+            <mat-chip-listbox>
+                @for (tag of templateObject?.tags; track tag) {
+                    <mat-chip>
                         {{tag}}
                     </mat-chip>
-                </mat-chip-listbox>
-            </ng-container>
+                }
+            </mat-chip-listbox>
         </mat-card-content>
     </mat-card>
 
-    <mat-accordion [multi]="false">
-        <h3 mat-subheader>Create New Template Tab</h3>
-        <mat-expansion-panel (afterExpand)="selectTab('new')" id="new-template-panel" [expanded]="tabId === 'new'">
-            <mat-expansion-panel-header>
-                <mat-panel-title>
-                    New Template Tab
-                </mat-panel-title>
-                <mat-panel-description>
-                    Create a new tab for this template.
-                </mat-panel-description>
-            </mat-expansion-panel-header>
-            <qhana-template-details [templateLink]="templateLink"></qhana-template-details>
-        </mat-expansion-panel>
-        <mat-divider></mat-divider>
-
-        <ng-container *ngFor="let group of templateTabLinks; trackBy:trackByTabLink">
-            <h3 mat-subheader>{{tabGroupNameOverrides[group.group] ?? group.name}}</h3>
-            <mat-expansion-panel *ngFor="let tab of group.tabs" [expanded]="tabId == tab.resourceKey?.uiTemplateTabId"
-            (afterExpand)="selectTab(tab.resourceKey?.uiTemplateTabId ?? 'null')" (closed)="deselectTab(tab.resourceKey?.uiTemplateTabId ?? null)"
-            [id]="'tab-' + $safeNavigationMigration(tab.resourceKey?.uiTemplateTabId)">
-            <mat-expansion-panel-header>
-                <mat-panel-title>
-                    <span>
-                        {{tab.name}}
-                        <span *ngIf="templateTabObjects[tab.resourceKey?.uiTemplateTabId ?? '']?.groupKey">
-                            (Group: {{templateTabObjects[tab.resourceKey?.uiTemplateTabId ?? '']?.groupKey}})
-                        </span>
-                    </span>
-                </mat-panel-title>
-                <mat-panel-description>
-                    {{templateTabObjects[tab.resourceKey?.uiTemplateTabId ?? '']?.description}}
-                </mat-panel-description>
-            </mat-expansion-panel-header>
-            <qhana-template-details [tabLink]="tab"></qhana-template-details>
-        </mat-expansion-panel>
-        </ng-container>
-    </mat-accordion>
+    @if (templateLink) {
+        <qhana-ui-template-tab-list [templateLink]="templateLink" [showOnly]="true"></qhana-ui-template-tab-list>
+    }
 </div>

@@ -1,23 +1,23 @@
 @if (filterValue == null) {
     <p>Flter Plugins by:</p>
     <mat-button-toggle-group class="toggle-group" aria-label="Filter Type">
-        <mat-button-toggle (click)="setType('id')">Identifier</mat-button-toggle>
-        <mat-button-toggle (click)="setType('name')">Name</mat-button-toggle>
-        <mat-button-toggle (click)="setType('version')">Version</mat-button-toggle>
-        <mat-button-toggle (click)="setType('type')">Type</mat-button-toggle>
-        <mat-button-toggle (click)="setType('tag')">Tag</mat-button-toggle>
+        <mat-button-toggle (click)="setType('id'); $event.preventDefault()">Identifier</mat-button-toggle>
+        <mat-button-toggle (click)="setType('name'); $event.preventDefault()">Name</mat-button-toggle>
+        <mat-button-toggle (click)="setType('version'); $event.preventDefault()">Version</mat-button-toggle>
+        <mat-button-toggle (click)="setType('type'); $event.preventDefault()">Type</mat-button-toggle>
+        <mat-button-toggle (click)="setType('tag'); $event.preventDefault()">Tag</mat-button-toggle>
     </mat-button-toggle-group>
     @if(depth < 4) {
         <p>Or combine multiple filters with:</p>
         <mat-button-toggle-group class="toggle-group" aria-label="Filter combinator">
-            <mat-button-toggle (click)="setType('and')">AND (match all filters)</mat-button-toggle>
-            <mat-button-toggle (click)="setType('or')">OR (match any filter)</mat-button-toggle>
+            <mat-button-toggle (click)="setType('and'); $event.preventDefault()">AND (match all filters)</mat-button-toggle>
+            <mat-button-toggle (click)="setType('or'); $event.preventDefault()">OR (match any filter)</mat-button-toggle>
         </mat-button-toggle-group>
     }
 } @else {
     <div class="filter-head">
         <mat-slide-toggle [checked]="isNegated" (toggleChange)="isNegated = !isNegated; updateFilterObject()">Exclude plugins matching this filter</mat-slide-toggle>
-        <button mat-icon-button (click)="resetCurrentFilter(); updateFilterObject()"><mat-icon>clear</mat-icon></button>
+        <button mat-icon-button (click)="resetCurrentFilter(); updateFilterObject(); $event.preventDefault()"><mat-icon>clear</mat-icon></button>
     </div>
 }
 @if (isNestedFilter) {
@@ -43,10 +43,10 @@
                             <qhana-plugin-filter-form [depth]="depth + 1" [filterIn]="f" (filterOut)="childFiltersOutput[$index] = $event; updateFilterObject()" (valid)="childFiltersValid[$index] = $event"></qhana-plugin-filter-form>
                         </mat-card-content>
                     </mat-card>
-                    <button mat-flat-button class="child-filter-remove-button" (click)="deleteChild($index)"><div><mat-icon>delete</mat-icon></div></button>
+                    <button mat-flat-button class="child-filter-remove-button" (click)="deleteChild($index); $event.preventDefault()"><div><mat-icon>delete</mat-icon></div></button>
                 </div>
             }
-            <button mat-raised-button class="add-child-filter-button" (click)="addChildFilter()"><mat-icon>plus</mat-icon>Add new filter</button>
+            <button mat-raised-button class="add-child-filter-button" (click)="addChildFilter(); $event.preventDefault()"><mat-icon>plus</mat-icon>Add new filter</button>
         </div>
     </div>
 }
@@ -79,7 +79,7 @@
                 Examples: "processing", "conversion", "dataloader", "visualization", "interaction"
             </mat-hint>
         </mat-form-field>
-        <button mat-raised-button class="filter-button" (click)="openPluginChooser()" *ngIf="filterType === 'name' || filterType === 'id'">
+        <button mat-raised-button class="filter-button" (click)="openPluginChooser(); $event.preventDefault()" *ngIf="filterType === 'name' || filterType === 'id'">
             choose
         </button>
     </div>

@@ -1,6 +1,7 @@
-<button class="tooltip-button" [style]="{'position-anchor': '--' + anchorId}"
+<button class="tooltip-button {{buttonPos === 'top-center' ? 'top-center' : ''}}" [style]="{'position-anchor': '--' + anchorId}"
     [attr.aria-label]="label" [hidden]="!showHelpButton"
     [attr.popovertarget]="anchorId" popovertargetaction="toggle">?</button>
-<div class="tooltip-content color-scheme-card" [id]="anchorId" [style]="{'position-anchor': '--' + anchorId}" popover="auto" [hidden]="!showHelpButton">
+<div class="tooltip-content color-scheme-card {{tooltipPos === 'bottom-center' ? 'bottom-center' : ''}}"
+    [id]="anchorId" [style]="{'position-anchor': '--' + anchorId}" popover="auto" [hidden]="!showHelpButton">
     <ng-content></ng-content>
 </div>
