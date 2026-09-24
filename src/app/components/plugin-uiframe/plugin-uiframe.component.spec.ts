@@ -1,19 +1,44 @@
+import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { PluginUiframeComponent } from './plugin-uiframe.component';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { of } from 'rxjs';
 
+import { PluginUiframeComponent } from './plugin-uiframe.component';
 
 describe('PluginUiframeComponent', () => {
     let component: PluginUiframeComponent;
     let fixture: ComponentFixture<PluginUiframeComponent>;
 
+    const matDialogStub = {
+        open: jasmine.createSpy('open').and.returnValue({
+            afterClosed: () => of(null)
+        })
+    };
+
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            declarations: [PluginUiframeComponent]
-        })
-            .compileComponents();
-    });
+            imports: [
+                CommonModule,
+                MatButtonModule,
+                MatDividerModule,
+                MatIconModule,
+                MatProgressSpinnerModule
+            ],
+            declarations: [
+                PluginUiframeComponent
+            ],
+            providers: [
+                {
+                    provide: MatDialog,
+                    useValue: matDialogStub
+                }
+            ]
+        }).compileComponents();
 
-    beforeEach(() => {
         fixture = TestBed.createComponent(PluginUiframeComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();

@@ -1,14 +1,28 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MarkdownComponent } from './markdown.component';
+import { MatDialog } from '@angular/material/dialog';
+import { of } from 'rxjs';
 
+import { MarkdownComponent } from './markdown.component';
 
 describe('MarkdownComponent', () => {
     let component: MarkdownComponent;
     let fixture: ComponentFixture<MarkdownComponent>;
 
+    const matDialogStub = {
+        open: jasmine.createSpy('open').and.returnValue({
+            afterClosed: () => of(null)
+        })
+    };
+
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            declarations: [MarkdownComponent]
+            declarations: [MarkdownComponent],
+            providers: [
+                {
+                    provide: MatDialog,
+                    useValue: matDialogStub
+                }
+            ]
         })
             .compileComponents();
     });
