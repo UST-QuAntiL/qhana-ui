@@ -1,4 +1,7 @@
 .menu
+    display: flex
+    align-items: center
+    gap: 0.4em
     padding-block: 6px
     padding-inline: 1em
     border: 1px solid var(--border-color)
@@ -11,9 +14,13 @@
     font-size: 0.875em
     height: 2em
     width: 2em
-    margin-block: 0.5em
-    margin-inline: 0.2em
+    margin: 0
     padding: 0.25em
+    color: var(--text)
+    background-color: transparent
+    border: 1px solid var(--border-color)
+    border-radius: 4px
+    cursor: pointer
 
 .menu button:hover
     background-color: var(--background-card)
@@ -23,6 +30,23 @@
 
 .menu .icon:hover
     background-color: initial
+
+:host ::ng-deep .milkdown
+    --crepe-color-background: var(--background)
+    --crepe-color-surface: var(--background)
+    --crepe-color-surface-low: var(--background-card)
+    --crepe-color-on-background: var(--text)
+    --crepe-color-on-surface: var(--text)
+    --crepe-color-on-surface-variant: var(--text-washed)
+    --crepe-color-primary: var(--primary-text)
+    --crepe-color-secondary: var(--background-card)
+    --crepe-color-on-secondary: var(--text)
+    --crepe-color-outline: var(--border-color)
+    --crepe-color-inverse: var(--text)
+    --crepe-color-on-inverse: var(--background)
+    --crepe-color-hover: var(--background-card)
+    --crepe-color-selected: var(--background-card)
+    --crepe-color-inline-area: var(--background-card)
 
 :host ::ng-deep .milkdown-block-handle
     display: none

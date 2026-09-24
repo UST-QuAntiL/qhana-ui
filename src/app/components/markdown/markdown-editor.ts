@@ -365,6 +365,13 @@ export const createMarkdownEditor = (
 
         setReadonly: (readonly: boolean): void => {
             crepe.setReadonly(readonly);
+
+            if (crepe.editor.status === EditorStatus.Created) {
+                crepe.editor.action((ctx) => {
+                    const view = ctx.get(editorViewCtx);
+                    view.updateState(view.state);
+                });
+            }
         },
 
         destroy: (): void => {
