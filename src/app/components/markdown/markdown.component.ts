@@ -41,7 +41,10 @@ export class MarkdownComponent implements OnChanges, OnDestroy {
     showAsPreview: boolean = false;
 
     private editor: MarkdownEditorHandle | null = null;
+    private currentMarkdown: string = '';
     private destroyed = false;
+    private editorVersion = 0;
+    private hasEmittedReady = false;
 
     constructor(
         public dialog: MatDialog,
@@ -49,54 +52,27 @@ export class MarkdownComponent implements OnChanges, OnDestroy {
     ) {}
 
     async ngAfterViewInit(): Promise<void> {
-        const nativeElement = this.editorRef?.nativeElement;
-
-        if (nativeElement == null) {
-            return;
-        }
-
-        try {
-            const { createMarkdownEditor } =
-                await import('./markdown-editor');
-
-            if (this.destroyed) {
-                return;
-            }
-
-            this.editor = createMarkdownEditor({
-                root: nativeElement,
-                markdown: this.markdown,
-                readonly: !this.editable || this.showAsPreview,
-                latexRendererUrl: this.backend.latexRendererUrl,
-                onMarkdownUpdated: (markdown) => {
-                    if (this.editable) {
-                        this.markdownChanges.emit(markdown);
-                    }
-                },
-                onReady: (markdown) => {
-                    this.markdownChanges.emit(markdown);
-                },
-            });
-        } catch (error) {
-            console.error(
-                'Could not load Markdown editor.',
-                error,
-            );
-        }
+        this.currentMarkdown = this.markdown;
+        await this.recreateEditor();
     }
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes.markdown != null) {
-            this.editor?.updateMarkdown(this.markdown);
+            this.currentMarkdown = this.markdown;
+            this.editor?.updateMarkdown(this.currentMarkdown);
         }
 
-        if (changes.editable != null) {
-            this.updateReadonlyState();
+        if (
+            changes.editable != null &&
+            this.editor != null
+        ) {
+            void this.recreateEditor();
         }
     }
 
     ngOnDestroy(): void {
         this.destroyed = true;
+        this.editorVersion += 1;
 
         const editor = this.editor;
         this.editor = null;
@@ -107,14 +83,14 @@ export class MarkdownComponent implements OnChanges, OnDestroy {
     showPreview(): void {
         if (this.editable) {
             this.showAsPreview = true;
-            this.updateReadonlyState();
+            void this.recreateEditor();
         }
     }
 
     resetEditMode(): void {
         if (this.editable) {
             this.showAsPreview = false;
-            this.updateReadonlyState();
+            void this.recreateEditor();
         }
     }
 
@@ -122,9 +98,58 @@ export class MarkdownComponent implements OnChanges, OnDestroy {
         this.dialog.open(MarkdownHelpDialog, {});
     }
 
-    private updateReadonlyState(): void {
-        this.editor?.setReadonly(
-            !this.editable || this.showAsPreview,
-        );
+    private async recreateEditor(): Promise<void> {
+        const nativeElement = this.editorRef?.nativeElement;
+
+        if (nativeElement == null || this.destroyed) {
+            return;
+        }
+
+        const version = ++this.editorVersion;
+
+        const previousEditor = this.editor;
+        this.editor = null;
+
+        previousEditor?.destroy();
+        nativeElement.replaceChildren();
+
+        try {
+            const { createMarkdownEditor } =
+                await import('./markdown-editor');
+
+            if (
+                this.destroyed ||
+                version !== this.editorVersion
+            ) {
+                return;
+            }
+
+            this.editor = createMarkdownEditor({
+                root: nativeElement,
+                markdown: this.currentMarkdown,
+                readonly: !this.editable || this.showAsPreview,
+                latexRendererUrl: this.backend.latexRendererUrl,
+                onMarkdownUpdated: (markdown) => {
+                    this.currentMarkdown = markdown;
+
+                    if (this.editable) {
+                        this.markdownChanges.emit(markdown);
+                    }
+                },
+                onReady: (markdown) => {
+                    this.currentMarkdown = markdown;
+
+                    if (!this.hasEmittedReady) {
+                        this.hasEmittedReady = true;
+                        this.markdownChanges.emit(markdown);
+                    }
+                },
+            });
+        } catch (error) {
+            console.error(
+                'Could not load Markdown editor.',
+                error,
+            );
+        }
     }
 }
