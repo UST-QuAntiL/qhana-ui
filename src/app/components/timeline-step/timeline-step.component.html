@@ -34,7 +34,7 @@
                 <button mat-button class="cancel-button" (click)="cancelTask()" [disabled]="isCanceling">
                     <span class="cancel-button-content">
                         <span>cancel</span>
-                        
+
                         @if (isCanceling) {
                             <mat-spinner diameter="20"></mat-spinner>
                         }
@@ -50,19 +50,31 @@
                         <qhana-step-status [step]="timelineStep" [spinner]="16"></qhana-step-status>
                     </dd>
                 </div>
+
                 <div *ngIf="stepProgress != null">
                     <dt>Progress</dt>
                     <dd>
                         <div class="step-progress">
-                            <mat-progress-bar class="progress-meter" mode="determinate" color="primary"
-                                [value]="((stepProgress.value-stepProgress.start) / (stepProgress.target-stepProgress.start)) * 100">
+                            <mat-progress-bar
+                                *ngIf="stepProgress.target != null"
+                                class="progress-meter"
+                                mode="determinate"
+                                color="primary"
+                                [value]="stepProgress.target !== (stepProgress.start ?? 0)
+                                    ? ((stepProgress.value - (stepProgress.start ?? 0))
+                                        / (stepProgress.target - (stepProgress.start ?? 0))) * 100
+                                    : 0">
                             </mat-progress-bar>
-                            <span [hidden]="stepProgress.unit == null">
-                                {{stepProgress.value}}/{{stepProgress.target}} {{stepProgress.unit}}
+
+                            <span>
+                                {{stepProgress.value}}
+                                <ng-container *ngIf="stepProgress.target != null">/ {{stepProgress.target}}</ng-container>
+                                <ng-container *ngIf="stepProgress.unit != null"> {{stepProgress.unit}}</ng-container>
                             </span>
                         </div>
                     </dd>
                 </div>
+
                 <div *ngIf="timelineStep.status !== 'PENDING'">
                     <dt>Result Quality</dt>
                     <dd>

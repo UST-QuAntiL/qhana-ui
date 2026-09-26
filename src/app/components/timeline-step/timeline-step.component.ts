@@ -9,8 +9,8 @@ import { PluginRegistryBaseService } from 'src/app/services/registry.service';
 import { TabDefinition } from '../timeline-step-nav/timeline-step-nav.component';
 
 interface Progress {
-    start: number;
-    target: number;
+    start?: number;
+    target?: number;
     value: number;
     unit?: string;
 }
@@ -31,7 +31,6 @@ export class TimelineStepComponent implements OnInit, OnDestroy {
     private manualRefresh: Subject<number> = new Subject();
     private notesUpdates: BehaviorSubject<string> = new BehaviorSubject<string>("");
     private lastSavedNotes: string = "";
-
 
     watching: "watching" | "paused" | "error" | null = null;
 
@@ -62,7 +61,6 @@ export class TimelineStepComponent implements OnInit, OnDestroy {
 
     isCanceling: boolean = false;
     cancelError: string | null = null;
-
 
     constructor(private route: ActivatedRoute, private experiment: CurrentExperimentService, private backend: QhanaBackendService, private registry: PluginRegistryBaseService) {
         this.backendUrl = backend.backendRootUrl;
@@ -235,18 +233,25 @@ export class TimelineStepComponent implements OnInit, OnDestroy {
     }
 
     private getStepProgress(step: TimelineStepApiObject): Progress | null {
-        if (step.progressStart != null && step.progressTarget != null && step.progressValue != null) {
-            const progress: Progress = {
-                start: step.progressStart,
-                target: step.progressTarget,
-                value: step.progressValue,
-            };
-            if (step.progressUnit) {
-                progress.unit = step.progressUnit;
-            }
-            return progress;
+        if (step.progressValue == null) {
+            return null;
         }
-        return null;
+
+        const progress: Progress = {
+            value: step.progressValue,
+        };
+
+        if (step.progressStart != null) {
+            progress.start = step.progressStart;
+        }
+        if (step.progressTarget != null) {
+            progress.target = step.progressTarget;
+        }
+        if (step.progressUnit) {
+            progress.unit = step.progressUnit;
+        }
+
+        return progress;
     }
 
     loadNotes(experimentId: number | string, step: string) {
