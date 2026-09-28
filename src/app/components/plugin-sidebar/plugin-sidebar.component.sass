@@ -1,15 +1,13 @@
 .sidebar-container
     height: 100vh
     display: flex
-    flex-direction: row
     position: sticky
     top: 0
 
 .nav-icons
     position: sticky
     top: 0
-    min-height: 100vh
-    max-height: 100vh
+    height: 100vh
     overflow-y: hidden
     display: flex
     flex-direction: column
@@ -18,11 +16,11 @@
 .sidebar-button
     min-width: 2.5rem
     min-height: 2.5rem
-    padding-inline: 0px
+    padding-inline: 0
     display: flex
     align-items: center
     justify-content: center
-    background-color: transparent
+    background: transparent
     border: none
     color: var(--text)
     cursor: pointer
@@ -31,10 +29,9 @@
     background-color: var(--background-card)
     color: var(--text-card)
 
-.template-header
+.template-header, .plugin-group-header
     display: flex
     gap: 0.3rem
-    align-content: center
     justify-content: space-between
     padding-inline: 1rem
     cursor: pointer
@@ -45,11 +42,11 @@
     align-items: center
     font-size: initial
 
-.builtin-template-button:hover, .builtin-template-button:focus, .builtin-template-button:active, .builtin-template-button.active
+.builtin-template-button:is(:hover, :focus, :active, .active)
     background-color: var(--primary-lighter)
 
 @media (prefers-color-scheme: dark)
-    .builtin-template-button:hover, .builtin-template-button:focus, .builtin-template-button:active, .builtin-template-button.active
+    .builtin-template-button:is(:hover, :focus, :active, .active)
         background-color: var(--primary)
 
 .new-template-button
@@ -60,14 +57,6 @@
 .plugin-group
     margin-block-end: 1rem
     scroll-margin-block-start: 10rem
-
-.plugin-group-header
-    display: flex
-    gap: 0.3rem
-    align-content: center
-    justify-content: space-between
-    padding-inline: 1rem
-    cursor: pointer
 
 .plugin-group-header-text
     display: inline-flex
@@ -81,25 +70,23 @@
     width: calc(100% - 2rem)
     margin-inline: 1rem
 
-.expander-head
+.expander-head, .sidebar-expander
     position: sticky
-    top: 0px
-    padding-top: 1px
+    top: 0
     background: var(--background)
+
+.expander-head
+    padding-top: 1px
     z-index: 2
 
 .sidebar-expander
-    position: sticky
-    top: 0px
     max-height: 100vh
-    overflow-y: scroll
-    overflow-x: clip
+    overflow: clip scroll
     scrollbar-width: thin
     min-width: 15rem
     width: 25vw
     max-width: 20rem
     padding-block-end: 4rem
-    background: var(--background)
     border-inline-end: 1px solid var(--border-color)
 
 @media (prefers-color-scheme: dark)
@@ -113,18 +100,6 @@
     .nav-icons[data-open=no] .sidebar-button.active
         background-color: transparent
         color: var(--text)
-
-.form-field-container
-    display: flex
-    flex-direction: column
-    margin: 1rem
-
-.form-field-container > button
-    margin-bottom: 0.5rem
-
-.sidebar-header
-    width: 100%
-    margin-left: 1rem
 
 .template-tab-sidebar
     position: sticky
